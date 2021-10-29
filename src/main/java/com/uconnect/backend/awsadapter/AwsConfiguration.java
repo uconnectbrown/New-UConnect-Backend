@@ -1,4 +1,4 @@
-package com.uconnect.backend.main;
+package com.uconnect.backend.awsadapter;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;

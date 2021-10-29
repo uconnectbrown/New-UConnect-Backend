@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
+import com.uconnect.backend.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -65,5 +66,20 @@ public class DdbAdapter {
                 .build();
 
         mapper = new DynamoDBMapper(ddbClient, config);
+    }
+
+    public User findByUsername(String username) {
+        // TODO: @David
+        return null;
+    }
+
+    public User findByEmailAddress(String emailAddress) {
+        // TODO: @David
+        return null;
+    }
+
+    public boolean existsById(String id) {
+        // TODO: @David
+        return false;
     }
 }

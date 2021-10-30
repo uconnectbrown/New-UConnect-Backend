@@ -22,7 +22,7 @@ public class JwtUtility implements Serializable {
     // TODO: decide token expiration time (current: 1 hours)
     public static final long JWT_TOKEN_VALIDITY = 1 * 60 * 60;
 
-    private final String secretKey = System.getenv("jwt.secret");
+    private final String secretKey = System.getenv("jwt_secret");
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {

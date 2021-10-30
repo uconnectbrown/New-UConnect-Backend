@@ -1,0 +1,6 @@
+server:
+  port: 5000
+amazon:
+  dynamodb:
+    tablename:
+      user: FIX-ME

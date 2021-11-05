@@ -6,7 +6,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +15,11 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan("com.uconnect.backend")
 @Slf4j
 public class AwsConfiguration {
-    @Value("${amazon.dynamodb.localdbport")
+    @Autowired
     private String localDbPort;
+
+    @Autowired
+    private LocalDdbServerRunner localDdbServerRunner;
 
     @Bean
     public AWSCredentialsProvider getAWSCredentialsProvider() {
@@ -28,7 +31,6 @@ public class AwsConfiguration {
         boolean isDev = "DEV".equals(System.getenv("spring_profiles_active"));
 
         if (isDev) {
-            LocalDdbServerRunner localDdbServerRunner = new LocalDdbServerRunner();
             localDdbServerRunner.start();
 
             return AmazonDynamoDBClientBuilder
@@ -36,7 +38,8 @@ public class AwsConfiguration {
                     .withEndpointConfiguration(
                             new AwsClientBuilder
                                     .EndpointConfiguration(
-                                    "http://localhost:" + localDbPort, "us-east-1"))
+                                    "http://localhost:" + localDbPort,
+                                    "us-east-1"))
                     .build();
         }
 

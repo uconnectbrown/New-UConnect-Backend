@@ -3,7 +3,6 @@ package com.uconnect.backend.user.dao;
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
@@ -11,15 +10,14 @@ import java.util.Set;
 
 @Repository
 public class UserDAO {
-
     @Autowired
     private DdbAdapter ddbAdapter;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${amazon.dynamodb.tablename.users")
-    private String tableName;
+    @Autowired
+    private String userTableName;
 
     public String getPasswordByUsername(String username) {
         User user = ddbAdapter.findByUsername(username);
@@ -45,7 +43,7 @@ public class UserDAO {
         user.setNativeLanguages(nl);
         user.setLearningLanguages(ll);
 
-        ddbAdapter.save(tableName, user);
+        ddbAdapter.save(userTableName, user);
 
         // successfully created a new user
         return 0;
@@ -60,7 +58,7 @@ public class UserDAO {
         }
 
         String id = userToDelete.getId();
-        ddbAdapter.delete(tableName, userToDelete);
+        ddbAdapter.delete(userTableName, userToDelete);
 
         // successfully created a new user
         return ddbAdapter.existsById(id) ? -2 : 0;

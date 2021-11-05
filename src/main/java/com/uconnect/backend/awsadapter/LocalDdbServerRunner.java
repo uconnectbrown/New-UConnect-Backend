@@ -3,11 +3,13 @@ package com.uconnect.backend.awsadapter;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class LocalDdbServerRunner {
-    @Value("${amazon.dynamodb.localdbport")
+    @Autowired
     private String localDbPort;
     private DynamoDBProxyServer server;
 
@@ -16,7 +18,6 @@ public class LocalDdbServerRunner {
     }
 
     public void start() throws Exception {
-        log.info(localDbPort);
         server = ServerRunner.createServerFromCommandLineArgs(
                 new String[]{"-inMemory", "-port", localDbPort, "delayTransientStatuses"});
         server.start();

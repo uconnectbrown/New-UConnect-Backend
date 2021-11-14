@@ -3,12 +3,11 @@ package com.uconnect.backend.main;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
+import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,9 +43,9 @@ public class HomeController {
             throw new Exception("INVALID CREDENTIALS", e);
         }
 
-        final UserDetails userDetails = userService.loadUserByUsername(jwtRequest.getUsername());
+        final User user = userService.loadUserByUsername(jwtRequest.getUsername());
 
-        final String token = jwtUtility.generateToken(userDetails);
+        final String token = jwtUtility.generateToken(user);
 
         return new JwtResponse(token);
     }

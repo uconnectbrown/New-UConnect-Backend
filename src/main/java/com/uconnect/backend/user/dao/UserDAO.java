@@ -3,10 +3,9 @@ package com.uconnect.backend.user.dao;
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
-
-import java.util.Set;
 
 @Repository
 public class UserDAO {
@@ -19,29 +18,34 @@ public class UserDAO {
     @Autowired
     private String userTableName;
 
+    public User getUserByUsername(String username) {
+        User user = ddbAdapter.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(String.format("%s is not a valid username", username));
+        }
+
+        return user;
+    }
+
+    public User getUserById(String id) {
+        return ddbAdapter.findById(id);
+    }
+
     public String getPasswordByUsername(String username) {
         User user = ddbAdapter.findByUsername(username);
 
         return user.getPassword();
     }
 
-    public int createNewUser(String username, String rawPassword, String emailAddress, Set<String> nl, Set<String> ll) {
+    public int createNewUser(String username, String rawPassword) {
         if (ddbAdapter.findByUsername(username) != null) {
             // username exists
             return -1;
         }
 
-        if (ddbAdapter.findByEmailAddress(emailAddress) != null) {
-            // email address exists
-            return -2;
-        }
-
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setEmailAddress(emailAddress);
-        user.setNativeLanguages(nl);
-        user.setLearningLanguages(ll);
 
         ddbAdapter.save(userTableName, user);
 

@@ -1,11 +1,11 @@
 package com.uconnect.backend.security.jwt.filter;
 
 import com.uconnect.backend.security.jwt.util.JwtUtility;
+import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -37,12 +37,12 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userService.loadUserByUsername(username);
+            User user = userService.loadUserByUsername(username);
 
-            if (jwtUtility.validateToken(token, userDetails)) {
+            if (jwtUtility.validateToken(token, user)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                        = new UsernamePasswordAuthenticationToken(userDetails, null,
-                        userDetails.getAuthorities());
+                        = new UsernamePasswordAuthenticationToken(user, null,
+                        user.getAuthorities());
 
                 usernamePasswordAuthenticationToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)

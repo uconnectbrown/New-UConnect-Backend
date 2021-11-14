@@ -1,10 +1,10 @@
 package com.uconnect.backend.security.jwt.util;
 
+import com.uconnect.backend.user.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -19,7 +19,9 @@ public class JwtUtility implements Serializable {
     private static final long serialVersionUID = 234234523523L;
 
     // TODO: decide token expiration time (current: 1 hours)
-    public static final long JWT_TOKEN_VALIDITY = 1 * 60 * 60;
+    private static final long JWT_TOKEN_VALIDITY = 1 * 60 * 60;
+    // sub = username
+    private static final String JWT_CLAIM_ID = "id";
 
     private final String secretKey = System.getenv("jwt_secret");
 
@@ -43,8 +45,10 @@ public class JwtUtility implements Serializable {
     }
 
     //generate token for user
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(User userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put(JWT_CLAIM_ID, userDetails.getId());
+
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
@@ -58,8 +62,8 @@ public class JwtUtility implements Serializable {
     }
 
     //validate token
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, User user) {
         final String username = getUsernameFromToken(token);
-        return username != null && username.equals(userDetails.getUsername());
+        return username != null && username.equals(user.getUsername());
     }
 }

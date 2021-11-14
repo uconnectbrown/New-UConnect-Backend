@@ -73,7 +73,7 @@ public class DdbAdapter {
         return null;
     }
 
-    public User findByEmailAddress(String emailAddress) {
+    public User findById(String id) {
         // TODO: @David
         return null;
     }

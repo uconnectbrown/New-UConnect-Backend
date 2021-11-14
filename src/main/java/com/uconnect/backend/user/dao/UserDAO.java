@@ -1,5 +1,7 @@
 package com.uconnect.backend.user.dao;
 
+import java.util.List;
+
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,8 @@ public class UserDAO {
         return user.getPassword();
     }
 
-    public int createNewUser(String username, String rawPassword) {
+    public int createNewUser(String username, String rawPassword, String firstName, String lastName, String classYear,
+            List<String> majors, String pronouns, List<String> location, List<String> interests) {
         if (ddbAdapter.findByUsername(username) != null) {
             // username exists
             return -1;
@@ -46,6 +49,14 @@ public class UserDAO {
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
+
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setClassYear(classYear);
+        user.setMajors(majors);
+        user.setPronouns(pronouns);
+        user.setLocation(location);
+        user.setInterests(interests);
 
         ddbAdapter.save(userTableName, user);
 
@@ -68,4 +79,3 @@ public class UserDAO {
         return ddbAdapter.existsById(id) ? -2 : 0;
     }
 }
-

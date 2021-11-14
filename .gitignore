@@ -9,6 +9,12 @@ target/
 .idea/*
 *.iml
 
+# VSCode
+.classpath
+.factorypath
+.project
+.settings/
+
 # DynamoDB Local
 sqlite4java-native-libs/*
 

@@ -34,6 +34,31 @@ public class User implements UserDetails {
     private String password;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey
+    private String firstName;
+
+    @DynamoDBAttribute
+    private String lastName;
+
+    @DynamoDBAttribute
+    private String classYear;
+
+    // {concentration1, concentration2}
+    @DynamoDBAttribute
+    private List<String> majors;
+
+    @DynamoDBAttribute
+    private String pronouns;
+
+    // {country, state, city}
+    @DynamoDBAttribute
+    private List<String> location;
+
+    // {interest1, interest2, interest3}
+    @DynamoDBAttribute
+    private List<String> interests;
+    
+    @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;
 
     @Override

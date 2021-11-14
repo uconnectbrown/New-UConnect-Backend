@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,8 +19,14 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/api/signup/createNewUser")
-    public ResponseEntity<String> createNewUser(@RequestBody Map<String, String> req) {
-        int result = userService.createNewUser(req.get("username"), req.get("rawPassword"));
+    @SuppressWarnings("unchecked") // For cast to List<String>
+    public ResponseEntity<String> createNewUser(@RequestBody Map<String, Object> req) {
+        int result = userService.createNewUser((String) req.get("username"), (String) req.get("rawPassword"),
+                (String) req.get("firstName"), (String) req.get("lastName"), (String) req.get("classYear"),
+                (List<String>) req.get("majors"), (String) req.get("pronouns"), (List<String>) req.get("location"),
+                (List<String>) req.get("interests"));
+
+        // TODO: Give user a default profile picture
 
         switch (result) {
             case 0:

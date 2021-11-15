@@ -1,6 +1,8 @@
 server:
   port: 5000
-amazon:
-  dynamodb:
-    tablename:
-      user: FIX-ME
+
+db-setting:
+  localdbport: N/A
+
+db-table-name:
+  user: FIX-ME

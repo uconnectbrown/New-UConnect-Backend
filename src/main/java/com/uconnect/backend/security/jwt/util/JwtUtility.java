@@ -23,7 +23,7 @@ public class JwtUtility implements Serializable {
     // sub = username
     private static final String JWT_CLAIM_ID = "id";
 
-    private final String secretKey = System.getenv("jwt_secret");
+    private final String secretKey = System.getenv("JWT_SECRET");
 
     //retrieve username from jwt token
     public String getUsernameFromToken(String token) {

@@ -2,9 +2,9 @@ package com.uconnect.backend.security.jwt.util;
 
 import com.uconnect.backend.user.model.User;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -14,14 +14,15 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtUtility implements Serializable {
 
     private static final long serialVersionUID = 234234523523L;
 
     // TODO: decide token expiration time (current: 1 hours)
-    private static final long JWT_TOKEN_VALIDITY = 1 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 1 * 60 * 60;
     // sub = username
-    private static final String JWT_CLAIM_ID = "id";
+    public static final String JWT_CLAIM_ID = "id";
 
     private final String secretKey = System.getenv("JWT_SECRET");
 
@@ -32,16 +33,12 @@ public class JwtUtility implements Serializable {
 
     public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
-        return claims == null ? null : claimsResolver.apply(claims);
+        return claimsResolver.apply(claims);
     }
 
     //for retrieving any information from token we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
-        try {
-            return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-        } catch (ExpiredJwtException e) {
-            return null;
-        }
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     }
 
     //generate token for user
@@ -56,14 +53,32 @@ public class JwtUtility implements Serializable {
     //1. Define  claims of the token, like Issuer, Expiration, Subject, and the ID
     //2. Sign the JWT using the HS512 algorithm and secret key.
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+        long iss = System.currentTimeMillis();
+        long exp = iss + JWT_TOKEN_VALIDITY * 1000;
+
+        return Jwts.builder().setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(iss))
+                .setExpiration(new Date(exp))
                 .signWith(SignatureAlgorithm.HS256, secretKey).compact();
     }
 
     //validate token
     public boolean validateToken(String token, User user) {
-        final String username = getUsernameFromToken(token);
-        return username != null && username.equals(user.getUsername());
+        try {
+            final String username = getUsernameFromToken(token);
+
+            if (username == null || !username.equals(user.getUsername())) {
+                log.info("JWT token \"{}\" failed to validate for user \"{}\". Username in token: \"{}\"", token, user.getUsername(),
+                        username);
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            log.info("JWT token \"{}\" failed to validate for user \"{}\". Exception: {}", token, user.getUsername(),
+                    e.getMessage());
+            return false;
+        }
     }
 }

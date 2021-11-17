@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
@@ -17,6 +18,7 @@ import java.util.List;
 @Slf4j
 public class DdbAdapter {
     private final AmazonDynamoDB ddbClient;
+
     private DynamoDBMapper mapper;
 
     public DdbAdapter(AmazonDynamoDB ddbClient) {
@@ -40,6 +42,13 @@ public class DdbAdapter {
     public <T> void delete(String tableName, T item) {
         setMapperTableName(tableName);
         mapper.delete(item);
+    }
+
+    public <T> List<T> scan(String tableName, Class clazz) {
+        setMapperTableName(tableName);
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+
+        return mapper.scan(clazz, scanExpression);
     }
 
     public <T> List<T> query(String tableName, T item, Class clazz) {

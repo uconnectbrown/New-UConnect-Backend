@@ -24,7 +24,7 @@ public class UtilDAO {
      * 
      * @return A list of all emails in the database
      */
-    public List<String> getEmails() {
+    public List<String> getAllEmails() {
         List<String> emails = new ArrayList<>();
         List<User> users = ddbAdapter.scan(userTableName, User.class);
         for (User u : users) {

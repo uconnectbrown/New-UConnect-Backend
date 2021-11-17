@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,9 @@ public class UserController {
             .pronouns((String) req.get("pronouns"))
             .location((List<String>) req.get("location"))
             .interests((List<String>) req.get("interests"))
+            .sent(new ArrayList<>())
+            .pending(new ArrayList<>())
+            .connections(new ArrayList<>())
             .build();
         int result = userService.createNewUser(username, rawPassword, user);
 

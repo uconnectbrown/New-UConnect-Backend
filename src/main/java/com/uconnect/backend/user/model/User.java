@@ -57,6 +57,18 @@ public class User implements UserDetails {
     // {interest1, interest2, interest3}
     @DynamoDBAttribute
     private List<String> interests;
+
+    // list of usernames (emails)
+    @DynamoDBAttribute
+    private List<String> sent;
+
+    // list of usernames (emails)
+    @DynamoDBAttribute
+    private List<String> pending;
+
+    // list of usernames (emails)
+    @DynamoDBAttribute
+    private List<String> connections;
     
     @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;

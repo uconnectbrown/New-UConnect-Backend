@@ -20,4 +20,9 @@ public class UtilController {
     public ResponseEntity<List<String>> getAllEmails() {
         return new ResponseEntity<>(utilService.getAllEmails(), HttpStatus.OK);
     }
+
+    @GetMapping("/v1/util/getAllPending")
+    public ResponseEntity<List<String>> getAllPending() {
+        return new ResponseEntity<>(utilService.getAllPending(), HttpStatus.OK);
+    }
 }

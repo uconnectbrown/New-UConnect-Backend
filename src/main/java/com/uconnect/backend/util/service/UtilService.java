@@ -17,4 +17,7 @@ public class UtilService {
         return dao.getAllEmails();
     }
     
+    public List<String> getAllPending() {
+        return dao.getAllPending();
+    }
 }

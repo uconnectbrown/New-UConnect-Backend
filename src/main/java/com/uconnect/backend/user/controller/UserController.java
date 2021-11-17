@@ -19,7 +19,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/api/signup/createNewUser")
-    @SuppressWarnings("unchecked") // For cast to List<String>
+    @SuppressWarnings("unchecked") // For casting request fields
     public ResponseEntity<String> createNewUser(@RequestBody Map<String, Object> req) {
         int result = userService.createNewUser((String) req.get("username"), (String) req.get("rawPassword"),
                 (String) req.get("firstName"), (String) req.get("lastName"), (String) req.get("classYear"),

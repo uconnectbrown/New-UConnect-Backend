@@ -33,5 +33,23 @@ public class UtilDAO {
 
         return emails;
     }
-    
+
+    /**
+     * Get all emails that currently have a pending connection request.
+     * 
+     * Calls to this function should be avoided, as it makes use of the DDB scan operation.
+     * 
+     * @return A list of emails that have at least one pending connection request
+     */
+    public List<String> getAllPending() {
+        List<String> emails = new ArrayList<>();
+        List<User> users = ddbAdapter.scan(userTableName, User.class);
+        for (User u : users) {
+            if (!(u.getPending().isEmpty())) {
+                emails.add(u.getUsername());
+            }
+        }
+
+        return emails;
+    } 
 }

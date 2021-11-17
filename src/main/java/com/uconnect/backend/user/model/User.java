@@ -16,8 +16,8 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 @DynamoDBTable(tableName = "placeholder")
 public class User implements UserDetails {
     @DynamoDBHashKey

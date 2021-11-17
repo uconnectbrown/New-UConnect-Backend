@@ -1,5 +1,6 @@
 package com.uconnect.backend.user.controller;
 
+import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,10 +22,18 @@ public class UserController {
     @PostMapping("/api/signup/createNewUser")
     @SuppressWarnings("unchecked") // For casting request fields
     public ResponseEntity<String> createNewUser(@RequestBody Map<String, Object> req) {
-        int result = userService.createNewUser((String) req.get("username"), (String) req.get("rawPassword"),
-                (String) req.get("firstName"), (String) req.get("lastName"), (String) req.get("classYear"),
-                (List<String>) req.get("majors"), (String) req.get("pronouns"), (List<String>) req.get("location"),
-                (List<String>) req.get("interests"));
+        String username = (String) req.get("username");
+        String rawPassword = (String) req.get("rawPassword");
+        User user = User.builder()
+            .firstName((String) req.get("firstName"))
+            .lastName((String) req.get("lastName"))
+            .classYear((String) req.get("classYear"))
+            .majors((List<String>) req.get("majors"))
+            .pronouns((String) req.get("pronouns"))
+            .location((List<String>) req.get("location"))
+            .interests((List<String>) req.get("interests"))
+            .build();
+        int result = userService.createNewUser(username, rawPassword, user);
 
         // TODO: Give user a default profile picture
 

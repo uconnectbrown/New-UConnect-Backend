@@ -1,5 +1,7 @@
 package com.uconnect.backend.user.dao;
 
+import java.util.List;
+
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,5 +67,21 @@ public class UserDAO {
 
         // successfully created a new user
         return ddbAdapter.existsById(id) ? -2 : 0;
+    }
+
+    /**
+     * Gets the pending connections of the specified user.
+     * 
+     * @param username The username of the user
+     * @return If the user exists, return the list of pending connections; otherwise, return null
+     */
+    public List<String> getPending(String username) {
+        User user = ddbAdapter.findByUsername(username);
+
+        if (user == null) {
+            return null;
+        }
+
+        return user.getPending();
     }
 }

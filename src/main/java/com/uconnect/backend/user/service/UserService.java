@@ -1,5 +1,7 @@
 package com.uconnect.backend.user.service;
 
+import java.util.List;
+
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,10 @@ public class UserService implements UserDetailsService {
 
     public int deleteUser(String username) {
         return dao.deleteUser(username);
+    }
+
+    public List<String> getPending(String username) {
+        return dao.getPending(username);
     }
 }
 

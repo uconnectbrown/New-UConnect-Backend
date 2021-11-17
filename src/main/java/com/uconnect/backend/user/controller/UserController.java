@@ -5,6 +5,7 @@ import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -66,5 +67,11 @@ public class UserController {
                 return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
         }
     }
-}
 
+    @GetMapping("/v1/user/getPending")
+    public ResponseEntity<List<String>> getPending(@RequestHeader(name = "Username") String username) {
+        List<String> pending = userService.getPending(username);
+
+        return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+    }
+}

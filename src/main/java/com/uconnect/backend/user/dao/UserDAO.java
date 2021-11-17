@@ -84,4 +84,20 @@ public class UserDAO {
 
         return user.getPending();
     }
+
+    /**
+     * Gets the connections of the specified user.
+     * 
+     * @param username The username of the user
+     * @return If the user exists, return the list of connections; otherwise, return null
+     */
+    public List<String> getConnections(String username) {
+        User user = ddbAdapter.findByUsername(username);
+
+        if (user == null) {
+            return null;
+        }
+
+        return user.getConnections();
+    }
 }

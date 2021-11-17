@@ -31,5 +31,9 @@ public class UserService implements UserDetailsService {
     public List<String> getPending(String username) {
         return dao.getPending(username);
     }
+
+    public List<String> getConnections(String username) {
+        return dao.getConnections(username);
+    }
 }
 

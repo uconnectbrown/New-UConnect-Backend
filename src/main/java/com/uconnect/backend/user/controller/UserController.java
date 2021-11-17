@@ -68,10 +68,33 @@ public class UserController {
         }
     }
 
+    /**
+     * Gets the pending connections for the specified user.
+     * 
+     * Responds with BAD_REQUEST if the specified user does not exist.
+     * 
+     * @param username The username of the user
+     * @return A list of pending connections for the user
+     */
     @GetMapping("/v1/user/getPending")
     public ResponseEntity<List<String>> getPending(@RequestHeader(name = "Username") String username) {
         List<String> pending = userService.getPending(username);
 
         return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+    }
+
+    /**
+     * Gets the connections for the specified user.
+     * 
+     * Responds with BAD_REQUEST if the specified user does not exist.
+     * 
+     * @param username The username of the user
+     * @return A list of connections for the user
+     */
+    @GetMapping("/v1/user/getConnections")
+    public ResponseEntity<List<String>> getConnections(@RequestHeader(name = "Username") String username) {
+        List<String> connections = userService.getConnections(username);
+
+        return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
     }
 }

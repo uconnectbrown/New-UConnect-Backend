@@ -13,8 +13,8 @@ public class UtilService {
     @Autowired
     UtilDAO dao;
 
-    public List<String> getEmails() {
-        return dao.getEmails();
+    public List<String> getAllEmails() {
+        return dao.getAllEmails();
     }
     
 }

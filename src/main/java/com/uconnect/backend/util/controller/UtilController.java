@@ -16,8 +16,8 @@ public class UtilController {
     @Autowired
     private UtilService utilService;
 
-    @GetMapping("/v1/util/getEmails")
-    public ResponseEntity<List<String>> getEmails() {
-        return new ResponseEntity<>(utilService.getEmails(), HttpStatus.OK);
+    @GetMapping("/v1/util/getAllEmails")
+    public ResponseEntity<List<String>> getAllEmails() {
+        return new ResponseEntity<>(utilService.getAllEmails(), HttpStatus.OK);
     }
 }

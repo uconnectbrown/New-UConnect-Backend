@@ -37,6 +37,7 @@ public class UserController {
             .sent(new ArrayList<>())
             .pending(new ArrayList<>())
             .connections(new ArrayList<>())
+            .requests(10)
             .build();
         int result = userService.createNewUser(username, rawPassword, user);
 

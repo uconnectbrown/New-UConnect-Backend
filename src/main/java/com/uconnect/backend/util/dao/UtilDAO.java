@@ -52,4 +52,29 @@ public class UtilDAO {
 
         return emails;
     } 
+
+    /**
+     * Queries the database for users with property param equal to an element in options.
+     * 
+     * Acceptable values for param:
+     * - firstName
+     * - lastName
+     * - classYear
+     * - majors
+     * - pronouns
+     * - location
+     * - email
+     * - interests
+     * 
+     * @param options
+     * @param param
+     * @return
+     */
+    public List<String> searchByParam(List<String> options, String param) {
+        ArrayList<String> output = new ArrayList<>();
+
+        // TODO: Implement 
+
+        return output;
+    }
 }

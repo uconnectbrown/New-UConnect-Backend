@@ -69,6 +69,9 @@ public class User implements UserDetails {
     // list of usernames (emails)
     @DynamoDBAttribute
     private List<String> connections;
+
+    @DynamoDBAttribute
+    private int requests;
     
     @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;

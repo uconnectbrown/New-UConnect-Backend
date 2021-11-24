@@ -35,7 +35,7 @@ public class ConnectController {
                 msg = "Operation unsuccessful: " + username1 + " has already sent a request to " + username2;
                 break;
             case -2:
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                status = HttpStatus.BAD_REQUEST;
                 msg = "Operation unsuccessful: " + username2 + " has already received a request from " + username2 + ". This should not have happened.";
                 break;
             case -3:
@@ -69,11 +69,11 @@ public class ConnectController {
                 msg = "Operation unsuccessful: " + username1 + " has not sent a request to " + username2;
                 break;
             case -2:
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                status = HttpStatus.BAD_REQUEST;
                 msg = "Operation unsuccessful: " + username2 + " has not received a request from " + username2 + ". This should not have happened.";
                 break;
             case -3:
-                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                status = HttpStatus.BAD_REQUEST;
                 msg = "Operation unsuccessful: " + username1 + " has too many requests. This should not have happened.";
                 break;
             default:

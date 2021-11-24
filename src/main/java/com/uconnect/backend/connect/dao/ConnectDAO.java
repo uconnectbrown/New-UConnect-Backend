@@ -6,6 +6,9 @@ import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class ConnectDAO {
     @Autowired
@@ -51,6 +54,7 @@ public class ConnectDAO {
         // Decrement sender's requests
         int requests = sender.getRequests();
         if (requests < 1) {
+            log.info("User " + senderUsername + " did not have enough requests to send a request to " + receiverUsername);
             return -3; // sender does not have a sufficient number of requests
         } else {
             sender.setRequests(--requests);
@@ -100,6 +104,7 @@ public class ConnectDAO {
         // Increment sender's requests
         int requests = sender.getRequests();
         if (requests > 9) {
+            log.info("User " + senderUsername + " has " + requests + " requests, which is more than the maximum");
             return -3; // sender has too many requests (should not happen)
         } else {
             sender.setRequests(++requests);

@@ -10,11 +10,11 @@ public class ConnectService {
     @Autowired
     ConnectDAO dao;
 
-    public int request(String username1, String username2) {
-        return dao.request(username1, username2);
+    public int request(String senderUsername, String receiverUsername) {
+        return dao.request(senderUsername, receiverUsername);
     }
 
-    public int undoRequest(String username1, String username2) {
-        return dao.undoRequest(username1, username2);
+    public int undoRequest(String senderUsername, String receiverUsername) {
+        return dao.undoRequest(senderUsername, receiverUsername);
     }
 }

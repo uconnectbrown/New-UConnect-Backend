@@ -42,6 +42,10 @@ public class ConnectController {
                 status = HttpStatus.BAD_REQUEST;
                 msg = "Operation unsuccessful: " + senderUsername + " has an insufficient number of requests";
                 break;
+            case -4:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                msg = "Unexpected error";
+                break;
             default:
                 status = HttpStatus.I_AM_A_TEAPOT;
                 msg = "This should not have happened. A certain dev asks that you call your mother for him.";
@@ -75,6 +79,10 @@ public class ConnectController {
             case -3:
                 status = HttpStatus.BAD_REQUEST;
                 msg = "Operation unsuccessful: " + senderUsername + " has too many requests. This should not have happened.";
+                break;
+            case -4:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                msg = "Unexpected error";
                 break;
             default:
                 status = HttpStatus.I_AM_A_TEAPOT;

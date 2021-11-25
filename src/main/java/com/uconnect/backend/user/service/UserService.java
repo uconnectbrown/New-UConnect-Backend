@@ -9,6 +9,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class UserService implements UserDetailsService {
 
@@ -20,12 +23,40 @@ public class UserService implements UserDetailsService {
         return dao.getUserByUsername(username);
     }
 
+    /**
+     * Creates a new user.
+     * 
+     * Returns -2 in case of unexpected exception.
+     * 
+     * @param username The username of the user to create
+     * @param rawPassword The raw password of the user
+     * @param user A user object to populate the remainder of the user's data
+     * @return An exit code
+     */
     public int createNewUser(String username, String rawPassword, User user) {
-        return dao.createNewUser(username, rawPassword, user);
+        try {
+            return dao.createNewUser(username, rawPassword, user);
+        } catch (Exception e) {
+            log.error("Unexpected exception while creating new user " + username, e);
+            return -2;
+        }
     }
 
+    /**
+     * Deletes a user.
+     * 
+     * Returns -3 in case of unexpected exception.
+     * 
+     * @param username The username of the user to delete
+     * @return An exit code
+     */
     public int deleteUser(String username) {
-        return dao.deleteUser(username);
+        try {
+            return dao.deleteUser(username);
+        } catch (Exception e) {
+            log.error("Unexpected exception while deleting user " + username, e);
+            return -3;
+        }
     }
 
     public Set<String> getPending(String username) {

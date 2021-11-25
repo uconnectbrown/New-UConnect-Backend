@@ -1,5 +1,7 @@
 package com.uconnect.backend.user.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +23,37 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    private ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+            false);
+
+    /**
+     * Endpoint for creating a new user. 
+     * 
+     * Takes in a request with the following fields:
+     *   - username -- String
+     *   - rawPassword -- String
+     *   - firstName -- String
+     *   - lastName -- String
+     *   - classYear -- String
+     *   - majors -- List<String>
+     *   - pronouns -- String
+     *   - location -- List<String>
+     *   - interests -- List<String>
+     *   - sent -- List<String>
+     *   - pending -- List<String>
+     *   - connections -- List<String>
+     *   - requests -- int
+     * 
+     * @param req The request to the endpoint
+     * @return An HTTP response
+     */
     @PostMapping("/api/signup/createNewUser")
-    @SuppressWarnings("unchecked") // For casting request fields
     public ResponseEntity<String> createNewUser(@RequestBody Map<String, Object> req) {
         String username = (String) req.get("username");
         String rawPassword = (String) req.get("rawPassword");
-        User user = User.builder()
-            .firstName((String) req.get("firstName"))
-            .lastName((String) req.get("lastName"))
-            .classYear((String) req.get("classYear"))
-            .majors((List<String>) req.get("majors"))
-            .pronouns((String) req.get("pronouns"))
-            .location((List<String>) req.get("location"))
-            .interests((List<String>) req.get("interests"))
-            .sent(new ArrayList<>())
-            .pending(new ArrayList<>())
-            .connections(new ArrayList<>())
-            .requests(10)
-            .build();
+
+        User user = mapper.convertValue(req, User.class);
+
         int result = userService.createNewUser(username, rawPassword, user);
 
         // TODO: Give user a default profile picture

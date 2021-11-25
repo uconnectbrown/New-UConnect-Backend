@@ -36,7 +36,7 @@ public class UserController {
      *   - classYear -- String
      *   - majors -- List<String>
      *   - pronouns -- String
-     *   - location -- List<String>
+     *   - location -- Location {String country, String state, String city}
      *   - interests -- List<String>
      *   - sent -- List<String>
      *   - pending -- List<String>

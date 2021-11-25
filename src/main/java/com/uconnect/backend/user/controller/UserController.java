@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class UserController {
@@ -92,8 +92,8 @@ public class UserController {
      * @return A list of pending connections for the user
      */
     @GetMapping("/v1/user/getPending")
-    public ResponseEntity<List<String>> getPending(@RequestHeader(name = "Username") String username) {
-        List<String> pending = userService.getPending(username);
+    public ResponseEntity<Set<String>> getPending(@RequestHeader(name = "Username") String username) {
+        Set<String> pending = userService.getPending(username);
 
         return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
@@ -107,8 +107,8 @@ public class UserController {
      * @return A list of connections for the user
      */
     @GetMapping("/v1/user/getConnections")
-    public ResponseEntity<List<String>> getConnections(@RequestHeader(name = "Username") String username) {
-        List<String> connections = userService.getConnections(username);
+    public ResponseEntity<Set<String>> getConnections(@RequestHeader(name = "Username") String username) {
+        Set<String> connections = userService.getConnections(username);
 
         return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }

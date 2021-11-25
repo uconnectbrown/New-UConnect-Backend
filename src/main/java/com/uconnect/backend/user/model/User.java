@@ -30,7 +30,6 @@ public class User implements UserDetails {
     private String username;
 
     @DynamoDBAttribute
-    @DynamoDBIndexHashKey
     private String password;
 
     @DynamoDBAttribute
@@ -38,6 +37,7 @@ public class User implements UserDetails {
     private String firstName;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey
     private String lastName;
 
     @DynamoDBAttribute

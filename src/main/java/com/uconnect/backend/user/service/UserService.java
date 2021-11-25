@@ -1,6 +1,6 @@
 package com.uconnect.backend.user.service;
 
-import java.util.List;
+import java.util.Set;
 
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
@@ -28,11 +28,11 @@ public class UserService implements UserDetailsService {
         return dao.deleteUser(username);
     }
 
-    public List<String> getPending(String username) {
+    public Set<String> getPending(String username) {
         return dao.getPending(username);
     }
 
-    public List<String> getConnections(String username) {
+    public Set<String> getConnections(String username) {
         return dao.getConnections(username);
     }
 }

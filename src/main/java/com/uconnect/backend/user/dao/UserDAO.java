@@ -1,6 +1,6 @@
 package com.uconnect.backend.user.dao;
 
-import java.util.List;
+import java.util.Set;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
@@ -73,9 +73,9 @@ public class UserDAO {
      * Gets the pending connections of the specified user.
      * 
      * @param username The username of the user
-     * @return If the user exists, return the list of pending connections; otherwise, return null
+     * @return If the user exists, return the set of pending connections; otherwise, return null
      */
-    public List<String> getPending(String username) {
+    public Set<String> getPending(String username) {
         User user = ddbAdapter.findByUsername(username);
 
         if (user == null) {
@@ -89,9 +89,9 @@ public class UserDAO {
      * Gets the connections of the specified user.
      * 
      * @param username The username of the user
-     * @return If the user exists, return the list of connections; otherwise, return null
+     * @return If the user exists, return the set of connections; otherwise, return null
      */
-    public List<String> getConnections(String username) {
+    public Set<String> getConnections(String username) {
         User user = ddbAdapter.findByUsername(username);
 
         if (user == null) {

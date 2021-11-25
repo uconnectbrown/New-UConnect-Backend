@@ -13,9 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
+import static org.mockito.ArgumentMatchers.notNull;
+
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @RestController
 public class UserController {
 
@@ -62,6 +67,8 @@ public class UserController {
                 return new ResponseEntity<>("Successfully created a new account for " + req.get("username"), HttpStatus.ACCEPTED);
             case -1:
                 return new ResponseEntity<>("Failed to create a new account for " + req.get("username") + ", USERNAME/EMAIL already exists", HttpStatus.BAD_REQUEST);
+            case -2:
+                return new ResponseEntity<>("Unexpected exception occurred when creating account for " + req.get("username"), HttpStatus.INTERNAL_SERVER_ERROR);
             default:
                 return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
         }
@@ -78,6 +85,8 @@ public class UserController {
                 return new ResponseEntity<>("Failed to delete account for " + username + ", USERNAME/EMAIL does not exist", HttpStatus.BAD_REQUEST);
             case -2:
                 return new ResponseEntity<>("Something went wrong with our database, failed to delete account for " + username, HttpStatus.INTERNAL_SERVER_ERROR);
+            case -3:
+                return new ResponseEntity<>("Unexpected exception occurred when deleting account for " + username, HttpStatus.INTERNAL_SERVER_ERROR);
             default:
                 return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
         }
@@ -87,29 +96,39 @@ public class UserController {
      * Gets the pending connections for the specified user.
      * 
      * Responds with NOT_FOUND if the specified user does not exist.
+     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is encountered.
      * 
      * @param username The username of the user
      * @return A list of pending connections for the user
      */
     @GetMapping("/v1/user/getPending")
     public ResponseEntity<Set<String>> getPending(@RequestHeader(name = "Username") String username) {
-        Set<String> pending = userService.getPending(username);
-
-        return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+        try {
+            Set<String> pending = userService.getPending(username);
+            return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Unexpected exception encountered when getting pending connections for user " + username, e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Gets the connections for the specified user.
      * 
      * Responds with NOT_FOUND if the specified user does not exist.
+     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is encountered.
      * 
      * @param username The username of the user
      * @return A list of connections for the user
      */
     @GetMapping("/v1/user/getConnections")
     public ResponseEntity<Set<String>> getConnections(@RequestHeader(name = "Username") String username) {
-        Set<String> connections = userService.getConnections(username);
-
-        return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+        try {
+            Set<String> connections = userService.getConnections(username);
+            return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Unexpected exception encountered when getting connections for user " + username, e);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

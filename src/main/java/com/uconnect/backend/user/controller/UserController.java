@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -87,7 +86,7 @@ public class UserController {
     /**
      * Gets the pending connections for the specified user.
      * 
-     * Responds with BAD_REQUEST if the specified user does not exist.
+     * Responds with NOT_FOUND if the specified user does not exist.
      * 
      * @param username The username of the user
      * @return A list of pending connections for the user
@@ -96,13 +95,13 @@ public class UserController {
     public ResponseEntity<List<String>> getPending(@RequestHeader(name = "Username") String username) {
         List<String> pending = userService.getPending(username);
 
-        return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+        return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
     /**
      * Gets the connections for the specified user.
      * 
-     * Responds with BAD_REQUEST if the specified user does not exist.
+     * Responds with NOT_FOUND if the specified user does not exist.
      * 
      * @param username The username of the user
      * @return A list of connections for the user
@@ -111,6 +110,6 @@ public class UserController {
     public ResponseEntity<List<String>> getConnections(@RequestHeader(name = "Username") String username) {
         List<String> connections = userService.getConnections(username);
 
-        return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+        return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 }

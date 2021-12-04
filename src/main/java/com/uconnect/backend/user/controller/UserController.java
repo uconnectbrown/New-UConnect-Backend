@@ -1,11 +1,15 @@
 package com.uconnect.backend.user.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.extern.slf4j.Slf4j;
-
-import static org.mockito.ArgumentMatchers.notNull;
 
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +29,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // TODO: Create bean for mapper
     private ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
             false);
 
@@ -51,26 +54,35 @@ public class UserController {
      * @param req The request to the endpoint
      * @return An HTTP response
      */
-    @PostMapping("/api/signup/createNewUser")
-    public ResponseEntity<String> createNewUser(@RequestBody Map<String, Object> req) {
-        String username = (String) req.get("username");
-        String rawPassword = (String) req.get("rawPassword");
+    @PostMapping(value="/api/signup/createNewUser", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> createNewUser(@RequestBody String json) {
+        try {
+            JsonNode jsonNode = mapper.readTree(json);
 
-        User user = mapper.convertValue(req, User.class);
+            String username = jsonNode.get("username").asText();
+            String rawPassword = jsonNode.get("rawPassword").asText();
 
-        int result = userService.createNewUser(username, rawPassword, user);
+            User user = mapper.readValue(json, User.class);
 
-        // TODO: Give user a default profile picture
+            int result = userService.createNewUser(username, rawPassword, user);
 
-        switch (result) {
-            case 0:
-                return new ResponseEntity<>("Successfully created a new account for " + req.get("username"), HttpStatus.ACCEPTED);
-            case -1:
-                return new ResponseEntity<>("Failed to create a new account for " + req.get("username") + ", USERNAME/EMAIL already exists", HttpStatus.BAD_REQUEST);
-            case -2:
-                return new ResponseEntity<>("Unexpected exception occurred when creating account for " + req.get("username"), HttpStatus.INTERNAL_SERVER_ERROR);
-            default:
-                return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
+            // TODO: Give user a default profile picture
+
+            switch (result) {
+                case 0:
+                    return new ResponseEntity<>("Successfully created a new account for " + username, HttpStatus.ACCEPTED);
+                case -1:
+                    return new ResponseEntity<>("Failed to create a new account for " + username + ", USERNAME/EMAIL already exists", HttpStatus.BAD_REQUEST);
+                case -2:
+                    return new ResponseEntity<>("Unexpected exception occurred when creating account for " + username, HttpStatus.INTERNAL_SERVER_ERROR);
+                default:
+                    return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
+            }
+        } catch (JsonProcessingException e) {
+            return new ResponseEntity<>("Bad request format", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e);
+            return new ResponseEntity<>("Unexpected exception occurred", HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -82,13 +94,19 @@ public class UserController {
             case 0:
                 return new ResponseEntity<>("Successfully deleted account for " + username, HttpStatus.OK);
             case -1:
-                return new ResponseEntity<>("Failed to delete account for " + username + ", USERNAME/EMAIL does not exist", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(
+                        "Failed to delete account for " + username + ", USERNAME/EMAIL does not exist",
+                        HttpStatus.BAD_REQUEST);
             case -2:
-                return new ResponseEntity<>("Something went wrong with our database, failed to delete account for " + username, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(
+                        "Something went wrong with our database, failed to delete account for " + username,
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             case -3:
-                return new ResponseEntity<>("Unexpected exception occurred when deleting account for " + username, HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("Unexpected exception occurred when deleting account for " + username,
+                        HttpStatus.INTERNAL_SERVER_ERROR);
             default:
-                return new ResponseEntity<>("should not see this response, call your mother for me if you do", HttpStatus.I_AM_A_TEAPOT);
+                return new ResponseEntity<>("should not see this response, call your mother for me if you do",
+                        HttpStatus.I_AM_A_TEAPOT);
         }
     }
 
@@ -96,7 +114,8 @@ public class UserController {
      * Gets the pending connections for the specified user.
      * 
      * Responds with NOT_FOUND if the specified user does not exist.
-     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is encountered.
+     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is
+     * encountered.
      * 
      * @param username The username of the user
      * @return A list of pending connections for the user
@@ -116,7 +135,8 @@ public class UserController {
      * Gets the connections for the specified user.
      * 
      * Responds with NOT_FOUND if the specified user does not exist.
-     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is encountered.
+     * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is
+     * encountered.
      * 
      * @param username The username of the user
      * @return A list of connections for the user

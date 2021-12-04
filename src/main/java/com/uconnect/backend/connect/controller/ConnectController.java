@@ -1,7 +1,5 @@
 package com.uconnect.backend.connect.controller;
 
-import java.util.Map;
-
 import com.uconnect.backend.connect.service.ConnectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,11 +8,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 public class ConnectController {
-    
+
+    private final ConnectService connectService;
+
     @Autowired
-    private ConnectService connectService;
+    public ConnectController(ConnectService connectService) {
+        this.connectService = connectService;
+    }
 
     @PostMapping("/v1/connect/request")
     public ResponseEntity<String> request(@RequestBody Map<String, String> req) {

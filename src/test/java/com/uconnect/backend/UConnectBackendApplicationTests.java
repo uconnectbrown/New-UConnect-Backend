@@ -1,9 +1,10 @@
-package com.uconnect.backend.main;
+package com.uconnect.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class UConnectBackendApplicationTests {
 
     @Test

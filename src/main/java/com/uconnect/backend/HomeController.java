@@ -1,4 +1,4 @@
-package com.uconnect.backend.main;
+package com.uconnect.backend;
 
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;

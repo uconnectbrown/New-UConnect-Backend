@@ -3,17 +3,16 @@ package com.uconnect.backend.awsadapter;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class LocalDdbServerRunner {
-    @Autowired
-    private String localDbPort;
+    private final String localDbPort;
     private DynamoDBProxyServer server;
 
-    public LocalDdbServerRunner() {
+    public LocalDdbServerRunner(String localDbPort) {
+        this.localDbPort = localDbPort;
         System.setProperty("sqlite4java.library.path", "sqlite4java-native-libs");
     }
 

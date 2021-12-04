@@ -11,25 +11,29 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Repository
 public class ConnectDAO {
-    @Autowired
-    private DdbAdapter ddbAdapter;
+    private final DdbAdapter ddbAdapter;
+
+    private final String userTableName;
 
     @Autowired
-    private String userTableName;
+    public ConnectDAO(DdbAdapter ddbAdapter, String userTableName) {
+        this.ddbAdapter = ddbAdapter;
+        this.userTableName = userTableName;
+    }
 
     /**
      * Creates a request to connect from sender to receiver.
-     * 
+     * <p>
      * Exit codes:
-     *   0 -- normal termination
-     *   -1 -- sender has already sent a request to receiver
-     *   -2 -- receiver has already received a request from sender
-     *   -3 -- sender does not have a sufficient number of requests
-     * 
+     * 0 -- normal termination
+     * -1 -- sender has already sent a request to receiver
+     * -2 -- receiver has already received a request from sender
+     * -3 -- sender does not have a sufficient number of requests
+     * <p>
      * The operation is only successful on normal termination. All other cases will
      * result in no changes to sender and receiver in the database.
-     * 
-     * @param senderUsername The username of sender
+     *
+     * @param senderUsername   The username of sender
      * @param receiverUsername The username of receiver
      * @return An exit code
      */
@@ -69,17 +73,17 @@ public class ConnectDAO {
 
     /**
      * Undoes a request to connect from sender to receiver.
-     * 
+     * <p>
      * Exit codes:
-     *   0 -- normal termination
-     *   -1 -- sender has not sent a request to receiver
-     *   -2 -- receiver has not received a request from sender
-     *   -3 -- sender has too many requests
-     * 
+     * 0 -- normal termination
+     * -1 -- sender has not sent a request to receiver
+     * -2 -- receiver has not received a request from sender
+     * -3 -- sender has too many requests
+     * <p>
      * The operation is only successful on normal termination. All other cases will
      * result in no changes to sender and receiver in the database.
-     * 
-     * @param senderUsername The username of sender
+     *
+     * @param senderUsername   The username of sender
      * @param receiverUsername The username of receiver
      * @return An exit code
      */

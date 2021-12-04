@@ -31,8 +31,6 @@ public class AwsConfiguration {
         boolean isDev = "DEV".equals(System.getenv("spring_profiles_active"));
 
         if (isDev) {
-            localDdbServerRunner.start();
-
             return AmazonDynamoDBClientBuilder
                     .standard()
                     .withEndpointConfiguration(

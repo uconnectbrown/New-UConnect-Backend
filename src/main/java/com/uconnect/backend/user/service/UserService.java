@@ -1,22 +1,25 @@
 package com.uconnect.backend.user.service;
 
-import java.util.Set;
-
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.Set;
 
 @Slf4j
 @Service
 public class UserService implements UserDetailsService {
 
+    private final UserDAO dao;
+
     @Autowired
-    UserDAO dao;
+    public UserService(UserDAO dao) {
+        this.dao = dao;
+    }
 
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -25,9 +28,9 @@ public class UserService implements UserDetailsService {
 
     /**
      * Creates a new user.
-     * 
+     * <p>
      * Returns -2 in case of unexpected exception.
-     * 
+     *
      * @param username    The username of the user to create
      * @param rawPassword The raw password of the user
      * @param user        A user object to populate the remainder of the user's data
@@ -44,9 +47,9 @@ public class UserService implements UserDetailsService {
 
     /**
      * Deletes a user.
-     * 
+     * <p>
      * Returns -3 in case of unexpected exception.
-     * 
+     *
      * @param username The username of the user to delete
      * @return An exit code
      */

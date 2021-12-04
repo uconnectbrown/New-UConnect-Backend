@@ -1,14 +1,10 @@
 package com.uconnect.backend.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,20 +12,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
-
+import javax.validation.Valid;
 import java.util.Set;
 
 @Slf4j
 @RestController
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    // TODO: Create bean for mapper
-    private ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-            false);
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * Endpoint for creating a new user.
@@ -49,18 +44,14 @@ public class UserController {
      * - connections -- List<String>
      * - requests -- int
      * 
-     * @param req The request to the endpoint
+     * @param user The request deserialized into a User object after validation
      * @return An HTTP response
      */
-    @PostMapping(value = "/api/signup/createNewUser", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createNewUser(@RequestBody String json) {
+    @PostMapping(value = "/api/signup/createNewUser")
+    public ResponseEntity<String> createNewUser(@Valid @RequestBody User user) {
         try {
-            JsonNode jsonNode = mapper.readTree(json);
-
-            String username = jsonNode.get("username").asText();
-            String rawPassword = jsonNode.get("rawPassword").asText();
-
-            User user = mapper.readValue(json, User.class);
+            String username = user.getUsername();
+            String rawPassword = user.getPassword();
 
             int result = userService.createNewUser(username, rawPassword, user);
 
@@ -81,10 +72,8 @@ public class UserController {
                     return new ResponseEntity<>("should not see this response, call your mother for me if you do",
                             HttpStatus.I_AM_A_TEAPOT);
             }
-        } catch (JsonProcessingException e) {
-            return new ResponseEntity<>("Bad request format", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            log.error("Unexpected error: {}", e);
+            log.error("Unexpected error: {}", e.getMessage());
             return new ResponseEntity<>("Unexpected exception occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

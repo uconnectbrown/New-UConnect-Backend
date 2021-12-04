@@ -10,16 +10,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class ConnectService {
+    private final ConnectDAO dao;
+
     @Autowired
-    ConnectDAO dao;
+    public ConnectService(ConnectDAO dao) {
+        this.dao = dao;
+    }
 
     /**
      * Calls request() from ConnectDAO.
-     * 
+     * <p>
      * Returns -4 if an unexpected exception occurs. Otherwise, returns the
      * exit code of ConnectDAO.request().
-     * 
-     * @param senderUsername The username of the sender
+     *
+     * @param senderUsername   The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
      */
@@ -34,11 +38,11 @@ public class ConnectService {
 
     /**
      * Calls undoRequest() from ConnectDAO.
-     * 
+     * <p>
      * Returns -4 if an unexpected exception occurs. Otherwise, returns the
      * exit code of ConnectDAO.undoRequest().
-     * 
-     * @param senderUsername The username of the sender
+     *
+     * @param senderUsername   The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
      */

@@ -1,7 +1,5 @@
 package com.uconnect.backend.user.dao;
 
-import java.util.Set;
-
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,16 +7,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
+
 @Repository
 public class UserDAO {
-    @Autowired
-    private DdbAdapter ddbAdapter;
+    private final DdbAdapter ddbAdapter;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final String userTableName;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private String userTableName;
+    public UserDAO(DdbAdapter ddbAdapter, PasswordEncoder passwordEncoder, String userTableName) {
+        this.ddbAdapter = ddbAdapter;
+        this.passwordEncoder = passwordEncoder;
+        this.userTableName = userTableName;
+    }
 
     public User getUserByUsername(String username) {
         User user = ddbAdapter.findByUsername(username);
@@ -71,7 +75,7 @@ public class UserDAO {
 
     /**
      * Gets the pending connections of the specified user.
-     * 
+     *
      * @param username The username of the user
      * @return If the user exists, return the set of pending connections; otherwise, return null
      */
@@ -87,7 +91,7 @@ public class UserDAO {
 
     /**
      * Gets the connections of the specified user.
-     * 
+     *
      * @param username The username of the user
      * @return If the user exists, return the set of connections; otherwise, return null
      */

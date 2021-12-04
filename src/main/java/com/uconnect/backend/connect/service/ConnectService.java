@@ -27,7 +27,7 @@ public class ConnectService {
         try {
             return dao.request(senderUsername, receiverUsername);
         } catch (Exception e) {
-            log.error("Unexpected error", e);
+            log.error("Unexpected error: {}", e);
             return -4;
         }
     }
@@ -46,7 +46,7 @@ public class ConnectService {
         try {
             return dao.undoRequest(senderUsername, receiverUsername);
         } catch (Exception e) {
-            log.error("Unexpected error", e);
+            log.error("Unexpected error: {}", e);
             return -4;
         }
     }

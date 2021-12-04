@@ -28,16 +28,16 @@ public class UserService implements UserDetailsService {
      * 
      * Returns -2 in case of unexpected exception.
      * 
-     * @param username The username of the user to create
+     * @param username    The username of the user to create
      * @param rawPassword The raw password of the user
-     * @param user A user object to populate the remainder of the user's data
+     * @param user        A user object to populate the remainder of the user's data
      * @return An exit code
      */
     public int createNewUser(String username, String rawPassword, User user) {
         try {
             return dao.createNewUser(username, rawPassword, user);
         } catch (Exception e) {
-            log.error("Unexpected exception while creating new user " + username, e);
+            log.error("Unexpected exception while creating new user " + username + ": {}", e);
             return -2;
         }
     }
@@ -54,7 +54,7 @@ public class UserService implements UserDetailsService {
         try {
             return dao.deleteUser(username);
         } catch (Exception e) {
-            log.error("Unexpected exception while deleting user " + username, e);
+            log.error("Unexpected exception while deleting user " + username + ": {}", e);
             return -3;
         }
     }
@@ -67,4 +67,3 @@ public class UserService implements UserDetailsService {
         return dao.getConnections(username);
     }
 }
-

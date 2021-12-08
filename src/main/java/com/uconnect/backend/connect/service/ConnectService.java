@@ -61,4 +61,23 @@ public class ConnectService {
             return -5;
         }
     }
+
+    /**
+     * Calls accept() from ConnectDAO.
+     * <p>
+     * Returns -6 if an unexpected exception occurs. Otherwise, returns the
+     * exit code of ConnectDAO.accept().
+     * 
+     * @param senderUsername   The username of the sender
+     * @param receiverUsername The username of the receiver
+     * @return An exit code
+     */
+    public int accept(String senderUsername, String receiverUsername) {
+        try {
+            return dao.accept(senderUsername, receiverUsername);
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e);
+            return -6;
+        }
+    }
 }

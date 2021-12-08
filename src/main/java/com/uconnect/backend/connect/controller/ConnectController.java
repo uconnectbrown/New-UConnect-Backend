@@ -108,7 +108,7 @@ public class ConnectController {
         return new ResponseEntity<>(msg, status);
     }
 
-    @PostMapping("v1/connect/accept")
+    @PostMapping("/v1/connect/accept")
     public ResponseEntity<String> accept(@RequestBody Map<String, String> req) {
         String senderUsername = req.get("sender");
         String receiverUsername = req.get("receiver");
@@ -148,6 +148,44 @@ public class ConnectController {
                         + " has too many requests. This should not have happened.";
                 break;
             case -6:
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
+                msg = "Unexpected error";
+                break;
+            default:
+                status = HttpStatus.I_AM_A_TEAPOT;
+                msg = "This should not have happened. A certain dev asks that you call your mother for him.";
+        }
+
+        return new ResponseEntity<>(msg, status);
+    }
+
+    @PostMapping("/v1/connect/checkStatus")
+    public ResponseEntity<String> checkStatus(@RequestBody Map<String, String> req) {
+        String currentUsername = req.get("current");
+        String otherUsername = req.get("other");
+
+        int result = connectService.checkStatus(currentUsername, otherUsername);
+
+        HttpStatus status;
+        String msg;
+        switch (result) {
+            case 3:
+                status = HttpStatus.BAD_REQUEST;
+                msg = currentUsername + " has an incoming request from " + otherUsername;
+                break;
+            case 2:
+                status = HttpStatus.BAD_REQUEST;
+                msg = currentUsername + " has an outgoing request to " + otherUsername;
+                break;
+            case 1:
+                status = HttpStatus.BAD_REQUEST;
+                msg = currentUsername + " and " + otherUsername + " are connected.";
+                break;
+            case 0:
+                status = HttpStatus.OK;
+                msg = "No relation exists between " + currentUsername + " and " + otherUsername;
+                break;
+            case -1:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 msg = "Unexpected error";
                 break;

@@ -80,4 +80,23 @@ public class ConnectService {
             return -6;
         }
     }
+
+    /**
+     * Calls checkStatus() from ConnectDAO.
+     * <p>
+     * Returns -1 if an unexpected exception occurs. Otherwise, returns the
+     * exit code of ConnectDAO.checkStauts().
+     * 
+     * @param currentUsername The username of the current user
+     * @param otherUsername   The username of the other user
+     * @return An exit code
+     */
+    public int checkStatus(String currentUsername, String otherUsername) {
+        try {
+            return dao.checkStatus(currentUsername, otherUsername);
+        } catch (Exception e) {
+            log.error("Unexpected error: {}", e);
+            return -1;
+        }
+    }
 }

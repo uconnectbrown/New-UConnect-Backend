@@ -182,4 +182,39 @@ public class ConnectDAO {
 
         return 0;
     }
+
+    /**
+     * Check the relation of the current user to some other user.
+     * <p> 
+     * Exit codes:
+     * 0 -- no relation
+     * 1 -- connected
+     * 2 -- current has an outgoing request to other
+     * 3 -- current has an incoming request from other
+     * 
+     * @param currentUsername The username of the current user
+     * @param otherUsername The username of the other user
+     * @return An exit code
+     */
+    public int checkStatus(String currentUsername, String otherUsername) {
+        // Get current and other
+        User current = ddbAdapter.findByUsername(currentUsername);
+
+        // Connected
+        if (current.getConnections().contains(otherUsername)) {
+            return 1;
+        }
+
+        // Current has an outgoing request to other
+        if (current.getSent().contains(otherUsername)) {
+            return 2;
+        }
+
+        // Current has an incoming request from other
+        if (current.getPending().contains(otherUsername)) {
+            return 3; 
+        }
+
+        return 0;
+    }
 }

@@ -107,6 +107,29 @@ public class UserController {
         return new JwtResponse(token);
     }
 
+    @PostMapping("/v1/user/updateUser")
+    public ResponseEntity<String> updateUser(@Valid @RequestBody User user) {
+        String username = user.getUsername();
+        String rawPassword = user.getPassword();
+
+        int result = userService.createNewUser(username, rawPassword, user);
+
+        switch (result) {
+            case 0:
+                return new ResponseEntity<>("Successfully updated user " + username, HttpStatus.ACCEPTED);
+            case -1:
+                return new ResponseEntity<>(
+                        "Failed to update details for " + username + ", USERNAME/EMAIL does not exist",
+                        HttpStatus.BAD_REQUEST);
+            case -2:
+                return new ResponseEntity<>("Unexpected exception occurred when updating details for " + username,
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            default:
+                return new ResponseEntity<>("should not see this response, call your mother for me if you do",
+                        HttpStatus.I_AM_A_TEAPOT);
+        }
+    }
+
     @PostMapping("/api/userControl/deleteUser")
     public ResponseEntity<String> deleteUser(@RequestHeader(name = "Username") String username) {
         int result = userService.deleteUser(username);

@@ -61,6 +61,28 @@ public class UserDAO {
         }
     }
 
+    /**
+     * Update the details of an existing user.
+     * 
+     * @param username The username of the user to update
+     * @param rawPassword The raw password of the user to update
+     * @param user The user to update
+     * @return Returns 0 if successful and -1 otherwise (user does not exist)
+     */
+    public int updateUser(String username, String rawPassword, User user) {
+        if (ddbAdapter.findByUsername(username) == null) {
+            // user does not exist
+            return -1;
+        }
+
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+
+        ddbAdapter.save(userTableName, user);
+
+        return 0;
+    }
+
     public int deleteUser(String username) {
         try {
             User userToDelete = ddbAdapter.findByUsername(username);

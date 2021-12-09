@@ -3,6 +3,7 @@ package com.uconnect.backend.exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -34,5 +35,11 @@ public class ExceptionHandlers {
         }
 
         return ResponseEntity.badRequest().body(mapper.writeValueAsString(ret));
+    }
+
+    @ExceptionHandler(UnauthorizedUserRequestException.class)
+    public ResponseEntity<String> handleUnauthorizedRequestExceptions(UnauthorizedUserRequestException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                "You are not authorized to make that request. We've got our eyes on you!");
     }
 }

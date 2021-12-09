@@ -3,6 +3,7 @@ package com.uconnect.backend.security.jwt.filter;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -19,9 +20,9 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtility jwtUtility;
-
     private final UserService userService;
 
+    @Autowired
     public JwtFilter(JwtUtility jwtUtility, UserService userService) {
         this.jwtUtility = jwtUtility;
         this.userService = userService;

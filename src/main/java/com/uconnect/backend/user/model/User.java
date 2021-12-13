@@ -32,6 +32,9 @@ public class User implements UserDetails {
     @Null(message = "New users are assigned random IDs")
     private String id;
 
+    @DynamoDBAttribute
+    private UserCreationType creationType;
+
     // username = email
     @DynamoDBAttribute
     @DynamoDBIndexHashKey

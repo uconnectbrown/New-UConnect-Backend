@@ -1,6 +1,7 @@
 package com.uconnect.backend.connect.service;
 
 import com.uconnect.backend.connect.dao.ConnectDAO;
+import com.uconnect.backend.exception.UserNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,8 @@ public class ConnectService {
     /**
      * Calls request() from ConnectDAO.
      * <p>
-     * Returns -4 if an unexpected exception occurs. Otherwise, returns the
-     * exit code of ConnectDAO.request().
+     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot
+     * be found. Otherwise, returns the exit code of ConnectDAO.request().
      *
      * @param senderUsername   The username of the sender
      * @param receiverUsername The username of the receiver
@@ -30,17 +31,20 @@ public class ConnectService {
     public int request(String senderUsername, String receiverUsername) {
         try {
             return dao.request(senderUsername, receiverUsername);
+        } catch (UserNotFoundException e) {
+            log.error("User not found: {}", e);
+            return -4;
         } catch (Exception e) {
             log.error("Unexpected error: {}", e);
-            return -4;
+            return -5;
         }
     }
 
     /**
      * Calls undoRequest() from ConnectDAO.
      * <p>
-     * Returns -4 if an unexpected exception occurs. Otherwise, returns the
-     * exit code of ConnectDAO.undoRequest().
+     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot
+     * be found. Otherwise, returns the exit code of ConnectDAO.undoRequest().
      *
      * @param senderUsername   The username of the sender
      * @param receiverUsername The username of the receiver
@@ -49,9 +53,12 @@ public class ConnectService {
     public int undoRequest(String senderUsername, String receiverUsername) {
         try {
             return dao.undoRequest(senderUsername, receiverUsername);
+        } catch (UserNotFoundException e) {
+            log.error("User not found: {}", e);
+            return -4;
         } catch (Exception e) {
             log.error("Unexpected error: {}", e);
-            return -4;
+            return -5;
         }
     }
 }

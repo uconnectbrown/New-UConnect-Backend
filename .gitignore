@@ -10,6 +10,7 @@ target/
 *.iml
 
 # VSCode
+.vscode/
 .classpath
 .factorypath
 .project

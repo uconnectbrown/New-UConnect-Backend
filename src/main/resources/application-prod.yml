@@ -6,3 +6,4 @@ db-setting:
 
 db-table-name:
   user: FIX-ME
+  emailIndex: "emailIndex"

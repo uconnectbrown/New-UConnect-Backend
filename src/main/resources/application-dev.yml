@@ -5,4 +5,5 @@ db-setting:
   localdbport: 8000
 
 db-table-name:
-    user: FIX-ME
+  user: FIX-ME
+  emailIndex: 'emailIndex'

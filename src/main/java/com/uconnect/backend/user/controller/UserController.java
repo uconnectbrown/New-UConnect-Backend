@@ -1,6 +1,7 @@
 package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.user.model.User;
+import com.uconnect.backend.user.model.UserCreationType;
 import com.uconnect.backend.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class UserController {
 
     /**
      * Endpoint for creating a new user.
-     * 
+     * <p>
      * Takes in a request with the following fields:
      * - username -- String
      * - rawPassword -- String
@@ -43,15 +44,17 @@ public class UserController {
      * - pending -- List<String>
      * - connections -- List<String>
      * - requests -- int
-     * 
+     *
      * @param user The request deserialized into a User object after validation
      * @return An HTTP response
      */
-    @PostMapping(value = "/api/signup/createNewUser")
+    @PostMapping(value = "/v1/user/signup/createNewUserTraditional")
     public ResponseEntity<String> createNewUser(@Valid @RequestBody User user) {
         try {
             String username = user.getUsername();
             String rawPassword = user.getPassword();
+
+            user.setCreationType(UserCreationType.Traditional);
 
             int result = userService.createNewUser(username, rawPassword, user);
 
@@ -104,11 +107,11 @@ public class UserController {
 
     /**
      * Gets the pending connections for the specified user.
-     * 
+     * <p>
      * Responds with NOT_FOUND if the specified user does not exist.
      * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is
      * encountered.
-     * 
+     *
      * @param username The username of the user
      * @return A list of pending connections for the user
      */
@@ -125,11 +128,11 @@ public class UserController {
 
     /**
      * Gets the connections for the specified user.
-     * 
+     * <p>
      * Responds with NOT_FOUND if the specified user does not exist.
      * Responds with INTERNAL_SERVER_ERROR if an unexpected exception is
      * encountered.
-     * 
+     *
      * @param username The username of the user
      * @return A list of connections for the user
      */

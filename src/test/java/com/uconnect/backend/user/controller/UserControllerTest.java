@@ -53,7 +53,7 @@ public class UserControllerTest {
         String requestBody = mapper.writeValueAsString(user);
         MvcResult result = mockMvc
                 .perform(MockMvcRequestBuilders
-                        .post("/api/signup/createNewUser")
+                        .post("/v1/user/signup/createNewUserTraditional")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

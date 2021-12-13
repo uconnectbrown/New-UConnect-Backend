@@ -1,11 +1,11 @@
 package com.uconnect.backend.user.service;
 
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -22,7 +22,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User loadUserByUsername(String username) {
         return dao.getUserByUsername(username);
     }
 

@@ -1,6 +1,7 @@
 package com.uconnect.backend.user.dao;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,84 +25,87 @@ public class UserDAO {
         this.userTableName = userTableName;
     }
 
-    public User getUserByUsername(String username) {
-        User user = ddbAdapter.findByUsername(username);
-        if (user == null) {
+    public User getUserByUsername(String username) throws UsernameNotFoundException {
+        try {
+            User user = ddbAdapter.findByUsername(username);
+            return user;
+        } catch (UserNotFoundException e) {
             throw new UsernameNotFoundException(String.format("%s is not a valid username", username));
         }
-
-        return user;
     }
 
-    public User getUserById(String id) {
+    public User getUserById(String id) throws UserNotFoundException {
         return ddbAdapter.findById(id);
     }
 
-    public String getPasswordByUsername(String username) {
+    public String getPasswordByUsername(String username) throws UserNotFoundException {
         User user = ddbAdapter.findByUsername(username);
 
         return user.getPassword();
     }
 
     public int createNewUser(String username, String rawPassword, User user) {
-        if (ddbAdapter.findByUsername(username) != null) {
-            // username exists
+        try {
+            ddbAdapter.findByUsername(username);
+
+            // user exists
             return -1;
+        } catch (UserNotFoundException e) {
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(rawPassword));
+
+            ddbAdapter.save(userTableName, user);
+
+            // successfully created a new user
+            return 0;
         }
-
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(rawPassword));
-
-        ddbAdapter.save(userTableName, user);
-
-        // successfully created a new user
-        return 0;
     }
 
     public int deleteUser(String username) {
-        User userToDelete = ddbAdapter.findByUsername(username);
+        try {
+            User userToDelete = ddbAdapter.findByUsername(username);
+            String id = userToDelete.getId();
+            ddbAdapter.delete(userTableName, userToDelete);
 
-        if (userToDelete == null) {
+            // successfully created a new user
+            return ddbAdapter.existsById(id) ? -2 : 0;
+        } catch (UserNotFoundException e) {
             // username does not exist
             return -1;
         }
-
-        String id = userToDelete.getId();
-        ddbAdapter.delete(userTableName, userToDelete);
-
-        // successfully created a new user
-        return ddbAdapter.existsById(id) ? -2 : 0;
     }
 
     /**
      * Gets the pending connections of the specified user.
      *
      * @param username The username of the user
-     * @return If the user exists, return the set of pending connections; otherwise, return null
+     * @return If the user exists, return the set of pending connections; otherwise,
+     *         return null
      */
     public Set<String> getPending(String username) {
-        User user = ddbAdapter.findByUsername(username);
-
-        if (user == null) {
+        try {
+            User user = ddbAdapter.findByUsername(username);
+            return user.getPending();
+        } catch (UserNotFoundException e) {
+            // user does not exist
             return null;
         }
-
-        return user.getPending();
     }
 
     /**
      * Gets the connections of the specified user.
      *
      * @param username The username of the user
-     * @return If the user exists, return the set of connections; otherwise, return null
+     * @return If the user exists, return the set of connections; otherwise, return
+     *         null
      */
     public Set<String> getConnections(String username) {
-        User user = ddbAdapter.findByUsername(username);
-
-        if (user == null) {
+        try {
+            User user = ddbAdapter.findByUsername(username);
+            return user.getConnections();
+        } catch (UserNotFoundException e) {
+            // user does not exist
             return null;
         }
-
-        return user.getConnections();
     }
 }

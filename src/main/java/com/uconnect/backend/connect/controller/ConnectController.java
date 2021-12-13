@@ -47,6 +47,10 @@ public class ConnectController {
                 msg = "Operation unsuccessful: " + senderUsername + " has an insufficient number of requests";
                 break;
             case -4:
+                status = HttpStatus.NOT_FOUND;
+                msg = "Operation unsuccessful: user not found";
+                break;
+            case -5:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 msg = "Unexpected error";
                 break;
@@ -85,6 +89,10 @@ public class ConnectController {
                 msg = "Operation unsuccessful: " + senderUsername + " has too many requests. This should not have happened.";
                 break;
             case -4:
+                status = HttpStatus.NOT_FOUND;
+                msg = "Operation unsuccessful: user not found";
+                break;
+            case -5:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 msg = "Unexpected error";
                 break;

@@ -1,6 +1,7 @@
 package com.uconnect.backend.connect.dao;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class ConnectDAO {
      * @param receiverUsername The username of receiver
      * @return An exit code
      */
-    public int request(String senderUsername, String receiverUsername) {
+    public int request(String senderUsername, String receiverUsername) throws UserNotFoundException {
         User sender = ddbAdapter.findByUsername(senderUsername);
         User receiver = ddbAdapter.findByUsername(receiverUsername);
 
@@ -87,7 +88,7 @@ public class ConnectDAO {
      * @param receiverUsername The username of receiver
      * @return An exit code
      */
-    public int undoRequest(String senderUsername, String receiverUsername) {
+    public int undoRequest(String senderUsername, String receiverUsername) throws UserNotFoundException {
         User sender = ddbAdapter.findByUsername(senderUsername);
         User receiver = ddbAdapter.findByUsername(receiverUsername);
 

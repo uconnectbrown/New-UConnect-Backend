@@ -11,8 +11,15 @@ import org.springframework.context.annotation.Configuration;
 public class DbTableProperties {
     private String user;
 
+    private String emailIndex;
+
     @Bean (name = "userTableName")
     public String getUserTableName() {
         return user;
+    }
+
+    @Bean (name = "emailIndexName")
+    public String getEmailIndexName() {
+        return emailIndex;
     }
 }

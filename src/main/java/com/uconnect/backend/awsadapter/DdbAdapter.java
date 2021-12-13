@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,9 @@ import java.util.List;
 public class DdbAdapter {
     @Autowired
     private String userTableName;
+
+    @Autowired
+    private String emailIndexName;
 
     private final AmazonDynamoDB ddbClient;
 
@@ -82,18 +86,29 @@ public class DdbAdapter {
         mapper = new DynamoDBMapper(ddbClient, config);
     }
 
-    public User findByUsername(String username) {
-        // TODO: @David
-        return null;
+    public User findByUsername(String username) throws UserNotFoundException { 
+        User desiredUser = new User();
+        desiredUser.setUsername(username);
+        List<User> res = queryGSI(userTableName, emailIndexName, desiredUser, User.class);
+        if (res.isEmpty()) {
+            throw new UserNotFoundException("User not found with username " + username);
+        } else {
+            return res.get(0);
+        }
     }
 
-    public User findById(String id) {
-        // TODO: @David
-        return null;
+    public User findById(String id) throws UserNotFoundException {
+        setMapperTableName(userTableName);
+        User user = mapper.load(User.class, id);
+        if (user == null) {
+            throw new UserNotFoundException("User not found with ID " + id);
+        } else {
+            return user;
+        }
     }
 
     public boolean existsById(String id) {
-        // TODO: @David
-        return false;
+        setMapperTableName(userTableName);
+        return (mapper.load(User.class, id) != null);
     }
 }

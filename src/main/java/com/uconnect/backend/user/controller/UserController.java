@@ -1,5 +1,8 @@
 package com.uconnect.backend.user.controller;
 
+import com.uconnect.backend.security.jwt.model.JwtRequest;
+import com.uconnect.backend.security.jwt.model.JwtResponse;
+import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
 import com.uconnect.backend.user.service.UserService;
@@ -7,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,9 +27,15 @@ public class UserController {
 
     private final UserService userService;
 
+    private final AuthenticationManager authenticationManager;
+
+    private final JwtUtility jwtUtility;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtility jwtUtility) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtility = jwtUtility;
     }
 
     /**
@@ -79,6 +90,21 @@ public class UserController {
             log.error("Unexpected error: {}", e.getMessage());
             return new ResponseEntity<>("Unexpected exception occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/v1/user/authenticate/authenticateTraditional")
+    public JwtResponse authenticate(@Valid @RequestBody JwtRequest jwtRequest) {
+        // failed authentication exceptions handled by ExceptionHandlers
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                jwtRequest.getUsername(),
+                jwtRequest.getPassword()
+        ));
+
+        final User user = userService.loadUserByUsername(jwtRequest.getUsername());
+
+        final String token = jwtUtility.generateToken(user);
+
+        return new JwtResponse(token);
     }
 
     @PostMapping("/api/userControl/deleteUser")

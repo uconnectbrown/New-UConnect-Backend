@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,5 +42,12 @@ public class ExceptionHandlers {
     public ResponseEntity<String> handleUnauthorizedRequestExceptions(UnauthorizedUserRequestException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 "You are not authorized to make that request. We've got our eyes on you!");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> handleAuthenticationExceptions(AuthenticationException e) {
+        // purposely leave error message vague to prevent user information leaks
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                "Invalid credentials / Account disabled / Account locked");
     }
 }

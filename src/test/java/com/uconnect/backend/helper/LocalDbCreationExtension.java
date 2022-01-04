@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class LocalDbCreationExtension implements BeforeAllCallback, AfterAllCallback {
     private final LocalDdbServerRunner runner;
 
-    private final String localDbPort = "5000";
+    private final String localDbPort = "8000";
 
     public LocalDbCreationExtension() {
         runner = new LocalDdbServerRunner(localDbPort);

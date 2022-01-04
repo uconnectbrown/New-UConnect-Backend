@@ -7,12 +7,14 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
+import com.amazonaws.services.dynamodbv2.model.Projection;
+import com.amazonaws.services.dynamodbv2.model.ProjectionType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.User;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +51,9 @@ public class DdbAdapter {
         CreateTableRequest request = mapper.generateCreateTableRequest(clazz);
         request.setTableName(tableName);
         request.setBillingMode(BillingMode.PAY_PER_REQUEST.name());
+        for (GlobalSecondaryIndex gsi : request.getGlobalSecondaryIndexes()) {
+            gsi.setProjection(new Projection().withProjectionType(ProjectionType.ALL));
+        }
 
         return TableUtils.createTableIfNotExists(ddbClient, request);
     }

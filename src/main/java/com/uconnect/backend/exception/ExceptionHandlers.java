@@ -2,6 +2,7 @@ package com.uconnect.backend.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class ExceptionHandlers {
 
     private final ObjectMapper mapper;
@@ -46,6 +48,7 @@ public class ExceptionHandlers {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthenticationExceptions(AuthenticationException e) {
+        log.error("A failed authentication occurred: ", e);
         // purposely leave error message vague to prevent user information leaks
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 "Invalid credentials / Account disabled / Account locked");

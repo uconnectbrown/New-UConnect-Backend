@@ -23,7 +23,7 @@ public class AwsConfiguration {
 
     @Bean
     public AmazonDynamoDB getAmazonDynamoDB(AWSCredentialsProvider awsCredentialsProvider) throws Exception {
-        boolean isDev = "DEV".equals(System.getenv("spring_profiles_active"));
+        boolean isDev = "dev".equals(System.getenv("SPRING_PROFILES_ACTIVE"));
 
         if (isDev) {
             return AmazonDynamoDBClientBuilder

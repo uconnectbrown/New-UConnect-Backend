@@ -1,6 +1,5 @@
 package com.uconnect.backend.user.service;
 
-import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 import lombok.extern.slf4j.Slf4j;

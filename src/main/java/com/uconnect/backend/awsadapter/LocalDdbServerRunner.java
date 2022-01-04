@@ -18,7 +18,7 @@ public class LocalDdbServerRunner {
 
     public void start() throws Exception {
         server = ServerRunner.createServerFromCommandLineArgs(
-                new String[]{"-inMemory", "-port", localDbPort, "delayTransientStatuses"});
+                new String[]{"-sharedDb", "-inMemory", "-port", localDbPort});
         server.start();
         log.info(String.format("DynamoDB Local has started on port %s", localDbPort));
     }
@@ -26,6 +26,7 @@ public class LocalDdbServerRunner {
     public void stop() {
         try {
             server.stop();
+            log.info("DynamoDB Local has stopped");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

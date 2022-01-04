@@ -86,15 +86,14 @@ public class DdbAdapter {
         mapper = new DynamoDBMapper(ddbClient, config);
     }
 
-    public User findByUsername(String username) throws UserNotFoundException { 
+    public User findByUsername(String username) throws UserNotFoundException {
         User desiredUser = new User();
         desiredUser.setUsername(username);
         List<User> res = queryGSI(userTableName, emailIndexName, desiredUser, User.class);
         if (res.isEmpty()) {
             throw new UserNotFoundException("User not found with username " + username);
-        } else {
-            return res.get(0);
         }
+        return res.get(0);
     }
 
     public User findById(String id) throws UserNotFoundException {
@@ -102,9 +101,8 @@ public class DdbAdapter {
         User user = mapper.load(User.class, id);
         if (user == null) {
             throw new UserNotFoundException("User not found with ID " + id);
-        } else {
-            return user;
         }
+        return user;
     }
 
     public boolean existsById(String id) {

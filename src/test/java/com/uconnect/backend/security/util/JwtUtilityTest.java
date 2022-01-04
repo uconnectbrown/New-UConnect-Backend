@@ -98,6 +98,11 @@ public class JwtUtilityTest {
     }
 
     @Test
+    public void testValidateTokenNullUser() {
+        assertFalse(jwtUtility.validateToken("anything", null));
+    }
+
+    @Test
     public void testValidateTokenInvalidSignature() {
         long iss = System.currentTimeMillis();
         long exp = iss + JwtUtility.JWT_TOKEN_VALIDITY * 1000;

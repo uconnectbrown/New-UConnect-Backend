@@ -76,8 +76,13 @@ public class JwtUtility implements Serializable {
 
             return true;
         } catch (Exception e) {
-            log.info("JWT token \"{}\" failed to validate for user \"{}\". Exception: {}", token, user.getUsername(),
-                    e.getMessage());
+            if (user == null || user.getUsername() == null) {
+                log.info("JWT token \"{}\" failed to validate. No username provided. Exception: {}", token,
+                        e.getMessage());
+            } else {
+                log.info("JWT token \"{}\" failed to validate for user \"{}\". Exception: {}", token, user.getUsername(),
+                        e.getMessage());
+            }
             return false;
         }
     }

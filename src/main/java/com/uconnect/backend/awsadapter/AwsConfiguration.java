@@ -8,18 +8,13 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan("com.uconnect.backend")
 @Slf4j
 public class AwsConfiguration {
     @Autowired
     private String localDbPort;
-
-    @Autowired
-    private LocalDdbServerRunner localDdbServerRunner;
 
     @Bean
     public AWSCredentialsProvider getAWSCredentialsProvider() {

@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
@@ -39,6 +40,15 @@ public class DdbAdapter {
         CreateTableRequest request = mapper.generateCreateTableRequest(clazz);
         request.setTableName(tableName);
         request.setProvisionedThroughput(new ProvisionedThroughput(rcu, wcu));
+
+        return TableUtils.createTableIfNotExists(ddbClient, request);
+    }
+
+    public boolean createOnDemandTableIfNotExists(String tableName, Class<?> clazz) {
+        mapper = new DynamoDBMapper(ddbClient);
+        CreateTableRequest request = mapper.generateCreateTableRequest(clazz);
+        request.setTableName(tableName);
+        request.setBillingMode(BillingMode.PAY_PER_REQUEST.name());
 
         return TableUtils.createTableIfNotExists(ddbClient, request);
     }

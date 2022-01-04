@@ -1,6 +1,7 @@
 package com.uconnect.backend.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uconnect.backend.helper.BaseUnitTest;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc
-public class UserSignupTest {
+// use "addFilters=false" to circumvent security
+@AutoConfigureMockMvc(addFilters = false)
+public class UserSignupTest extends BaseUnitTest {
 
     @Autowired
     private MockMvc mockMvc;

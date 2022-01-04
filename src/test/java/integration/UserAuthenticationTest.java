@@ -1,69 +1,82 @@
-package com.uconnect.backend.user.controller;
+package integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uconnect.backend.UConnectBackendApplication;
+import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.user.model.User;
-import com.uconnect.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest(classes = UConnectBackendApplication.class)
 @AutoConfigureMockMvc
-public class UserAuthenticationTest {
-
+public class UserAuthenticationTest extends BaseIntTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private UserService userService;
+    @Autowired
+    private DdbAdapter ddbAdapter;
 
-    @MockBean
-    private AuthenticationManager authenticationManager;
+    @Autowired
+    private String userTableName;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private User user;
-    private final String validId = "0";
     private final String validUsername = "test@email.com";
     private final String validPassword = "tellMeASecret";
+    private final String classYear = "2021";
     private final String nonExistentUsername = "no-such@user.edu";
     private final String badPassword = "hushMyChildItsChristmas";
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws InterruptedException {
         user = User.builder()
-                .id(validId)
                 .username(validUsername)
+                .password(validPassword)
+                .firstName(validUsername)
+                .lastName(validUsername)
+                .classYear(classYear)
                 .build();
+
+        if (ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class)) {
+            // wait for the new table to become available
+            Thread.sleep(10);
+        }
     }
 
     @Test
     public void testTraditionalAuthSuccess() throws Exception {
-        when(userService.loadUserByUsername(validUsername)).thenReturn(user);
-        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(validUsername, validPassword)))
-                .thenReturn(null);
+        MvcResult result;
+
+        // register test user
+        String requestBody = mapper.writeValueAsString(user);
+        mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/user/signup/createNewUserTraditional")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted())
+                .andReturn();
 
         JwtRequest request = new JwtRequest(validUsername, validPassword);
-        String requestBody = mapper.writeValueAsString(request);
+        requestBody = mapper.writeValueAsString(request);
 
         // obtain token
-        MvcResult result = mockMvc
+        result = mockMvc
                 .perform(MockMvcRequestBuilders
                         .post("/v1/user/authenticate/authenticateTraditional")
                         .content(requestBody)
@@ -89,10 +102,6 @@ public class UserAuthenticationTest {
 
     @Test
     public void testTraditionalAuthUsernameDoesNotExist() throws Exception {
-        when(userService.loadUserByUsername(validUsername)).thenReturn(user);
-        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(nonExistentUsername, validPassword)))
-                .thenThrow(new BadCredentialsException(""));
-
         JwtRequest request = new JwtRequest(nonExistentUsername, validPassword);
         String requestBody = mapper.writeValueAsString(request);
 
@@ -109,10 +118,6 @@ public class UserAuthenticationTest {
 
     @Test
     public void testTraditionalAuthIncorrectPassword() throws Exception {
-        when(userService.loadUserByUsername(validUsername)).thenReturn(user);
-        when(authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(validUsername, badPassword)))
-                .thenThrow(new BadCredentialsException(""));
-
         JwtRequest request = new JwtRequest(validUsername, badPassword);
         String requestBody = mapper.writeValueAsString(request);
 

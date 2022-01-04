@@ -3,6 +3,7 @@ package com.uconnect.backend.security.jwt.filter;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtility jwtUtility;
@@ -36,7 +38,13 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
 
         if (auth != null) {
-            token = auth.split(" ")[1];
+            String[] tokenArray = auth.split(" ");
+            if (tokenArray.length < 2) {
+                log.info("Received malformed JWT token: {}", auth);
+                return;
+            }
+
+            token = tokenArray[1];
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

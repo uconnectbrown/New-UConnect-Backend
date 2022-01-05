@@ -17,6 +17,8 @@ jobs:
     env:
       SPRING_PROFILES_ACTIVE: dev
       JWT_SECRET: jwt_ci_github
+      AWS_ACCESS_KEY: aws
+      AWS_SECRET_KEY: secret
 
     steps:
       - uses: actions/checkout@v2

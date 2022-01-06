@@ -7,3 +7,12 @@ db-setting:
 db-table-name:
   user: FIX-ME
   emailIndex: 'emailIndex'
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 43709566606-7aqrqos1en4nql7eifqcc5s1lhhgmp0c.apps.googleusercontent.com
+            client-secret: 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

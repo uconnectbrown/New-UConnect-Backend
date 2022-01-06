@@ -4,6 +4,7 @@ import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
 import com.uconnect.backend.user.service.UserService;
@@ -13,12 +14,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Set;
 
@@ -32,17 +41,25 @@ public class UserController {
 
     private final JwtUtility jwtUtility;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final ClientRegistrationRepository clientRegistrationRepository;
+
     private final RequestPermissionUtility requestPermissionUtility;
 
     @Autowired
     public UserController(UserService userService,
-            AuthenticationManager authenticationManager,
-            JwtUtility jwtUtility,
-            RequestPermissionUtility requestPermissionUtility) {
+                          AuthenticationManager authenticationManager,
+                          JwtUtility jwtUtility,
+                          RequestPermissionUtility requestPermissionUtility,
+                          PasswordEncoder passwordEncoder,
+                          ClientRegistrationRepository clientRegistrationRepository) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtility = jwtUtility;
         this.requestPermissionUtility = requestPermissionUtility;
+        this.passwordEncoder = passwordEncoder;
+        this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
     /**
@@ -72,9 +89,10 @@ public class UserController {
             String username = user.getUsername();
             String rawPassword = user.getPassword();
 
+            user.setPassword(passwordEncoder.encode(rawPassword));
             user.setCreationType(UserCreationType.Traditional);
 
-            int result = userService.createNewUser(username, rawPassword, user);
+            int result = userService.createNewUser(user);
 
             // TODO: Give user a default profile picture
 
@@ -82,6 +100,7 @@ public class UserController {
                 case 0:
                     return new ResponseEntity<>("Successfully created a new account for " + username,
                             HttpStatus.ACCEPTED);
+                case 1:
                 case -1:
                     return new ResponseEntity<>(
                             "Failed to create a new account for " + username + ", USERNAME/EMAIL already exists",
@@ -99,17 +118,36 @@ public class UserController {
         }
     }
 
-    @PostMapping("/v1/user/authenticate/authenticateTraditional")
-    public JwtResponse authenticate(@Valid @RequestBody JwtRequest jwtRequest) {
+    @PostMapping("/v1/user/authenticate/traditional")
+    public JwtResponse authenticateTraditional(@Valid @RequestBody JwtRequest jwtRequest) {
+        String username = jwtRequest.getUsername();
+        String password = jwtRequest.getPassword();
+
+        log.info("User {} attempted to authenticate", username);
+
         // failed authentication exceptions handled by ExceptionHandlers
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                jwtRequest.getUsername(),
-                jwtRequest.getPassword()));
+                username,
+                password
+        ));
 
-        final User user = userService.loadUserByUsername(jwtRequest.getUsername());
+        String token = userService.generateTraditionalJWT(username);
+        return new JwtResponse(token);
+    }
 
-        final String token = jwtUtility.generateToken(user);
+    @PostMapping("/v1/user/authenticate/oauth/{registrationId}")
+    public JwtResponse authenticateOAuth(HttpServletRequest request, @Valid @RequestBody OAuthRequest oAuthRequest,
+                                         @PathVariable String registrationId) {
+        String authCode = oAuthRequest.getAuthCode();
+        ClientRegistration registration = clientRegistrationRepository.findByRegistrationId(registrationId);
 
+        OAuth2LoginAuthenticationToken oAuth2LoginAuthenticationToken
+                = userService.getOAuth2LoginAuthenticationToken(request, authCode, registrationId, registration);
+
+        Authentication authResult = authenticationManager.authenticate(oAuth2LoginAuthenticationToken);
+
+        String authenticatedUsername = ((UserDetails) authResult.getPrincipal()).getUsername();
+        String token = userService.generateOAuthJWT(authenticatedUsername);
         return new JwtResponse(token);
     }
 

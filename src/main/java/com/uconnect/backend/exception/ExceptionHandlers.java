@@ -48,9 +48,23 @@ public class ExceptionHandlers {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthenticationExceptions(AuthenticationException e) {
-        log.error("A failed authentication occurred: ", e);
+        log.info("A failed traditional authentication occurred: ", e);
         // purposely leave error message vague to prevent user information leaks
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 "Invalid credentials / Account disabled / Account locked");
+    }
+
+    @ExceptionHandler(UnknownOAuthRegistrationException.class)
+    public ResponseEntity<String> handleUnknownOAuthRegistrationExceptions(UnknownOAuthRegistrationException e) {
+        log.info("An unknown OAuth registration was requested: ", e);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                "Provided registration ID is unknown or not yet supported");
+    }
+
+    @ExceptionHandler(UnmatchedUserCreationTypeException.class)
+    public ResponseEntity<String> handleUnmatchedUserCreationTypeExceptions(UnmatchedUserCreationTypeException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                String.format("Requested user was not created through creation type: %s", e.getUnmatchedCreationType().name()));
     }
 }

@@ -1,12 +1,25 @@
 package com.uconnect.backend.user.service;
 
+import com.uconnect.backend.exception.UnknownOAuthRegistrationException;
+import com.uconnect.backend.exception.UnmatchedUserCreationTypeException;
+import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
+import com.uconnect.backend.user.model.UserCreationType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationExchange;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
 
 @Slf4j
@@ -15,14 +28,26 @@ public class UserService implements UserDetailsService {
 
     private final UserDAO dao;
 
+    private final JwtUtility jwtUtility;
+
+    private final OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
+
     @Autowired
-    public UserService(UserDAO dao) {
+    public UserService(UserDAO dao,
+                       JwtUtility jwtUtility,
+                       OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver) {
         this.dao = dao;
+        this.jwtUtility = jwtUtility;
+        this.oAuth2AuthorizationRequestResolver = oAuth2AuthorizationRequestResolver;
     }
 
     @Override
     public User loadUserByUsername(String username) {
-        return dao.getUserByUsername(username);
+        try {
+            return dao.getUserByUsername(username);
+        } catch (UserNotFoundException e) {
+            throw new UsernameNotFoundException(String.format("%s is not a valid username", username));
+        }
     }
 
     /**
@@ -30,16 +55,26 @@ public class UserService implements UserDetailsService {
      * <p>
      * Returns -2 in case of unexpected exception.
      *
-     * @param username    The username of the user to create
-     * @param rawPassword The raw password of the user
-     * @param user        A user object to populate the remainder of the user's data
+     * @param user A user object to populate the remainder of the user's data
      * @return An exit code
      */
-    public int createNewUser(String username, String rawPassword, User user) {
+    public int createNewUser(User user) {
         try {
-            return dao.createNewUser(username, rawPassword, user);
+            String username = user.getUsername();
+            User foundUser = dao.getUserByUsername(username);
+            if (!foundUser.getCreationType().equals(UserCreationType.OAuth)) {
+                return 1;
+            }
+
+            // user exists
+            return -1;
+        } catch (UserNotFoundException e) {
+            dao.saveUser(user);
+
+            // successfully created a new user
+            return 0;
         } catch (Exception e) {
-            log.error("Unexpected exception while creating new user " + username + ": {}", e);
+            log.error("Unexpected exception while creating new user " + user.getUsername() + ": {}", e);
             return -2;
         }
     }
@@ -87,5 +122,49 @@ public class UserService implements UserDetailsService {
 
     public Set<String> getConnections(String username) {
         return dao.getConnections(username);
+    }
+
+    public String generateTraditionalJWT(String username) {
+
+        final User user = loadUserByUsername(username);
+
+        return jwtUtility.generateToken(user);
+    }
+
+    public String generateOAuthJWT(String username) {
+        User user = loadUserByUsername(username);
+
+        if (user == null) {
+            // new user, create new record;
+            user = User.builder()
+                    .username(username)
+                    .creationType(UserCreationType.OAuth)
+                    .build();
+
+            int result = createNewUser(user);
+            if (result == 1) {
+                // user was NOT created through OAuth
+                throw new UnmatchedUserCreationTypeException();
+            }
+        }
+
+        return jwtUtility.generateToken(user);
+    }
+
+    public OAuth2LoginAuthenticationToken getOAuth2LoginAuthenticationToken(HttpServletRequest request, String authCode,
+                                                                            String registrationId, ClientRegistration registration) {
+        if (registration == null) {
+            throw new UnknownOAuthRegistrationException();
+        }
+
+        OAuth2AuthorizationRequest authorizationRequest = oAuth2AuthorizationRequestResolver.resolve(request, registrationId);
+        OAuth2AuthorizationResponse authorizationResponse = OAuth2AuthorizationResponse
+                .success(authCode)
+                .redirectUri("/")
+                .state(authorizationRequest.getState())
+                .build();
+
+        return new OAuth2LoginAuthenticationToken(registration,
+                new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse));
     }
 }

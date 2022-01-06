@@ -1,7 +1,6 @@
 package com.uconnect.backend.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uconnect.backend.helper.BaseUnitTest;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
@@ -23,13 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 // use "addFilters=false" to circumvent security
 @AutoConfigureMockMvc(addFilters = false)
-public class UserSignupTest extends BaseUnitTest {
+public class UserSignupTest extends BaseUserControllerUnitTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private UserService userService;
 
     @MockBean
     private RequestPermissionUtility requestPermissionUtility;

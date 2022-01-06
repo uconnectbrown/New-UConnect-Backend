@@ -4,8 +4,6 @@ import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.Set;
@@ -14,24 +12,17 @@ import java.util.Set;
 public class UserDAO {
     private final DdbAdapter ddbAdapter;
 
-    private final PasswordEncoder passwordEncoder;
 
     private final String userTableName;
 
     @Autowired
-    public UserDAO(DdbAdapter ddbAdapter, PasswordEncoder passwordEncoder, String userTableName) {
+    public UserDAO(DdbAdapter ddbAdapter, String userTableName) {
         this.ddbAdapter = ddbAdapter;
-        this.passwordEncoder = passwordEncoder;
         this.userTableName = userTableName;
     }
 
-    public User getUserByUsername(String username) throws UsernameNotFoundException {
-        try {
-            User user = ddbAdapter.findByUsername(username);
-            return user;
-        } catch (UserNotFoundException e) {
-            throw new UsernameNotFoundException(String.format("%s is not a valid username", username));
-        }
+    public User getUserByUsername(String username) throws UserNotFoundException {
+        return ddbAdapter.findByUsername(username);
     }
 
     public User getUserById(String id) throws UserNotFoundException {
@@ -44,21 +35,8 @@ public class UserDAO {
         return user.getPassword();
     }
 
-    public int createNewUser(String username, String rawPassword, User user) {
-        try {
-            ddbAdapter.findByUsername(username);
-
-            // user exists
-            return -1;
-        } catch (UserNotFoundException e) {
-            user.setUsername(username);
-            user.setPassword(passwordEncoder.encode(rawPassword));
-
-            ddbAdapter.save(userTableName, user);
-
-            // successfully created a new user
-            return 0;
-        }
+    public void saveUser(User user) {
+        ddbAdapter.save(userTableName, user);
     }
 
     // TODO: Redesign updateUser API @Jake
@@ -104,7 +82,7 @@ public class UserDAO {
      *
      * @param username The username of the user
      * @return If the user exists, return the set of pending connections; otherwise,
-     *         return null
+     * return null
      */
     public Set<String> getPending(String username) {
         try {
@@ -121,7 +99,7 @@ public class UserDAO {
      *
      * @param username The username of the user
      * @return If the user exists, return the set of connections; otherwise, return
-     *         null
+     * null
      */
     public Set<String> getConnections(String username) {
         try {

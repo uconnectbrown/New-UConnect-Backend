@@ -78,7 +78,7 @@ public class UserAuthenticationTest extends BaseIntTest {
         // obtain token
         result = mockMvc
                 .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/authenticateTraditional")
+                        .post("/v1/user/authenticate/traditional")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -108,7 +108,7 @@ public class UserAuthenticationTest extends BaseIntTest {
         // fail to obtain token
         mockMvc
                 .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/authenticateTraditional")
+                        .post("/v1/user/authenticate/traditional")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -124,7 +124,7 @@ public class UserAuthenticationTest extends BaseIntTest {
         // fail to obtain token
         mockMvc
                 .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/authenticateTraditional")
+                        .post("/v1/user/authenticate/traditional")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))

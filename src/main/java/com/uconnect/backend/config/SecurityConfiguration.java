@@ -1,4 +1,4 @@
-package com.uconnect.backend.security;
+package com.uconnect.backend.config;
 
 import com.uconnect.backend.security.jwt.filter.JwtFilter;
 import com.uconnect.backend.user.service.UserService;
@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -24,15 +25,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final Filter jwtFilter;
 
+    private final AuthenticationProvider authenticationProvider;
+
     @Autowired
-    public SecurityConfiguration(UserService userService, JwtFilter jwtFilter) {
+    public SecurityConfiguration(UserService userService, JwtFilter jwtFilter,
+                                 AuthenticationProvider authenticationProvider) {
         this.userService = userService;
         this.jwtFilter = jwtFilter;
+        this.authenticationProvider = authenticationProvider;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userService);
+        auth.authenticationProvider(authenticationProvider);
     }
 
     @Override
@@ -43,7 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
+    public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/v1/user/authenticate/**");
         web.ignoring().antMatchers("/v1/user/signup/**");
     }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -48,7 +49,11 @@ public class ExceptionHandlers {
 
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthenticationExceptions(AuthenticationException e) {
-        log.info("A failed traditional authentication occurred: ", e);
+        if (e instanceof OAuth2AuthenticationException) {
+            log.info("A failed OAuth authentication attempt occurred: ", e);
+        } else {
+            log.info("A failed authentication occurred: ", e);
+        }
         // purposely leave error message vague to prevent user information leaks
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                 "Invalid credentials / Account disabled / Account locked");

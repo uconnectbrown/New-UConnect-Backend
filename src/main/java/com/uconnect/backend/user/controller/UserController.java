@@ -15,11 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -146,7 +146,7 @@ public class UserController {
 
         Authentication authResult = authenticationManager.authenticate(oAuth2LoginAuthenticationToken);
 
-        String authenticatedUsername = ((UserDetails) authResult.getPrincipal()).getUsername();
+        String authenticatedUsername = ((DefaultOidcUser) authResult.getPrincipal()).getEmail();
         String token = userService.generateOAuthJWT(authenticatedUsername);
         return new JwtResponse(token);
     }

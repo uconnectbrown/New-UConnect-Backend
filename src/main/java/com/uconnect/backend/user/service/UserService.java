@@ -132,9 +132,11 @@ public class UserService implements UserDetailsService {
     }
 
     public String generateOAuthJWT(String username) {
-        User user = loadUserByUsername(username);
+        User user;
 
-        if (user == null) {
+        try {
+            user = loadUserByUsername(username);
+        } catch (UsernameNotFoundException e) {
             // new user, create new record;
             user = User.builder()
                     .username(username)

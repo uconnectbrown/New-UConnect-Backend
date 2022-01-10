@@ -7,6 +7,7 @@ import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,13 +25,14 @@ import java.util.Set;
 
 @Slf4j
 @Service
+@NoArgsConstructor
 public class UserService implements UserDetailsService {
 
-    private final UserDAO dao;
+    private UserDAO dao;
 
-    private final JwtUtility jwtUtility;
+    private JwtUtility jwtUtility;
 
-    private final OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
+    private OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
 
     @Autowired
     public UserService(UserDAO dao,
@@ -61,10 +63,7 @@ public class UserService implements UserDetailsService {
     public int createNewUser(User user) {
         try {
             String username = user.getUsername();
-            User foundUser = dao.getUserByUsername(username);
-            if (!foundUser.getCreationType().equals(UserCreationType.OAuth)) {
-                return 1;
-            }
+            dao.getUserByUsername(username);
 
             // user exists
             return -1;
@@ -140,14 +139,14 @@ public class UserService implements UserDetailsService {
             // new user, create new record;
             user = User.builder()
                     .username(username)
-                    .creationType(UserCreationType.OAuth)
+                    .creationType(UserCreationType.O_AUTH)
                     .build();
 
-            int result = createNewUser(user);
-            if (result == 1) {
-                // user was NOT created through OAuth
-                throw new UnmatchedUserCreationTypeException();
-            }
+            createNewUser(user);
+        }
+
+        if (!UserCreationType.O_AUTH.equals(user.getCreationType())) {
+            throw new UnmatchedUserCreationTypeException(UserCreationType.O_AUTH);
         }
 
         return jwtUtility.generateToken(user);

@@ -69,7 +69,8 @@ public class ExceptionHandlers {
 
     @ExceptionHandler(UnmatchedUserCreationTypeException.class)
     public ResponseEntity<String> handleUnmatchedUserCreationTypeExceptions(UnmatchedUserCreationTypeException e) {
+        String unmatchedCreationTypeName = e.getUnmatchedCreationType() == null ? "Unknown" : e.getUnmatchedCreationType().name();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                String.format("Requested user was not created through creation type: %s", e.getUnmatchedCreationType().name()));
+                String.format("Requested user was not created through creation type: %s", unmatchedCreationTypeName));
     }
 }

@@ -3,6 +3,7 @@ package integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.UConnectBackendApplication;
 import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
@@ -12,10 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -63,41 +62,21 @@ public class UserAuthenticationTest extends BaseIntTest {
 
         // register test user
         String requestBody = mapper.writeValueAsString(user);
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/user/signup/createNewUserTraditional")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
                 .andExpect(status().isAccepted())
                 .andReturn();
 
         JwtRequest request = new JwtRequest(validUsername, validPassword);
         requestBody = mapper.writeValueAsString(request);
-
         // obtain token
-        result = mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/traditional")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        result = AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
                 .andExpect(status().isOk())
                 .andReturn();
 
         JwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
         String token = response.getJwtToken();
 
-        // test returned token
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/")
-                        .header("Username", validUsername)
-                        .header("Authorization", String.format("%s %s", "Bearer", token))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("You are logged in, John Cena!")));
+        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validUsername);
     }
 
     @Test
@@ -105,15 +84,10 @@ public class UserAuthenticationTest extends BaseIntTest {
         JwtRequest request = new JwtRequest(nonExistentUsername, validPassword);
         String requestBody = mapper.writeValueAsString(request);
 
-        // fail to obtain token
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/traditional")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
                 .andExpect(status().isForbidden())
-                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")));
+                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
+                .andReturn();
     }
 
     @Test
@@ -121,14 +95,9 @@ public class UserAuthenticationTest extends BaseIntTest {
         JwtRequest request = new JwtRequest(validUsername, badPassword);
         String requestBody = mapper.writeValueAsString(request);
 
-        // fail to obtain token
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/user/authenticate/traditional")
-                        .content(requestBody)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
                 .andExpect(status().isForbidden())
-                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")));
+                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
+                .andReturn();
     }
 }

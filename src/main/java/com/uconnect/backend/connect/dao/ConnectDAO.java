@@ -37,6 +37,7 @@ public class ConnectDAO {
      * @param senderUsername   The username of sender
      * @param receiverUsername The username of receiver
      * @return An exit code
+     * @throws UserNotFoundException If the user is not found
      */
     public int request(String senderUsername, String receiverUsername) throws UserNotFoundException {
         User sender = ddbAdapter.findByUsername(senderUsername);
@@ -88,6 +89,7 @@ public class ConnectDAO {
      * @param senderUsername   The username of sender
      * @param receiverUsername The username of receiver
      * @return An exit code
+     * @throws UserNotFoundException If the user is not found
      */
     public int undoRequest(String senderUsername, String receiverUsername) throws UserNotFoundException {
         User sender = ddbAdapter.findByUsername(senderUsername);
@@ -140,8 +142,9 @@ public class ConnectDAO {
      * @param senderUsername   The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
+     * @throws UserNotFoundException If the user is not found
      */
-    public int accept(String senderUsername, String receiverUsername) {
+    public int accept(String senderUsername, String receiverUsername) throws UserNotFoundException {
         // Get sender and receiver
         User sender = ddbAdapter.findByUsername(senderUsername);
         User receiver = ddbAdapter.findByUsername(receiverUsername);
@@ -149,7 +152,6 @@ public class ConnectDAO {
         // Remove sender from receiver's pending set
         if (!receiver.getPending().remove(senderUsername)) {
             return -1; // receiver never got a request from sender
-        } else {
         }
 
         // Remove receiver from sender's sent set
@@ -195,8 +197,9 @@ public class ConnectDAO {
      * @param currentUsername The username of the current user
      * @param otherUsername The username of the other user
      * @return An exit code
+     * @throws UserNotFoundException If the user is not found
      */
-    public int checkStatus(String currentUsername, String otherUsername) {
+    public int checkStatus(String currentUsername, String otherUsername) throws UserNotFoundException {
         // Get current and other
         User current = ddbAdapter.findByUsername(currentUsername);
 

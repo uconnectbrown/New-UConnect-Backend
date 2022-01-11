@@ -80,21 +80,21 @@ public class DdbAdapter {
         mapper.delete(item);
     }
 
-    public <T> List<T> scan(String tableName, Class clazz) {
+    public <T> List<T> scan(String tableName, Class<T> clazz) {
         setMapperTableName(tableName);
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
 
         return mapper.scan(clazz, scanExpression);
     }
 
-    public <T> List<T> query(String tableName, T item, Class clazz) {
+    public <T> List<T> query(String tableName, T item, Class<T> clazz) {
         setMapperTableName(tableName);
         DynamoDBQueryExpression<T> queryExpression = new DynamoDBQueryExpression<T>().withHashKeyValues(item);
 
         return mapper.query(clazz, queryExpression);
     }
 
-    public <T> List<T> queryGSI(String tableName, String indexName, T item, Class clazz) {
+    public <T> List<T> queryGSI(String tableName, String indexName, T item, Class<T> clazz) {
         setMapperTableName(tableName);
         DynamoDBQueryExpression<T> queryExpression = new DynamoDBQueryExpression<T>()
                 .withIndexName(indexName)

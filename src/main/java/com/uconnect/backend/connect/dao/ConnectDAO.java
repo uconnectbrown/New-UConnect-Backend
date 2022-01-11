@@ -112,7 +112,7 @@ public class ConnectDAO {
         // Increment sender's requests
         int requests = sender.getRequests();
         if (requests > 9) {
-            log.info("User " + senderUsername + " has " + requests + " requests, which is more than the maximum");
+            log.info("User {} has {} requests, which is more than the maximum", senderUsername, requests);
             return -3; // sender has too many requests (should not happen)
         } else {
             sender.setRequests(++requests);
@@ -187,7 +187,7 @@ public class ConnectDAO {
 
     /**
      * Check the relation of the current user to some other user.
-     * <p> 
+     * <p>
      * Exit codes:
      * 0 -- no relation
      * 1 -- connected
@@ -195,7 +195,7 @@ public class ConnectDAO {
      * 3 -- current has an incoming request from other
      * 
      * @param currentUsername The username of the current user
-     * @param otherUsername The username of the other user
+     * @param otherUsername   The username of the other user
      * @return An exit code
      * @throws UserNotFoundException If the user is not found
      */
@@ -215,7 +215,7 @@ public class ConnectDAO {
 
         // Current has an incoming request from other
         if (current.getPending().contains(otherUsername)) {
-            return 3; 
+            return 3;
         }
 
         return 0;

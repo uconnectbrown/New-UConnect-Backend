@@ -1,6 +1,9 @@
 package com.uconnect.backend.connect.controller;
 
 import com.uconnect.backend.connect.service.ConnectService;
+import com.uconnect.backend.exception.UnauthorizedUserRequestException;
+import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,9 @@ import java.util.Map;
 public class ConnectController {
 
     private final ConnectService connectService;
+
+    @Autowired
+    private RequestPermissionUtility requestPermissionUtility;
 
     @Autowired
     public ConnectController(ConnectService connectService) {
@@ -76,7 +82,7 @@ public class ConnectController {
         switch (result) {
             case 0:
                 status = HttpStatus.OK;
-                msg = "Successfully created a request from " + senderUsername + " to " + receiverUsername;
+                msg = "Successfully unsent a request from " + senderUsername + " to " + receiverUsername;
                 break;
             case -1:
                 status = HttpStatus.BAD_REQUEST;
@@ -113,8 +119,13 @@ public class ConnectController {
         String senderUsername = req.get("sender");
         String receiverUsername = req.get("receiver");
 
-        int result = connectService.accept(senderUsername, receiverUsername);
+        try {
+            requestPermissionUtility.authorizeUser(receiverUsername);
+        } catch (UnauthorizedUserRequestException e) {
+            return new ResponseEntity<>("User not authorized to perform this action", HttpStatus.FORBIDDEN);
+        }
 
+        int result = connectService.accept(senderUsername, receiverUsername);
         HttpStatus status;
         String msg;
         switch (result) {
@@ -148,6 +159,10 @@ public class ConnectController {
                         + " has too many requests. This should not have happened.";
                 break;
             case -6:
+                status = HttpStatus.NOT_FOUND;
+                msg = "User not found";
+                break;
+            case -7:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 msg = "Unexpected error";
                 break;
@@ -164,21 +179,27 @@ public class ConnectController {
         String currentUsername = req.get("current");
         String otherUsername = req.get("other");
 
+        try {
+            requestPermissionUtility.authorizeUser(currentUsername);
+        } catch (UnauthorizedUserRequestException e) {
+            return new ResponseEntity<>("User not authorized to perform this action", HttpStatus.FORBIDDEN);
+        }
+
         int result = connectService.checkStatus(currentUsername, otherUsername);
 
         HttpStatus status;
         String msg;
         switch (result) {
             case 3:
-                status = HttpStatus.BAD_REQUEST;
+                status = HttpStatus.OK;
                 msg = currentUsername + " has an incoming request from " + otherUsername;
                 break;
             case 2:
-                status = HttpStatus.BAD_REQUEST;
+                status = HttpStatus.OK;
                 msg = currentUsername + " has an outgoing request to " + otherUsername;
                 break;
             case 1:
-                status = HttpStatus.BAD_REQUEST;
+                status = HttpStatus.OK;
                 msg = currentUsername + " and " + otherUsername + " are connected.";
                 break;
             case 0:

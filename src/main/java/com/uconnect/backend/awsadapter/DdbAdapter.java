@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.GlobalSecondaryIndex;
 import com.amazonaws.services.dynamodbv2.model.Projection;
 import com.amazonaws.services.dynamodbv2.model.ProjectionType;
@@ -42,6 +43,9 @@ public class DdbAdapter {
         CreateTableRequest request = mapper.generateCreateTableRequest(clazz);
         request.setTableName(tableName);
         request.setProvisionedThroughput(new ProvisionedThroughput(rcu, wcu));
+        for (GlobalSecondaryIndex gsi : request.getGlobalSecondaryIndexes()) {
+            gsi.setProvisionedThroughput(new ProvisionedThroughput(rcu, wcu));
+        }
 
         return TableUtils.createTableIfNotExists(ddbClient, request);
     }
@@ -56,6 +60,14 @@ public class DdbAdapter {
         }
 
         return TableUtils.createTableIfNotExists(ddbClient, request);
+    }
+
+    public boolean deleteTableIfExists(String tableName, Class<?> clazz) {
+        mapper = new DynamoDBMapper(ddbClient);
+        DeleteTableRequest request = mapper.generateDeleteTableRequest(clazz);
+        request.setTableName(tableName);
+        
+        return TableUtils.deleteTableIfExists(ddbClient, request);
     }
 
     public <T> void save(String tableName, T item) {

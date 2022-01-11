@@ -44,24 +44,25 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    /**
-     * Updates an existing user.
-     * <p>
-     * Returns -2 in case of unexpected exception.
-     * 
-     * @param username    The username of the user to update
-     * @param rawPassword The raw password of the user to update
-     * @param user        The user to update
-     * @return An exit code
-     */
-    public int updateUser(String username, String rawPassword, User user) {
-        try {
-            return dao.updateUser(username, rawPassword, user);
-        } catch (Exception e) {
-            log.error("Unexpected exception while updating existing user " + username + ": {}", e);
-            return -2;
-        }
-    }
+    // TODO: Redesign updateUser API @Jake
+    // /**
+    //  * Updates an existing user.
+    //  * <p>
+    //  * Returns -2 in case of unexpected exception.
+    //  * 
+    //  * @param username    The username of the user to update
+    //  * @param rawPassword The raw password of the user to update
+    //  * @param user        The user to update
+    //  * @return An exit code
+    //  */
+    // public int updateUser(String username, String rawPassword, User user) {
+    //     try {
+    //         return dao.updateUser(username, rawPassword, user);
+    //     } catch (Exception e) {
+    //         log.error("Unexpected exception while updating existing user " + username + ": {}", e);
+    //         return -2;
+    //     }
+    // }
 
     /**
      * Deletes a user.

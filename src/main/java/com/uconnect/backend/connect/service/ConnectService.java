@@ -75,9 +75,12 @@ public class ConnectService {
     public int accept(String senderUsername, String receiverUsername) {
         try {
             return dao.accept(senderUsername, receiverUsername);
+        } catch (UserNotFoundException e) {
+            log.error("user not found: {}", e);
+            return -6;
         } catch (Exception e) {
             log.error("Unexpected error: {}", e);
-            return -6;
+            return -7;
         }
     }
 

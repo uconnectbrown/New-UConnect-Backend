@@ -68,8 +68,9 @@ public class UserDAO {
      * @param rawPassword The raw password of the user to update
      * @param user The user to update
      * @return Returns 0 if successful and -1 otherwise (user does not exist)
+     * @throws UserNotFoundException If the user is not found
      */
-    public int updateUser(String username, String rawPassword, User user) {
+    public int updateUser(String username, String rawPassword, User user) throws UserNotFoundException {
         if (ddbAdapter.findByUsername(username) == null) {
             // user does not exist
             return -1;

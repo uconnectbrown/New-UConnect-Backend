@@ -14,7 +14,9 @@ import com.uconnect.backend.user.converters.LocationConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -27,6 +29,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder
 @DynamoDBTable(tableName = "placeholder")
 public class User implements UserDetails {
@@ -94,6 +97,7 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private int requests;
 
+    @EqualsAndHashCode.Exclude
     @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;
 

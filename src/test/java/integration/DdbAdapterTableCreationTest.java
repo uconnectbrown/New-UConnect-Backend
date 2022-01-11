@@ -8,14 +8,13 @@ import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.user.model.User;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = UConnectBackendApplication.class)
-@AutoConfigureMockMvc
 public class DdbAdapterTableCreationTest extends BaseIntTest {
 
     @Autowired
@@ -49,10 +48,9 @@ public class DdbAdapterTableCreationTest extends BaseIntTest {
     }
 
     @Test
-    public void testDeleteTableIfExists() throws InterruptedException {
+    public void testDeleteTableIfExists() {
         assertFalse(ddbAdapter.deleteTableIfExists(userTableName, clazz));
         ddbAdapter.createTableIfNotExists(userTableName, clazz, rcu, wcu);
-        Thread.sleep(10);
         assertTrue(ddbAdapter.deleteTableIfExists(userTableName, clazz));
     }
 

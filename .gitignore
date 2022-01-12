@@ -16,9 +16,6 @@ target/
 .project
 .settings/
 
-# DynamoDB Local
-sqlite4java-native-libs/*
-
 # BlueJ files
 *.ctxt
 

@@ -3,6 +3,7 @@ package com.uconnect.backend.security.util;
 import com.uconnect.backend.exception.UnauthorizedUserRequestException;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,11 @@ public class RequestPermissionUtilityTest {
 
         authenticatedUser = User.builder().username(authenticatedUsername).build();
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(authenticatedUser, null));
+    }
+
+    @AfterEach
+    public void teardown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test

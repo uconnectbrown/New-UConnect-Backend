@@ -60,6 +60,7 @@ public class User implements UserDetails {
     private String lastName;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYear")
     @Size(min = 4, max = 4, message = "Class year must be between 1000 and 9999 (inclusive)")
     private String classYear;
 

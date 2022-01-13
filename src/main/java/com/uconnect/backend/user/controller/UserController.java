@@ -3,6 +3,7 @@ package com.uconnect.backend.user.controller;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
+import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
 import com.uconnect.backend.user.service.UserService;
@@ -31,11 +32,17 @@ public class UserController {
 
     private final JwtUtility jwtUtility;
 
+    private final RequestPermissionUtility requestPermissionUtility;
+
     @Autowired
-    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtility jwtUtility) {
+    public UserController(UserService userService,
+            AuthenticationManager authenticationManager,
+            JwtUtility jwtUtility,
+            RequestPermissionUtility requestPermissionUtility) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtUtility = jwtUtility;
+        this.requestPermissionUtility = requestPermissionUtility;
     }
 
     /**
@@ -97,8 +104,7 @@ public class UserController {
         // failed authentication exceptions handled by ExceptionHandlers
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 jwtRequest.getUsername(),
-                jwtRequest.getPassword()
-        ));
+                jwtRequest.getPassword()));
 
         final User user = userService.loadUserByUsername(jwtRequest.getUsername());
 
@@ -110,29 +116,35 @@ public class UserController {
     // TODO: Redesign updateUser API @Jake
     // @PostMapping("/v1/user/updateUser")
     // public ResponseEntity<String> updateUser(@Valid @RequestBody User user) {
-    //     String username = user.getUsername();
-    //     String rawPassword = user.getPassword();
+    // String username = user.getUsername();
+    // String rawPassword = user.getPassword();
 
-    //     int result = userService.createNewUser(username, rawPassword, user);
+    // int result = userService.createNewUser(username, rawPassword, user);
 
-    //     switch (result) {
-    //         case 0:
-    //             return new ResponseEntity<>("Successfully updated user " + username, HttpStatus.ACCEPTED);
-    //         case -1:
-    //             return new ResponseEntity<>(
-    //                     "Failed to update details for " + username + ", USERNAME/EMAIL does not exist",
-    //                     HttpStatus.BAD_REQUEST);
-    //         case -2:
-    //             return new ResponseEntity<>("Unexpected exception occurred when updating details for " + username,
-    //                     HttpStatus.INTERNAL_SERVER_ERROR);
-    //         default:
-    //             return new ResponseEntity<>("should not see this response, call your mother for me if you do",
-    //                     HttpStatus.I_AM_A_TEAPOT);
-    //     }
+    // switch (result) {
+    // case 0:
+    // return new ResponseEntity<>("Successfully updated user " + username,
+    // HttpStatus.ACCEPTED);
+    // case -1:
+    // return new ResponseEntity<>(
+    // "Failed to update details for " + username + ", USERNAME/EMAIL does not
+    // exist",
+    // HttpStatus.BAD_REQUEST);
+    // case -2:
+    // return new ResponseEntity<>("Unexpected exception occurred when updating
+    // details for " + username,
+    // HttpStatus.INTERNAL_SERVER_ERROR);
+    // default:
+    // return new ResponseEntity<>("should not see this response, call your mother
+    // for me if you do",
+    // HttpStatus.I_AM_A_TEAPOT);
+    // }
     // }
 
     @PostMapping("/api/userControl/deleteUser")
     public ResponseEntity<String> deleteUser(@RequestHeader(name = "Username") String username) {
+        requestPermissionUtility.authorizeUser(username);
+
         int result = userService.deleteUser(username);
 
         switch (result) {
@@ -168,6 +180,7 @@ public class UserController {
     @GetMapping("/v1/user/getPending")
     public ResponseEntity<Set<String>> getPending(@RequestHeader(name = "Username") String username) {
         try {
+            requestPermissionUtility.authorizeUser(username);
             Set<String> pending = userService.getPending(username);
             return new ResponseEntity<>(pending, (pending == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
         } catch (Exception e) {
@@ -189,6 +202,7 @@ public class UserController {
     @GetMapping("/v1/user/getConnections")
     public ResponseEntity<Set<String>> getConnections(@RequestHeader(name = "Username") String username) {
         try {
+            requestPermissionUtility.authorizeUser(username);
             Set<String> connections = userService.getConnections(username);
             return new ResponseEntity<>(connections, (connections == null) ? HttpStatus.NOT_FOUND : HttpStatus.OK);
         } catch (Exception e) {

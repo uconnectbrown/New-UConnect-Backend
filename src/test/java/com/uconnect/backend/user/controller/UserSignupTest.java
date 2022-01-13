@@ -2,6 +2,7 @@ package com.uconnect.backend.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.helper.BaseUnitTest;
+import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,9 @@ public class UserSignupTest extends BaseUnitTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private RequestPermissionUtility requestPermissionUtility;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private User user;

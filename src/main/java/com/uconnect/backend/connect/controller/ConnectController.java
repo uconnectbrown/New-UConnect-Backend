@@ -1,7 +1,6 @@
 package com.uconnect.backend.connect.controller;
 
 import com.uconnect.backend.connect.service.ConnectService;
-import com.uconnect.backend.exception.UnauthorizedUserRequestException;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +17,21 @@ public class ConnectController {
 
     private final ConnectService connectService;
 
-    @Autowired
-    private RequestPermissionUtility requestPermissionUtility;
+    private final RequestPermissionUtility requestPermissionUtility;
 
     @Autowired
-    public ConnectController(ConnectService connectService) {
+    public ConnectController(ConnectService connectService,
+            RequestPermissionUtility requestPermissionUtility) {
         this.connectService = connectService;
+        this.requestPermissionUtility = requestPermissionUtility;
     }
 
     @PostMapping("/v1/connect/request")
     public ResponseEntity<String> request(@RequestBody Map<String, String> req) {
         String senderUsername = req.get("sender");
         String receiverUsername = req.get("receiver");
+
+        requestPermissionUtility.authorizeUser(senderUsername);
 
         int result = connectService.request(senderUsername, receiverUsername);
 
@@ -75,6 +77,8 @@ public class ConnectController {
         String senderUsername = req.get("sender");
         String receiverUsername = req.get("receiver");
 
+        requestPermissionUtility.authorizeUser(senderUsername);
+
         int result = connectService.undoRequest(senderUsername, receiverUsername);
 
         HttpStatus status;
@@ -119,11 +123,7 @@ public class ConnectController {
         String senderUsername = req.get("sender");
         String receiverUsername = req.get("receiver");
 
-        try {
-            requestPermissionUtility.authorizeUser(receiverUsername);
-        } catch (UnauthorizedUserRequestException e) {
-            return new ResponseEntity<>("User not authorized to perform this action", HttpStatus.FORBIDDEN);
-        }
+        requestPermissionUtility.authorizeUser(receiverUsername);
 
         int result = connectService.accept(senderUsername, receiverUsername);
         HttpStatus status;
@@ -179,11 +179,7 @@ public class ConnectController {
         String currentUsername = req.get("current");
         String otherUsername = req.get("other");
 
-        try {
-            requestPermissionUtility.authorizeUser(currentUsername);
-        } catch (UnauthorizedUserRequestException e) {
-            return new ResponseEntity<>("User not authorized to perform this action", HttpStatus.FORBIDDEN);
-        }
+        requestPermissionUtility.authorizeUser(currentUsername);
 
         int result = connectService.checkStatus(currentUsername, otherUsername);
 

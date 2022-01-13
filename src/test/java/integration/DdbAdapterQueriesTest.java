@@ -36,9 +36,9 @@ public class DdbAdapterQueriesTest extends BaseIntTest {
 
     private final Class<User> clazz = User.class;
 
-    private User user = MockData.generateUser();
+    private User user = MockData.generateValidUser();
 
-    private User userWithId = MockData.generateUser();
+    private User userWithId = MockData.generateValidUser();
 
     private List<User> userList = new ArrayList<>();
 
@@ -49,8 +49,9 @@ public class DdbAdapterQueriesTest extends BaseIntTest {
             ddbAdapter.createOnDemandTableIfNotExists(userTableName, clazz);
 
             // Add user data
-            for (int i = 0; i < 10; i++)
-                userList.add(MockData.generateUser());
+            for (int i = 0; i < 10; i++) {
+                userList.add(MockData.generateValidUser());
+            }
             userWithId.setId("1234");
 
             init = false;
@@ -58,18 +59,25 @@ public class DdbAdapterQueriesTest extends BaseIntTest {
     }
 
     @Test
-    public void testCRUD() {
-        for (User u : userList)
+    public void testCRUD() throws UserNotFoundException {
+        for (User u : userList) {
             ddbAdapter.save(userTableName, u);
+        }
         // Test that all users were added
         assertEquals(ddbAdapter.scan(userTableName, clazz).size(),
                 userList.size());
+        for (User u : userList) {
+            assertEquals(ddbAdapter.findByUsername(u.getUsername()), u);
+        }
         ddbAdapter.save(userTableName, user);
 
-        for (User u : userList)
+        for (User u : userList) {
             ddbAdapter.delete(userTableName, u);
+        }
         // Check that all users in userList were deleted
-        assertEquals(ddbAdapter.scan(userTableName, clazz).get(0), user);
+        List<User> scanRes = ddbAdapter.scan(userTableName, clazz);
+        assertEquals(scanRes.size(), 1);
+        assertEquals(scanRes.get(0), user);
         ddbAdapter.delete(userTableName, user);
     }
 

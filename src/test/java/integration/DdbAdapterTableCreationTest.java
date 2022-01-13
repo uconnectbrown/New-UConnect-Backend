@@ -8,7 +8,6 @@ import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.user.model.User;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

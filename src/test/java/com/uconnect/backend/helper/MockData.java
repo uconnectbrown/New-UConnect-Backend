@@ -13,7 +13,7 @@ public class MockData {
      * 
      * @return A randomly generated User.
      */
-    public static User generateUser() {
+    public static User generateValidUser() {
         String email = randomAlphanumeric(7) + "@" + randomAlphanumeric(5) +
                 "." + randomAlphanumeric(3);
         return User.builder()

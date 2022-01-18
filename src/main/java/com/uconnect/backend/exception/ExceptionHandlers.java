@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -72,5 +73,11 @@ public class ExceptionHandlers {
         String unmatchedCreationTypeName = e.getUnmatchedCreationType() == null ? "Unknown" : e.getUnmatchedCreationType().name();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 String.format("Requested user was not created through creation type: %s", unmatchedCreationTypeName));
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<String> handleUsernameNotFoundExceptions(UsernameNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                "Requested user either does not exist or is not available at this time");
     }
 }

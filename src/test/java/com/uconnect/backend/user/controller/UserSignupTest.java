@@ -1,15 +1,12 @@
 package com.uconnect.backend.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
-import com.uconnect.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -26,9 +23,6 @@ public class UserSignupTest extends BaseUserControllerUnitTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private RequestPermissionUtility requestPermissionUtility;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private User user;

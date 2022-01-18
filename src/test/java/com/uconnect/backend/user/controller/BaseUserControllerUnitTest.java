@@ -1,6 +1,7 @@
 package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.helper.BaseUnitTest;
+import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.user.service.UserService;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,4 +23,7 @@ public class BaseUserControllerUnitTest extends BaseUnitTest {
 
     @MockBean
     public OidcAuthorizationCodeAuthenticationProvider oidcAuthorizationCodeAuthenticationProvider;
+
+    @MockBean
+    private RequestPermissionUtility requestPermissionUtility;
 }

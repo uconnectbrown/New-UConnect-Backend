@@ -2,7 +2,6 @@ package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
-import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
@@ -39,8 +38,6 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JwtUtility jwtUtility;
-
     private final PasswordEncoder passwordEncoder;
 
     private final ClientRegistrationRepository clientRegistrationRepository;
@@ -50,13 +47,11 @@ public class UserController {
     @Autowired
     public UserController(UserService userService,
                           AuthenticationManager authenticationManager,
-                          JwtUtility jwtUtility,
                           RequestPermissionUtility requestPermissionUtility,
                           PasswordEncoder passwordEncoder,
                           ClientRegistrationRepository clientRegistrationRepository) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
-        this.jwtUtility = jwtUtility;
         this.requestPermissionUtility = requestPermissionUtility;
         this.passwordEncoder = passwordEncoder;
         this.clientRegistrationRepository = clientRegistrationRepository;
@@ -247,5 +242,13 @@ public class UserController {
             log.error("Unexpected exception encountered when getting connections for user " + username, e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping("/v1/user/{username}")
+    public ResponseEntity<User> getUser(@PathVariable String username) {
+        User foundUser = userService.loadUserByUsername(username);
+        foundUser.setPassword("");
+
+        return ResponseEntity.status(HttpStatus.OK).body(foundUser);
     }
 }

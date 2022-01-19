@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthor
  */
 public class BaseUserControllerUnitTest extends BaseUnitTest {
     @MockBean
-    private UserService userService;
+    public UserService userService;
 
     @MockBean
     public PasswordEncoder passwordEncoder;

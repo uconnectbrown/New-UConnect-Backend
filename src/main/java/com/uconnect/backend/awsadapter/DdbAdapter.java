@@ -24,18 +24,25 @@ import java.util.List;
 @Component
 @Slf4j
 public class DdbAdapter {
-    @Autowired
     private String userTableName;
 
-    @Autowired
     private String emailIndexName;
 
     private final AmazonDynamoDB ddbClient;
 
     private DynamoDBMapper mapper;
 
-    public DdbAdapter(AmazonDynamoDB ddbClient) {
+    @Autowired
+    public DdbAdapter(AmazonDynamoDB ddbClient, String userTableName, String emailIndexName) {
         this.ddbClient = ddbClient;
+        this.userTableName = userTableName;
+        this.emailIndexName = emailIndexName;
+
+        if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
+                "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
+            // create a user table if booting up locally for manual testing
+            createOnDemandTableIfNotExists(userTableName, User.class);
+        }
     }
 
     public boolean createTableIfNotExists(String tableName, Class<?> clazz, long rcu, long wcu) {
@@ -66,7 +73,7 @@ public class DdbAdapter {
         mapper = new DynamoDBMapper(ddbClient);
         DeleteTableRequest request = mapper.generateDeleteTableRequest(clazz);
         request.setTableName(tableName);
-        
+
         return TableUtils.deleteTableIfExists(ddbClient, request);
     }
 

@@ -5,7 +5,7 @@ db-setting:
   localdbport: N/A
 
 db-table-name:
-  user: FIX-ME
+  user: "prod-userInfo"
   emailIndex: "emailIndex"
 
 spring:
@@ -17,4 +17,4 @@ spring:
             client-id: 529455990235-nthg83dnb7rrb2f7640h5cj06d4bfsqd.apps.googleusercontent.com
             client-secret: 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
             client-authentication-method: client_secret_post
-            redirect-uri: https://developers.google.com/oauthplayground
+            redirect-uri: https://uconnectbrown.com/auth/google/callback

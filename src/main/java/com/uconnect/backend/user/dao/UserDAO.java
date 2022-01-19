@@ -74,6 +74,19 @@ public class UserDAO {
     //     return 0;
     // }
 
+    /**
+     * Deletes a user from the database.
+     * <p>
+     * Returns one of the following exit codes:
+     * <ul>
+     * <li> 0 indicates successful deletion </li>
+     * <li> -1 indicates username does not exist </li>
+     * <li> -2 indicates failure to delete </li>
+     * </ul>
+     * 
+     * @param username The username of the user to delete
+     * @return An exit code
+     */
     public int deleteUser(String username) {
         try {
             User userToDelete = ddbAdapter.findByUsername(username);

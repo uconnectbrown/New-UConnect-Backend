@@ -111,7 +111,13 @@ public class UserService implements UserDetailsService {
     /**
      * Deletes a user.
      * <p>
-     * Returns -3 in case of unexpected exception.
+     * Returns one of the following exit codes:
+     * <ul>
+     * <li> 0 indicates successful deletion </li>
+     * <li> -1 indicates username does not exist </li>
+     * <li> -2 indicates failure to delete </li>
+     * <li> -3 indicates unexpected exception occurred </li>
+     * </ul>
      *
      * @param username The username of the user to delete
      * @return An exit code

@@ -12,7 +12,7 @@ public class WebConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://api.uconnectbrown.com")
-                .allowedOrigins("http://localhost:3000");
+                .allowedOrigins("https://api.uconnectbrown.com", "http://localhost:3000")
+                .allowedMethods("*");
     }
 }

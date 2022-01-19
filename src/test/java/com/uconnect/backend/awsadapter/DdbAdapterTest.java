@@ -1,22 +1,21 @@
 package com.uconnect.backend.awsadapter;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.uconnect.backend.helper.BaseUnitTest;
 import com.uconnect.backend.user.model.User;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class DdbAdapterTest extends BaseUnitTest {
-    @Autowired
-    private String userTableName;
+    private String userTableName = "testTableName";
+
+    private String emailIndexName = "testEmailIndex";
 
     private final Class<User> clazz = User.class;
 
@@ -33,7 +32,7 @@ public class DdbAdapterTest extends BaseUnitTest {
 
     @BeforeEach
     public void setup() {
-        ddbAdapter = new DdbAdapter(ddbClient);
+        ddbAdapter = new DdbAdapter(ddbClient, userTableName, emailIndexName);
         user = User.builder().id("1234").username("Testy").build();
     }
 

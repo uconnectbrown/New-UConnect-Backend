@@ -24,8 +24,14 @@ public class AwsConfiguration {
     @Bean
     public AmazonDynamoDB getAmazonDynamoDB(AWSCredentialsProvider awsCredentialsProvider) throws Exception {
         boolean isDev = "dev".equals(System.getenv("SPRING_PROFILES_ACTIVE"));
+        boolean isManualTesting = "true".equals(System.getenv("IS_MANUAL_TESTING"));
 
         if (isDev) {
+            if (isManualTesting) {
+                LocalDdbServerRunner runner = new LocalDdbServerRunner(localDbPort);
+                runner.start();
+            }
+
             return AmazonDynamoDBClientBuilder
                     .standard()
                     .withEndpointConfiguration(
@@ -41,10 +47,5 @@ public class AwsConfiguration {
                 .withCredentials(awsCredentialsProvider)
                 .withRegion("us-east-1")
                 .build();
-    }
-
-    @Bean
-    public DdbAdapter getDdbAdapter(AmazonDynamoDB dynamoDB) {
-        return new DdbAdapter(dynamoDB);
     }
 }

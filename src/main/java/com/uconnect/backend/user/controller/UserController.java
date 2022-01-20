@@ -1,5 +1,6 @@
 package com.uconnect.backend.user.controller;
 
+import com.uconnect.backend.exception.DisallowedEmailDomainException;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
@@ -85,6 +86,8 @@ public class UserController {
             String username = user.getUsername();
             String rawPassword = user.getPassword();
 
+            userService.authorizeEmailDomain(username);
+
             user.setPassword(passwordEncoder.encode(rawPassword));
             user.setCreationType(UserCreationType.TRADITIONAL);
 
@@ -108,6 +111,8 @@ public class UserController {
                     return new ResponseEntity<>("should not see this response, call your mother for me if you do",
                             HttpStatus.I_AM_A_TEAPOT);
             }
+        } catch (DisallowedEmailDomainException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Unexpected error: {}", e.getMessage());
             return new ResponseEntity<>("Unexpected exception occurred", HttpStatus.INTERNAL_SERVER_ERROR);

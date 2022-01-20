@@ -9,6 +9,7 @@ import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,10 +35,11 @@ public class UserAuthenticationTest extends BaseIntTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private User user;
-    private final String validUsername = "test@email.com";
+    private final String validUsername = "test@brown.edu";
+    private final String invalidDomainUsername = "tester@vassar.edu";
     private final String validPassword = "tellMeASecret";
     private final String classYear = "2021";
-    private final String nonExistentUsername = "no-such@user.edu";
+    private final String nonExistentUsername = "no-such@brown.edu";
     private final String badPassword = "hushMyChildItsChristmas";
 
     @BeforeEach
@@ -57,6 +59,7 @@ public class UserAuthenticationTest extends BaseIntTest {
     }
 
     @Test
+    @Order(1)
     public void testTraditionalAuthSuccess() throws Exception {
         MvcResult result;
 
@@ -80,6 +83,7 @@ public class UserAuthenticationTest extends BaseIntTest {
     }
 
     @Test
+    @Order(2)
     public void testTraditionalAuthUsernameDoesNotExist() throws Exception {
         JwtRequest request = new JwtRequest(nonExistentUsername, validPassword);
         String requestBody = mapper.writeValueAsString(request);
@@ -91,10 +95,32 @@ public class UserAuthenticationTest extends BaseIntTest {
     }
 
     @Test
+    @Order(3)
     public void testTraditionalAuthIncorrectPassword() throws Exception {
         JwtRequest request = new JwtRequest(validUsername, badPassword);
         String requestBody = mapper.writeValueAsString(request);
 
+        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
+                .andReturn();
+    }
+
+    @Test
+    @Order(4)
+    public void testTraditionalAuthInvalidEmailDomain() throws Exception {
+        user.setUsername(invalidDomainUsername);
+
+        // register test user
+        String requestBody = mapper.writeValueAsString(user);
+        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(String.format("Disallowed email domain: %s", invalidDomainUsername))))
+                .andReturn();
+
+        JwtRequest request = new JwtRequest(invalidDomainUsername, user.getPassword());
+        requestBody = mapper.writeValueAsString(request);
+        // fail to log in
         AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))

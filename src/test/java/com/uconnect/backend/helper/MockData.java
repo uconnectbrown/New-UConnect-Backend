@@ -1,8 +1,8 @@
 package com.uconnect.backend.helper;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-
 import com.uconnect.backend.user.model.User;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 /**
  * Very rudimentary mock data generator for lack of a better one.
@@ -10,12 +10,11 @@ import com.uconnect.backend.user.model.User;
 public class MockData {
     /**
      * Generate a single User with valid fields.
-     * 
-     * @return A randomly generated User.
+     *
+     * @return A randomly generated User with an @brown.edu username.
      */
     public static User generateValidUser() {
-        String email = randomAlphanumeric(7) + "@" + randomAlphanumeric(5) +
-                "." + randomAlphanumeric(3);
+        String email = randomAlphanumeric(7) + "@brown.edu";
         return User.builder()
                 .username(email)
                 .password(randomAlphanumeric(15))

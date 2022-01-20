@@ -98,6 +98,8 @@ public class UserController {
 
             switch (result) {
                 case 0:
+                    userService.sendVerificationEmail(username);
+
                     return new ResponseEntity<>("Successfully created a new account for " + username,
                             HttpStatus.ACCEPTED);
                 case 1:

@@ -1,6 +1,7 @@
 package com.uconnect.backend.user.service;
 
 import com.google.common.collect.ImmutableSet;
+import com.uconnect.backend.awsadapter.SesAdapter;
 import com.uconnect.backend.exception.DisallowedEmailDomainException;
 import com.uconnect.backend.exception.UnknownOAuthRegistrationException;
 import com.uconnect.backend.exception.UnmatchedUserCreationTypeException;
@@ -37,15 +38,19 @@ public class UserService implements UserDetailsService {
 
     private OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
 
+    private SesAdapter sesAdapter;
+
     private static final Set<String> allowedEmailDomains = ImmutableSet.of("brown.edu");
 
     @Autowired
     public UserService(UserDAO dao,
                        JwtUtility jwtUtility,
-                       OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver) {
+                       OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver,
+                       SesAdapter sesAdapter) {
         this.dao = dao;
         this.jwtUtility = jwtUtility;
         this.oAuth2AuthorizationRequestResolver = oAuth2AuthorizationRequestResolver;
+        this.sesAdapter = sesAdapter;
     }
 
     @Override
@@ -189,5 +194,10 @@ public class UserService implements UserDetailsService {
         }
 
         throw new DisallowedEmailDomainException("Disallowed email domain", emailAddress);
+    }
+
+    public void sendVerificationEmail(String emailAddress) {
+        // TODO: add db table, get request, and verification logic
+        sesAdapter.sendAccountVerificationEmail(emailAddress);
     }
 }

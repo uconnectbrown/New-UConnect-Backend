@@ -7,6 +7,7 @@ db-setting:
 db-table-name:
   user: "prod-userInfo"
   emailIndex: "emailIndex"
+  emailVerification: "prod-emailVerification"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

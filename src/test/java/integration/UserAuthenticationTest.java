@@ -1,8 +1,6 @@
 package integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uconnect.backend.UConnectBackendApplication;
-import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.UserTestUtil;
@@ -12,10 +10,6 @@ import com.uconnect.backend.user.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.containsString;
@@ -23,17 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = UConnectBackendApplication.class)
-@AutoConfigureMockMvc
 public class UserAuthenticationTest extends BaseIntTest {
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private DdbAdapter ddbAdapter;
-
-    @Autowired
-    private String userTableName;
 
     private final ObjectMapper mapper = new ObjectMapper();
     private User user;
@@ -45,7 +29,7 @@ public class UserAuthenticationTest extends BaseIntTest {
     private final String badPassword = "hushMyChildItsChristmas";
 
     @BeforeEach
-    public void setup() throws InterruptedException {
+    public void setup() {
         user = User.builder()
                 .username(validUsername)
                 .password(validPassword)
@@ -54,10 +38,7 @@ public class UserAuthenticationTest extends BaseIntTest {
                 .classYear(classYear)
                 .build();
 
-        if (ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class)) {
-            // wait for the new table to become available
-            Thread.sleep(10);
-        }
+        setupDdb();
     }
 
     @Test

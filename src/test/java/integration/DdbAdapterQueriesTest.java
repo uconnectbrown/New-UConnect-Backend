@@ -1,36 +1,21 @@
 package integration;
 
+import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.helper.BaseIntTest;
+import com.uconnect.backend.helper.MockData;
+import com.uconnect.backend.user.model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.uconnect.backend.UConnectBackendApplication;
-import com.uconnect.backend.awsadapter.DdbAdapter;
-import com.uconnect.backend.exception.UserNotFoundException;
-import com.uconnect.backend.helper.BaseIntTest;
-import com.uconnect.backend.user.model.User;
-import com.uconnect.backend.helper.MockData;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest(classes = UConnectBackendApplication.class)
 public class DdbAdapterQueriesTest extends BaseIntTest {
-
-    @Autowired
-    private String userTableName;
-
-    @Autowired
-    private String emailIndexName;
-
-    @Autowired
-    private DdbAdapter ddbAdapter;
 
     private boolean init = false;
 

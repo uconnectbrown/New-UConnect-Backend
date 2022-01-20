@@ -1,26 +1,14 @@
 package integration;
 
+import com.uconnect.backend.helper.BaseIntTest;
+import com.uconnect.backend.user.model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.uconnect.backend.UConnectBackendApplication;
-import com.uconnect.backend.awsadapter.DdbAdapter;
-import com.uconnect.backend.helper.BaseIntTest;
-import com.uconnect.backend.user.model.User;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest(classes = UConnectBackendApplication.class)
 public class DdbAdapterTableCreationTest extends BaseIntTest {
-
-    @Autowired
-    private String userTableName;
-
-    @Autowired
-    private DdbAdapter ddbAdapter;
 
     private final Class<User> clazz = User.class;
 

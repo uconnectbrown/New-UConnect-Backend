@@ -23,7 +23,7 @@ public class SesAdapter {
 
     // TODO: fill these
     private static final String VERIFICATION_EMAIL_SUBJECT = "";
-    private static final String VERIFICATION_EMAIL_FORMAT = "";
+    private static final String VERIFICATION_EMAIL_FORMAT = "Here is your verification link: %s";
 
     @Autowired
     public SesAdapter(AmazonSimpleEmailService sesClient, String sesFromAddress) {
@@ -51,7 +51,7 @@ public class SesAdapter {
         log.info("An email titled \"{}\" was sent to: {}", subject, StringUtils.join(toAddresses, ", "));
     }
 
-    public void sendAccountVerificationEmail(String toAddress) {
-        sendOneEmail(toAddress, VERIFICATION_EMAIL_SUBJECT, VERIFICATION_EMAIL_FORMAT);
+    public void sendAccountVerificationEmail(String toAddress, String verificationCode) {
+        sendOneEmail(toAddress, VERIFICATION_EMAIL_SUBJECT, String.format(VERIFICATION_EMAIL_FORMAT, verificationCode));
     }
 }

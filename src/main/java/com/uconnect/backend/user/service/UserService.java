@@ -196,8 +196,43 @@ public class UserService implements UserDetailsService {
         throw new DisallowedEmailDomainException("Disallowed email domain", emailAddress);
     }
 
-    public void sendVerificationEmail(String emailAddress) {
+    public String startEmailVerification(String emailAddress) {
         // TODO: add db table, get request, and verification logic
-        sesAdapter.sendAccountVerificationEmail(emailAddress);
+        User codeModel = User.builder()
+                .username(emailAddress + "verify")
+                .build();
+        String verificationCode = jwtUtility.generateToken(codeModel);
+
+        dao.setEmailVerificationCode(emailAddress, verificationCode);
+
+        sesAdapter.sendAccountVerificationEmail(emailAddress, verificationCode);
+
+        return verificationCode;
+    }
+
+    public boolean validateEmailVerificationCode(String emailAddress, String inputCode) {
+        String expectedCode = dao.getEmailVerificationCode(emailAddress);
+
+        if (StringUtils.isEmpty(inputCode) || !inputCode.equals(expectedCode)) {
+            log.info("Email Verification: Code {} did not match with the expected code {} for user {}", inputCode,
+                    expectedCode, emailAddress);
+            return false;
+        }
+
+        log.info("Email Verification: Code {} was validated for user {}", inputCode, emailAddress);
+        return true;
+    }
+
+    public void verifyUser(String username) throws UserNotFoundException {
+        User user = dao.getUserByUsername(username);
+        if (user.isVerified()) {
+            log.info("User {} successfully verified their email more than once, something might be wrong. " +
+                    "Check UserController/Service/DAO", username);
+        }
+
+        // verify and delete entry from db
+        user.setVerified(true);
+        dao.saveUser(user);
+        dao.setEmailVerificationCode(username, null);
     }
 }

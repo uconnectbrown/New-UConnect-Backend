@@ -2,6 +2,7 @@ package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
+import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
@@ -131,8 +132,8 @@ public class UserController {
     }
 
     @PostMapping("/v1/user/authenticate/oauth/{registrationId}")
-    public JwtResponse authenticateOAuth(HttpServletRequest request, @Valid @RequestBody OAuthRequest oAuthRequest,
-                                         @PathVariable String registrationId) {
+    public OAuthJwtResponse authenticateOAuth(HttpServletRequest request, @Valid @RequestBody OAuthRequest oAuthRequest,
+                                              @PathVariable String registrationId) {
         String authCode = oAuthRequest.getAuthCode();
         ClientRegistration registration = clientRegistrationRepository.findByRegistrationId(registrationId);
 
@@ -143,7 +144,7 @@ public class UserController {
 
         String authenticatedUsername = ((DefaultOidcUser) authResult.getPrincipal()).getEmail();
         String token = userService.generateOAuthJWT(authenticatedUsername);
-        return new JwtResponse(token);
+        return new OAuthJwtResponse(token, authenticatedUsername);
     }
 
     // TODO: Redesign updateUser API @Jake

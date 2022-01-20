@@ -23,6 +23,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(UserController.class)
@@ -53,20 +54,38 @@ public class TestGetPending extends BaseUserControllerUnitTest {
         users.get(0).setPending(pending);
     }
 
+    private MvcResult testGetPending(String username, ResultMatcher status,
+            Set<String> pending) throws Exception {
+        if (pending != null) {
+            return mockMvc
+                    .perform(MockMvcRequestBuilders
+                            .get("/v1/user/getPending")
+                            .header("Username", username)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status)
+                    .andExpect(content().json(mapper.writeValueAsString(pending)))
+                    .andReturn();
+        } else {
+            return mockMvc
+                    .perform(MockMvcRequestBuilders
+                            .get("/v1/user/getPending")
+                            .header("Username", username)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status)
+                    .andExpect(content().string(""))
+                    .andReturn();
+        }
+    }
+
     @Test
     public void testValid() throws Exception {
         User currentUser = users.get(0);
         when(userService.getPending(currentUser.getUsername()))
                 .thenReturn(currentUser.getPending());
-        MvcResult res = mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/v1/user/getPending")
-                        .header("Username", currentUser.getUsername())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(currentUser.getPending())))
-                .andReturn();
+        MvcResult res = testGetPending(currentUser.getUsername(), status().isOk(),
+                currentUser.getPending());
         assertEquals(mapper.writeValueAsString(currentUser.getPending()),
                 res.getResponse().getContentAsString());
     }
@@ -76,16 +95,7 @@ public class TestGetPending extends BaseUserControllerUnitTest {
         User currentUser = users.get(0);
         when(userService.getPending(currentUser.getUsername()))
                 .thenReturn(null);
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/v1/user/getPending")
-                        .header("Username", currentUser.getUsername())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(""))
-                .andReturn();
-        return;
+        testGetPending(currentUser.getUsername(), status().isNotFound(), null);
     }
 
     @Test
@@ -93,15 +103,6 @@ public class TestGetPending extends BaseUserControllerUnitTest {
         User currentUser = users.get(0);
         when(userService.getPending(currentUser.getUsername()))
                 .thenThrow(RuntimeException.class);
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/v1/user/getPending")
-                        .header("Username", currentUser.getUsername())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string(""))
-                .andReturn();
-        return;
+        testGetPending(currentUser.getUsername(), status().isInternalServerError(), null);
     }
 }

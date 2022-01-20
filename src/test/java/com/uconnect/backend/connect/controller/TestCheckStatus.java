@@ -18,6 +18,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(ConnectController.class)
@@ -49,21 +51,26 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
         }
     }
 
+    private MvcResult testCheckStatus(Map<String, String> request, ResultMatcher status,
+            String msg) throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/connect/checkStatus")
+                        .content(mapper.writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status)
+                .andExpect(content().string(msg))
+                .andReturn();
+    }
+
     @Test
     public void testHasIncoming() throws Exception {
         when(connectService.checkStatus(current.getUsername(), other.getUsername()))
                 .thenReturn(3);
         String msg = current.getUsername() + " has an incoming request from "
                 + other.getUsername();
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/checkStatus")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testCheckStatus(request, status().isOk(), msg);
     }
 
     @Test
@@ -72,15 +79,7 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
                 .thenReturn(2);
         String msg = current.getUsername() + " has an outgoing request to "
                 + other.getUsername();
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/checkStatus")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testCheckStatus(request, status().isOk(), msg);
     }
 
     @Test
@@ -89,15 +88,7 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
                 .thenReturn(1);
         String msg = current.getUsername() + " and "
                 + other.getUsername() + " are connected.";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/checkStatus")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testCheckStatus(request, status().isOk(), msg);
     }
 
     @Test
@@ -106,15 +97,7 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
                 .thenReturn(0);
         String msg = "No relation exists between " + current.getUsername()
                 + " and " + other.getUsername();
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/checkStatus")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testCheckStatus(request, status().isOk(), msg);
     }
 
     // TODO: add a test for when exception handler for usernotfound is added
@@ -139,14 +122,6 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
         when(connectService.checkStatus(current.getUsername(), other.getUsername()))
                 .thenReturn(-1);
         String msg = "Unexpected error";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/checkStatus")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testCheckStatus(request, status().isInternalServerError(), msg);
     }
 }

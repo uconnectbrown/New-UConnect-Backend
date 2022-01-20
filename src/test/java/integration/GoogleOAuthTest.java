@@ -120,8 +120,10 @@ public class GoogleOAuthTest extends BaseIntTest {
 
         OAuthJwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), OAuthJwtResponse.class);
         String token = response.getJwtToken();
+        String returnedUsername = response.getUsername();
 
-        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validOAuthUsername);
+        assertEquals(validOAuthUsername, returnedUsername);
+        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, returnedUsername);
 
         User user = ddbAdapter.findByUsername(validOAuthUsername);
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
@@ -154,8 +156,10 @@ public class GoogleOAuthTest extends BaseIntTest {
 
         OAuthJwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), OAuthJwtResponse.class);
         String token = response.getJwtToken();
+        String returnedUsername = response.getUsername();
 
-        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validOAuthUsername);
+        assertEquals(validOAuthUsername, returnedUsername);
+        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, returnedUsername);
 
         User user = ddbAdapter.findByUsername(validOAuthUsername);
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());

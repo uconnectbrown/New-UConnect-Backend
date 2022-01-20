@@ -8,6 +8,9 @@ db-table-name:
   user: "prod-userInfo"
   emailIndex: "emailIndex"
 
+ses:
+  sesFromAddress: team@uconnectbrown.com
+
 spring:
   security:
     oauth2:

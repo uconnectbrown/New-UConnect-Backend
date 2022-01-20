@@ -132,6 +132,9 @@ public class UserService implements UserDetailsService {
 
         final User user = loadUserByUsername(username);
 
+        if (!user.isVerified()) {
+            return "notVerified";
+        }
         return jwtUtility.generateToken(user);
     }
 

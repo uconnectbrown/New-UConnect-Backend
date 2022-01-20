@@ -5,6 +5,7 @@ import com.uconnect.backend.UConnectBackendApplication;
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
+import com.uconnect.backend.helper.UserTestUtil;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.user.model.User;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,6 +71,9 @@ public class UserAuthenticationTest extends BaseIntTest {
                 .andExpect(status().isAccepted())
                 .andReturn();
 
+        // verify test user
+        UserTestUtil.verifyUser(ddbAdapter, user.getUsername(), userTableName);
+
         JwtRequest request = new JwtRequest(validUsername, validPassword);
         requestBody = mapper.writeValueAsString(request);
         // obtain token
@@ -79,7 +84,7 @@ public class UserAuthenticationTest extends BaseIntTest {
         JwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
         String token = response.getJwtToken();
 
-        AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validUsername);
+        AuthenticationTestUtil.verifyAuthenticationSuccess(mockMvc, token, validUsername);
     }
 
     @Test
@@ -125,5 +130,34 @@ public class UserAuthenticationTest extends BaseIntTest {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
                 .andReturn();
+    }
+
+    @Test
+    @Order(5)
+    public void testTraditionalAuthUnverified() throws Exception {
+        MvcResult result;
+        String altUsername = "temp@brown.edu";
+        String altPassword = "justAnother";
+        user.setUsername(altUsername);
+        user.setPassword(altPassword);
+
+        // register test user
+        String requestBody = mapper.writeValueAsString(user);
+        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        JwtRequest request = new JwtRequest(altUsername, altPassword);
+        requestBody = mapper.writeValueAsString(request);
+        // obtain token
+        result = AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
+        String token = response.getJwtToken();
+
+        assertEquals("notVerified", token);
+        AuthenticationTestUtil.verifyAuthenticationFailure(mockMvc, token, validUsername);
     }
 }

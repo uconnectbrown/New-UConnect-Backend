@@ -90,6 +90,7 @@ public class UserController {
 
             user.setPassword(passwordEncoder.encode(rawPassword));
             user.setCreationType(UserCreationType.TRADITIONAL);
+            user.setVerified(false);
 
             int result = userService.createNewUser(user);
 

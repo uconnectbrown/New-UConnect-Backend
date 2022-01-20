@@ -56,7 +56,7 @@ public class GetUserTest extends BaseIntTest {
     @Test
     @Order(1)
     public void testUserExists() throws Exception {
-        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, true);
+        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, true, ddbAdapter, userTableName);
 
         String response = UserTestUtil.getUser(mockMvc, validUser.getUsername(), validUser.getUsername(), token)
                 .andReturn().getResponse().getContentAsString();
@@ -74,7 +74,7 @@ public class GetUserTest extends BaseIntTest {
     public void testUserNotFound() throws Exception {
         String invalidUsername = "no@exist.org";
 
-        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false);
+        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false, ddbAdapter, userTableName);
         UserTestUtil.getUser(mockMvc, validUser.getUsername(), invalidUsername, token)
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(containsString("Requested user either does not exist or is not available at this time")));

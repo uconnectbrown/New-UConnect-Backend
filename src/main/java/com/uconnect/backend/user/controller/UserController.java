@@ -143,6 +143,9 @@ public class UserController {
         Authentication authResult = authenticationManager.authenticate(oAuth2LoginAuthenticationToken);
 
         String authenticatedUsername = ((DefaultOidcUser) authResult.getPrincipal()).getEmail();
+
+        userService.authorizeEmailDomain(authenticatedUsername);
+
         String token = userService.generateOAuthJWT(authenticatedUsername);
         return new OAuthJwtResponse(token, authenticatedUsername);
     }

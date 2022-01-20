@@ -97,6 +97,9 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private int requests;
 
+    @DynamoDBAttribute
+    private boolean isVerified;
+
     @EqualsAndHashCode.Exclude
     @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;

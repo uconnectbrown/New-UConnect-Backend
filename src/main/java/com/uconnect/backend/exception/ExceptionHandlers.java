@@ -80,4 +80,10 @@ public class ExceptionHandlers {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 "Requested user either does not exist or is not available at this time");
     }
+
+    @ExceptionHandler(DisallowedEmailDomainException.class)
+    public ResponseEntity<String> handleDisallowedEmailDomainExceptions(DisallowedEmailDomainException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                String.format("%s: %s", e.getMessage(), e.getEmailAddress()));
+    }
 }

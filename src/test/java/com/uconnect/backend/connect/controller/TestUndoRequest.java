@@ -18,6 +18,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @WebMvcTest(ConnectController.class)
@@ -49,20 +51,26 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
         }
     }
 
+    private MvcResult testUndoRequest(Map<String, String> request, ResultMatcher status, String msg)
+            throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/connect/undoRequest")
+                        .content(mapper.writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status)
+                .andExpect(content().string(msg))
+                .andReturn();
+    }
+
     @Test
     public void testValidUndoRequest() throws Exception {
         when(connectService.undoRequest(sender.getUsername(), receiver.getUsername()))
                 .thenReturn(0);
         String msg = "Successfully unsent a request from " + sender.getUsername()
                 + " to " + receiver.getUsername();
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/v1/connect/undoRequest")
-                .content(mapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isOk(), msg);
     }
 
     @Test
@@ -71,15 +79,7 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
                 .thenReturn(-1);
         String msg = "Operation unsuccessful: " + sender.getUsername()
                 + " has not sent a request to " + receiver.getUsername();
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/undoRequest")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isBadRequest(), msg);
     }
 
     @Test
@@ -89,15 +89,7 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
         String msg = "Operation unsuccessful: " + receiver.getUsername()
                 + " has not received a request from " + sender.getUsername()
                 + ". This should not have happened.";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/undoRequest")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isBadRequest(), msg);
     }
 
     @Test
@@ -106,15 +98,7 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
                 .thenReturn(-3);
         String msg = "Operation unsuccessful: " + sender.getUsername()
                 + " has too many requests. This should not have happened.";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/undoRequest")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isBadRequest(), msg);
     }
 
     @Test
@@ -122,15 +106,7 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
         when(connectService.undoRequest(sender.getUsername(), receiver.getUsername()))
                 .thenReturn(-4);
         String msg = "Operation unsuccessful: user not found";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/undoRequest")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isNotFound(), msg);
     }
 
     @Test
@@ -138,14 +114,6 @@ public class TestUndoRequest extends BaseConnectControllerUnitTest {
         when(connectService.undoRequest(sender.getUsername(), receiver.getUsername()))
                 .thenReturn(-5);
         String msg = "Unexpected error";
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .post("/v1/connect/undoRequest")
-                        .content(mapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(content().string(msg))
-                .andReturn();
+        testUndoRequest(request, status().isInternalServerError(), msg);
     }
 }

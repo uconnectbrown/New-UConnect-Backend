@@ -82,9 +82,13 @@ public class GoogleOAuthTest extends BaseIntTest {
     private DefaultOidcUser validUser;
 
     @Mock
+    private DefaultOidcUser invalidUser;
+
+    @Mock
     private Authentication successAuth;
 
     private final String validOAuthUsername = "tester@brown.edu";
+    private final String invalidDomainUsername = "tester@vassar.edu";
     private final OAuthRequest oAuthRequest = OAuthRequest.builder().authCode("random crap").build();
     private String oAuthRequestString;
     private String registrationId;
@@ -129,6 +133,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
+        assertTrue(user.isVerified());
     }
 
     @Test
@@ -165,6 +170,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
+        assertTrue(user.isVerified());
     }
 
     @Test
@@ -188,6 +194,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
+        assertTrue(user.isVerified());
 
         JwtRequest request = new JwtRequest(validOAuthUsername, "");
         String requestBody = mapper.writeValueAsString(request);
@@ -252,5 +259,25 @@ public class GoogleOAuthTest extends BaseIntTest {
         verify(userServiceSpy, times(0)).createNewUser(any(User.class));
         verify(userDAOSpy, times(0)).saveUser(any(User.class));
         assertEquals(user, ddbAdapter.findByUsername(traditionalUsername));
+    }
+
+    @Test
+    @Order(6)
+    public void testInvalidEmailDomain() throws Exception {
+        // make sure there is no entry of this user yet
+        assertThrows(UserNotFoundException.class, () -> ddbAdapter.findByUsername(invalidDomainUsername));
+
+        when(oidcAuthorizationCodeAuthenticationProvider.supports(OAuth2LoginAuthenticationToken.class)).thenReturn(true);
+        when(oidcAuthorizationCodeAuthenticationProvider.authenticate(any(Authentication.class)))
+                .thenReturn(successAuth);
+        when(successAuth.getPrincipal()).thenReturn(invalidUser);
+        when(invalidUser.getEmail()).thenReturn(invalidDomainUsername);
+
+        AuthenticationTestUtil.loginOAuth(mockMvc, registrationId, oAuthRequestString)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(String.format("Disallowed email domain: %s", invalidDomainUsername))))
+                .andReturn();
+
+        assertThrows(UserNotFoundException.class, () -> ddbAdapter.findByUsername(invalidDomainUsername));
     }
 }

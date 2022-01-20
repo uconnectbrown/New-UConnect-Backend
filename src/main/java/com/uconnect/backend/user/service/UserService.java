@@ -1,5 +1,7 @@
 package com.uconnect.backend.user.service;
 
+import com.google.common.collect.ImmutableSet;
+import com.uconnect.backend.exception.DisallowedEmailDomainException;
 import com.uconnect.backend.exception.UnknownOAuthRegistrationException;
 import com.uconnect.backend.exception.UnmatchedUserCreationTypeException;
 import com.uconnect.backend.exception.UserNotFoundException;
@@ -9,6 +11,7 @@ import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,6 +36,8 @@ public class UserService implements UserDetailsService {
     private JwtUtility jwtUtility;
 
     private OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
+
+    private static final Set<String> allowedEmailDomains = ImmutableSet.of("brown.edu");
 
     @Autowired
     public UserService(UserDAO dao,
@@ -140,6 +145,7 @@ public class UserService implements UserDetailsService {
             user = User.builder()
                     .username(username)
                     .creationType(UserCreationType.O_AUTH)
+                    .isVerified(true)
                     .build();
 
             createNewUser(user);
@@ -167,5 +173,18 @@ public class UserService implements UserDetailsService {
 
         return new OAuth2LoginAuthenticationToken(registration,
                 new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse));
+    }
+
+    public void authorizeEmailDomain(String emailAddress) {
+        if (StringUtils.isEmpty(emailAddress)) {
+            throw new DisallowedEmailDomainException("Empty email address", emailAddress);
+        }
+
+        String[] splits = emailAddress.split("@");
+        if (splits.length >= 2 && allowedEmailDomains.contains(splits[1])) {
+            return;
+        }
+
+        throw new DisallowedEmailDomainException("Disallowed email domain", emailAddress);
     }
 }

@@ -1,20 +1,14 @@
 package integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uconnect.backend.UConnectBackendApplication;
-import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.MockData;
 import com.uconnect.backend.helper.UserTestUtil;
 import com.uconnect.backend.user.model.User;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,18 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = UConnectBackendApplication.class)
-@AutoConfigureMockMvc
-@Slf4j
 public class GetUserTest extends BaseIntTest {
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private String userTableName;
-
-    @Autowired
-    private DdbAdapter ddbAdapter;
 
     @Autowired
     private ObjectMapper mapper;
@@ -46,7 +29,7 @@ public class GetUserTest extends BaseIntTest {
     public void setup() {
         if (init) {
             // Populate test data
-            ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class);
+            setupDdb();
             validUser = MockData.generateValidUser();
 
             init = false;

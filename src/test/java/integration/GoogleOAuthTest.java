@@ -2,8 +2,6 @@ package integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uconnect.backend.UConnectBackendApplication;
-import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
@@ -21,15 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeAuthenticationProvider;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Arrays;
@@ -48,23 +43,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = UConnectBackendApplication.class)
-@AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GoogleOAuthTest extends BaseIntTest {
     // unfortunately we have to mock the Google sign in flow, since obtaining the one-time authorization code from
     // Google is almost impossible to automate as of now (1/10/2022)
     @MockBean
     private OidcAuthorizationCodeAuthenticationProvider oidcAuthorizationCodeAuthenticationProvider;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private DdbAdapter ddbAdapter;
-
-    @Autowired
-    private String userTableName;
 
     @Autowired
     private ObjectMapper mapper;
@@ -94,14 +78,11 @@ public class GoogleOAuthTest extends BaseIntTest {
     private String registrationId;
 
     @BeforeEach
-    public void setup() throws InterruptedException, JsonProcessingException {
+    public void setup() throws JsonProcessingException {
         oAuthRequestString = mapper.writeValueAsString(oAuthRequest);
         registrationId = "google";
 
-        if (ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class)) {
-            // wait for the new table to become available
-            Thread.sleep(10);
-        }
+        setupDdb();
     }
 
     @Test

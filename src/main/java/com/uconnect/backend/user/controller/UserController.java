@@ -1,6 +1,6 @@
 package com.uconnect.backend.user.controller;
 
-import com.uconnect.backend.exception.DisallowedEmailDomainException;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,43 +83,36 @@ public class UserController {
      */
     @PostMapping(value = "/v1/user/signup/createNewUserTraditional")
     public ResponseEntity<String> createNewUser(@Valid @RequestBody User user) {
-        try {
-            String username = user.getUsername();
-            String rawPassword = user.getPassword();
+        String username = user.getUsername();
+        String rawPassword = user.getPassword();
 
-            userService.authorizeEmailDomain(username);
+        userService.authorizeEmailDomain(username);
 
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            user.setCreationType(UserCreationType.TRADITIONAL);
-            user.setVerified(false);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setCreationType(UserCreationType.TRADITIONAL);
+        user.setVerified(false);
 
-            int result = userService.createNewUser(user);
+        int result = userService.createNewUser(user);
 
-            // TODO: Give user a default profile picture
+        // TODO: Give user a default profile picture
 
-            switch (result) {
-                case 0:
-                    userService.sendVerificationEmail(username);
+        switch (result) {
+            case 0:
+                userService.startEmailVerification(username);
 
-                    return new ResponseEntity<>("Successfully created a new account for " + username,
-                            HttpStatus.ACCEPTED);
-                case 1:
-                case -1:
-                    return new ResponseEntity<>(
-                            "Failed to create a new account for " + username + ", USERNAME/EMAIL already exists",
-                            HttpStatus.BAD_REQUEST);
-                case -2:
-                    return new ResponseEntity<>("Unexpected exception occurred when creating account for " + username,
-                            HttpStatus.INTERNAL_SERVER_ERROR);
-                default:
-                    return new ResponseEntity<>("should not see this response, call your mother for me if you do",
-                            HttpStatus.I_AM_A_TEAPOT);
-            }
-        } catch (DisallowedEmailDomainException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unexpected error: {}", e.getMessage());
-            return new ResponseEntity<>("Unexpected exception occurred", HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("Successfully created a new account for " + username,
+                        HttpStatus.ACCEPTED);
+            case 1:
+            case -1:
+                return new ResponseEntity<>(
+                        "Failed to create a new account for " + username + ", USERNAME/EMAIL already exists",
+                        HttpStatus.BAD_REQUEST);
+            case -2:
+                return new ResponseEntity<>("Unexpected exception occurred when creating account for " + username,
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            default:
+                return new ResponseEntity<>("should not see this response, call your mother for me if you do",
+                        HttpStatus.I_AM_A_TEAPOT);
         }
     }
 
@@ -262,5 +256,19 @@ public class UserController {
         foundUser.setPassword("");
 
         return ResponseEntity.status(HttpStatus.OK).body(foundUser);
+    }
+
+    @GetMapping("/v1/user/authenticate/emailVerification/{email}")
+    public ResponseEntity<String> verifyEmail(@PathVariable String email, @RequestParam String code)
+            throws UserNotFoundException {
+        if (userService.validateEmailVerificationCode(email, code)) {
+            userService.verifyUser(email);
+
+            log.info("User {} has been verified", email);
+            return ResponseEntity.accepted().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verification failed. Please contact us if this " +
+                "happens repeatedly");
     }
 }

@@ -2,23 +2,34 @@ package com.uconnect.backend.user.dao;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.user.model.EmailVerification;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
 @Repository
 public class UserDAO {
     private final DdbAdapter ddbAdapter;
 
-
     private final String userTableName;
 
+    private final String emailVerificationTableName;
+
     @Autowired
-    public UserDAO(DdbAdapter ddbAdapter, String userTableName) {
+    public UserDAO(DdbAdapter ddbAdapter, String userTableName, String emailVerificationTableName) {
         this.ddbAdapter = ddbAdapter;
         this.userTableName = userTableName;
+        this.emailVerificationTableName = emailVerificationTableName;
+
+        if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
+                "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
+            // mirror prod tables if booting up locally for manual testing
+            ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class);
+            ddbAdapter.createOnDemandTableIfNotExists(emailVerificationTableName, EmailVerification.class);
+        }
     }
 
     public User getUserByUsername(String username) throws UserNotFoundException {
@@ -109,5 +120,38 @@ public class UserDAO {
             // user does not exist
             return null;
         }
+    }
+
+    /**
+     * Set the expected verification code for the given email address. Delete the entry if code is null.
+     * @param emailAddress
+     * @param code
+     */
+    public void setEmailVerificationCode(String emailAddress, String code) {
+        EmailVerification emailVerification = EmailVerification.builder()
+                .emailAddress(emailAddress)
+                .verificationCode(code)
+                .build();
+
+        if (code == null) {
+            ddbAdapter.delete(emailVerificationTableName, emailVerification);
+            return;
+        }
+
+        ddbAdapter.save(emailVerificationTableName, emailVerification);
+    }
+
+    public String getEmailVerificationCode(String emailAddress) {
+        EmailVerification emailVerification = EmailVerification.builder()
+                .emailAddress(emailAddress)
+                .build();
+        List<EmailVerification> verifications =
+                ddbAdapter.query(emailVerificationTableName, emailVerification, EmailVerification.class);
+
+        if (verifications.isEmpty()) {
+            return null;
+        }
+
+        return verifications.get(0).getVerificationCode();
     }
 }

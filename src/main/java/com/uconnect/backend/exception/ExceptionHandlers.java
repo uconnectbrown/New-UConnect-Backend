@@ -75,8 +75,8 @@ public class ExceptionHandlers {
                 String.format("Requested user was not created through creation type: %s", unmatchedCreationTypeName));
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<String> handleUsernameNotFoundExceptions(UsernameNotFoundException e) {
+    @ExceptionHandler({UsernameNotFoundException.class, UserNotFoundException.class})
+    public ResponseEntity<String> handleUsernameNotFoundExceptions(Exception e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 "Requested user either does not exist or is not available at this time");
     }

@@ -13,13 +13,20 @@ public class DbTableProperties {
 
     private String emailIndex;
 
-    @Bean (name = "userTableName")
+    private String emailVerification;
+
+    @Bean(name = "userTableName")
     public String getUserTableName() {
         return user;
     }
 
-    @Bean (name = "emailIndexName")
+    @Bean(name = "emailIndexName")
     public String getEmailIndexName() {
         return emailIndex;
+    }
+
+    @Bean(name = "emailVerificationTableName")
+    public String getEmailVerificationTableName() {
+        return emailVerification;
     }
 }

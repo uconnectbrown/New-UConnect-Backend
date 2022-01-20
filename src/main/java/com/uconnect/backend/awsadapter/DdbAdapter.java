@@ -37,12 +37,6 @@ public class DdbAdapter {
         this.ddbClient = ddbClient;
         this.userTableName = userTableName;
         this.emailIndexName = emailIndexName;
-
-        if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
-                "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
-            // create a user table if booting up locally for manual testing
-            createOnDemandTableIfNotExists(userTableName, User.class);
-        }
     }
 
     public boolean createTableIfNotExists(String tableName, Class<?> clazz, long rcu, long wcu) {
@@ -62,8 +56,10 @@ public class DdbAdapter {
         CreateTableRequest request = mapper.generateCreateTableRequest(clazz);
         request.setTableName(tableName);
         request.setBillingMode(BillingMode.PAY_PER_REQUEST.name());
-        for (GlobalSecondaryIndex gsi : request.getGlobalSecondaryIndexes()) {
-            gsi.setProjection(new Projection().withProjectionType(ProjectionType.ALL));
+        if (request.getGlobalSecondaryIndexes() != null) {
+            for (GlobalSecondaryIndex gsi : request.getGlobalSecondaryIndexes()) {
+                gsi.setProjection(new Projection().withProjectionType(ProjectionType.ALL));
+            }
         }
 
         return TableUtils.createTableIfNotExists(ddbClient, request);

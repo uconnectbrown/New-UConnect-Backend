@@ -97,6 +97,7 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private int requests;
 
+    // no validation needed, always manually set to false for new users
     @DynamoDBAttribute
     private boolean isVerified;
 

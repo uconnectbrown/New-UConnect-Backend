@@ -28,17 +28,16 @@ public class AuthenticationTestUtil {
                         .accept(MediaType.APPLICATION_JSON));
     }
 
-    public static void verifyAuthentication(MockMvc mockMvc, String token, String validUsername) throws Exception {
-        // test input token
-        mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get("/")
-                        .header("Username", validUsername)
-                        .header("Authorization", String.format("%s %s", "Bearer", token))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+    public static void verifyAuthenticationSuccess(MockMvc mockMvc, String token, String username) throws Exception {
+        verifyAuthentication(mockMvc, token, username)
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("You are logged in, John Cena!")))
+                .andReturn();
+    }
+
+    public static void verifyAuthenticationFailure(MockMvc mockMvc, String token, String username) throws Exception {
+        verifyAuthentication(mockMvc, token, username)
+                .andExpect(status().isForbidden())
                 .andReturn();
     }
 
@@ -47,6 +46,16 @@ public class AuthenticationTestUtil {
                 .perform(MockMvcRequestBuilders
                         .post(String.format("/v1/user/authenticate/oauth/%s", registrationId))
                         .content(oAuthRequestString)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+    }
+
+    private static ResultActions verifyAuthentication(MockMvc mockMvc, String token, String username) throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .get("/")
+                        .header("Username", username)
+                        .header("Authorization", String.format("%s %s", "Bearer", token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON));
     }

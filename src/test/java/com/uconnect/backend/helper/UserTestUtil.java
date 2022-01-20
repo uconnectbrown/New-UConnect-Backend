@@ -1,6 +1,8 @@
 package com.uconnect.backend.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.user.model.User;
@@ -15,12 +17,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserTestUtil {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static String getTokenForTraditionalUser(MockMvc mockMvc, User user, boolean isNewUser) throws Exception {
+    public static String getTokenForTraditionalUser(MockMvc mockMvc, User user, boolean isNewUser,
+                                                    DdbAdapter ddbAdapter, String userTableName) throws Exception {
         String requestBody;
 
         if (isNewUser) {
             requestBody = mapper.writeValueAsString(user);
             AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody);
+            verifyUser(ddbAdapter, user.getUsername(), userTableName);
         }
 
         JwtRequest request = new JwtRequest(user.getUsername(), user.getPassword());
@@ -42,5 +46,11 @@ public class UserTestUtil {
                         .header("Authorization", String.format("%s %s", "Bearer", token))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON));
+    }
+
+    public static void verifyUser(DdbAdapter ddbAdapter, String username, String userTableName) throws UserNotFoundException {
+        User user = ddbAdapter.findByUsername(username);
+        user.setVerified(true);
+        ddbAdapter.save(userTableName, user);
     }
 }

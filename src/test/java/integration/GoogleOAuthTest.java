@@ -8,7 +8,7 @@ import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
-import com.uconnect.backend.security.jwt.model.JwtResponse;
+import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
@@ -118,7 +118,7 @@ public class GoogleOAuthTest extends BaseIntTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
+        OAuthJwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), OAuthJwtResponse.class);
         String token = response.getJwtToken();
 
         AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validOAuthUsername);
@@ -152,7 +152,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         // make sure no new record was created when the same user logs in again
         verify(userServiceSpy, times(0)).createNewUser(any(User.class));
 
-        JwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
+        OAuthJwtResponse response = mapper.readValue(result.getResponse().getContentAsString(), OAuthJwtResponse.class);
         String token = response.getJwtToken();
 
         AuthenticationTestUtil.verifyAuthentication(mockMvc, token, validOAuthUsername);

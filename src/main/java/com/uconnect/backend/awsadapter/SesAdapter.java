@@ -22,8 +22,9 @@ public class SesAdapter {
     private final String sesFromAddress;
 
     // TODO: fill these
-    private static final String VERIFICATION_EMAIL_SUBJECT = "";
-    private static final String VERIFICATION_EMAIL_FORMAT = "Here is your verification link: %s";
+    private static final String VERIFICATION_EMAIL_SUBJECT = "UConnectBrown - Email Address Verification";
+    private static final String VERIFICATION_EMAIL_FORMAT = "Here is your verification link: " +
+            "https://api.uconnectbrown.com/v1/user/authenticate/emailVerification/%s?code=%s";
 
     @Autowired
     public SesAdapter(AmazonSimpleEmailService sesClient, String sesFromAddress) {
@@ -52,6 +53,6 @@ public class SesAdapter {
     }
 
     public void sendAccountVerificationEmail(String toAddress, String verificationCode) {
-        sendOneEmail(toAddress, VERIFICATION_EMAIL_SUBJECT, String.format(VERIFICATION_EMAIL_FORMAT, verificationCode));
+        sendOneEmail(toAddress, VERIFICATION_EMAIL_SUBJECT, String.format(VERIFICATION_EMAIL_FORMAT, toAddress, verificationCode));
     }
 }

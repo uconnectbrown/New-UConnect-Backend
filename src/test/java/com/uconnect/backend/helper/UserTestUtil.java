@@ -5,6 +5,7 @@ import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
+import com.uconnect.backend.user.model.EmailVerification;
 import com.uconnect.backend.user.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -15,25 +16,21 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class UserTestUtil {
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static String getTokenForTraditionalUser(MockMvc mockMvc, User user, boolean isNewUser,
                                                     DdbAdapter ddbAdapter, String userTableName) throws Exception {
-        String requestBody;
-
         if (isNewUser) {
-            requestBody = mapper.writeValueAsString(user);
-            AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody);
-            verifyUser(ddbAdapter, user.getUsername(), userTableName);
+            AuthenticationTestUtil.createUserTraditional(mockMvc, user);
+            verifyUserHack(ddbAdapter, user.getUsername(), userTableName);
         }
 
         JwtRequest request = new JwtRequest(user.getUsername(), user.getPassword());
-        requestBody = mapper.writeValueAsString(request);
-        MvcResult result = AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        MvcResult result = AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isOk())
                 .andReturn();
 
-        JwtResponse tokenResponse = mapper.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
+        JwtResponse tokenResponse = MAPPER.readValue(result.getResponse().getContentAsString(), JwtResponse.class);
 
         return tokenResponse.getJwtToken();
     }
@@ -48,9 +45,26 @@ public class UserTestUtil {
                         .accept(MediaType.APPLICATION_JSON));
     }
 
-    public static void verifyUser(DdbAdapter ddbAdapter, String username, String userTableName) throws UserNotFoundException {
+    /**
+     * Directly modify the database to verify a user. User with caution!
+     *
+     * @param ddbAdapter
+     * @param username
+     * @param userTableName
+     * @throws UserNotFoundException
+     */
+    public static void verifyUserHack(DdbAdapter ddbAdapter, String username, String userTableName) throws UserNotFoundException {
         User user = ddbAdapter.findByUsername(username);
         user.setVerified(true);
         ddbAdapter.save(userTableName, user);
+    }
+
+    public static ResultActions verifyUser(MockMvc mockMvc, EmailVerification verification) throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .get(String.format("/v1/user/authenticate/emailVerification/%s?code=%s",
+                                verification.getEmailAddress(),
+                                verification.getVerificationCode()))
+                        .accept(MediaType.APPLICATION_JSON));
     }
 }

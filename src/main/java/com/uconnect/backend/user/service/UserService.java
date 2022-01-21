@@ -197,7 +197,6 @@ public class UserService implements UserDetailsService {
     }
 
     public String startEmailVerification(String emailAddress) {
-        // TODO: add db table, get request, and verification logic
         User codeModel = User.builder()
                 .username(emailAddress + "verify")
                 .build();

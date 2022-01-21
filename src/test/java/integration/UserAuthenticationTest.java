@@ -47,18 +47,16 @@ public class UserAuthenticationTest extends BaseIntTest {
         MvcResult result;
 
         // register test user
-        String requestBody = mapper.writeValueAsString(user);
-        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.createUserTraditional(mockMvc, user)
                 .andExpect(status().isAccepted())
                 .andReturn();
 
         // verify test user
-        UserTestUtil.verifyUser(ddbAdapter, user.getUsername(), userTableName);
+        UserTestUtil.verifyUserHack(ddbAdapter, user.getUsername(), userTableName);
 
         JwtRequest request = new JwtRequest(validUsername, validPassword);
-        requestBody = mapper.writeValueAsString(request);
         // obtain token
-        result = AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        result = AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -72,9 +70,8 @@ public class UserAuthenticationTest extends BaseIntTest {
     @Order(2)
     public void testTraditionalAuthUsernameDoesNotExist() throws Exception {
         JwtRequest request = new JwtRequest(nonExistentUsername, validPassword);
-        String requestBody = mapper.writeValueAsString(request);
 
-        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
                 .andReturn();
@@ -84,9 +81,8 @@ public class UserAuthenticationTest extends BaseIntTest {
     @Order(3)
     public void testTraditionalAuthIncorrectPassword() throws Exception {
         JwtRequest request = new JwtRequest(validUsername, badPassword);
-        String requestBody = mapper.writeValueAsString(request);
 
-        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
                 .andReturn();
@@ -98,16 +94,14 @@ public class UserAuthenticationTest extends BaseIntTest {
         user.setUsername(invalidDomainUsername);
 
         // register test user
-        String requestBody = mapper.writeValueAsString(user);
-        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.createUserTraditional(mockMvc, user)
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString(String.format("Disallowed email domain: %s", invalidDomainUsername))))
                 .andReturn();
 
         JwtRequest request = new JwtRequest(invalidDomainUsername, user.getPassword());
-        requestBody = mapper.writeValueAsString(request);
         // fail to log in
-        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")))
                 .andReturn();
@@ -123,15 +117,13 @@ public class UserAuthenticationTest extends BaseIntTest {
         user.setPassword(altPassword);
 
         // register test user
-        String requestBody = mapper.writeValueAsString(user);
-        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.createUserTraditional(mockMvc, user)
                 .andExpect(status().isAccepted())
                 .andReturn();
 
         JwtRequest request = new JwtRequest(altUsername, altPassword);
-        requestBody = mapper.writeValueAsString(request);
         // obtain token
-        result = AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        result = AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isOk())
                 .andReturn();
 

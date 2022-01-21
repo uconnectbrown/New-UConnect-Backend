@@ -1,5 +1,8 @@
 package com.uconnect.backend.helper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.uconnect.backend.security.jwt.model.JwtRequest;
+import com.uconnect.backend.user.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -10,7 +13,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class AuthenticationTestUtil {
-    public static ResultActions createUserTraditional(MockMvc mockMvc, String requestBody) throws Exception {
+    public static final ObjectMapper MAPPER = new ObjectMapper();
+
+    public static ResultActions createUserTraditional(MockMvc mockMvc, User user) throws Exception {
+        String requestBody = MAPPER.writeValueAsString(user);
+
         return mockMvc
                 .perform(MockMvcRequestBuilders
                         .post("/v1/user/signup/createNewUserTraditional")
@@ -19,7 +26,15 @@ public class AuthenticationTestUtil {
                         .accept(MediaType.APPLICATION_JSON));
     }
 
-    public static ResultActions loginTraditional(MockMvc mockMvc, String requestBody) throws Exception {
+    public static void createUserTraditionalSuccess(MockMvc mockMvc, User user) throws Exception {
+        createUserTraditional(mockMvc, user)
+                .andExpect(status().isAccepted())
+                .andReturn();
+    }
+
+    public static ResultActions loginTraditional(MockMvc mockMvc, JwtRequest request) throws Exception {
+        String requestBody = MAPPER.writeValueAsString(request);
+
         return mockMvc
                 .perform(MockMvcRequestBuilders
                         .post("/v1/user/authenticate/traditional")

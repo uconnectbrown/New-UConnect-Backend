@@ -178,18 +178,16 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertTrue(user.isVerified());
 
         JwtRequest request = new JwtRequest(validOAuthUsername, "");
-        String requestBody = mapper.writeValueAsString(request);
 
         // fail with empty password
-        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(
                         containsString("Password length must be between 8 and 32 characters (inclusive)")));
 
         // fail with random password
         request.setPassword("0u9gqa3wrhklnju_hrlk;JKTAWE1-0");
-        requestBody = mapper.writeValueAsString(request);
-        AuthenticationTestUtil.loginTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")));
     }
@@ -218,8 +216,7 @@ public class GoogleOAuthTest extends BaseIntTest {
                 .classYear("2021")
                 .build();
         // register user with username + pw
-        String requestBody = mapper.writeValueAsString(user);
-        AuthenticationTestUtil.createUserTraditional(mockMvc, requestBody)
+        AuthenticationTestUtil.createUserTraditional(mockMvc, user)
                 .andExpect(status().isAccepted())
                 .andReturn();
 

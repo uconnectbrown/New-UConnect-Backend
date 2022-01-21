@@ -1,90 +1,118 @@
-//package integration;
-//
-//import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.uconnect.backend.UConnectBackendApplication;
-//import com.uconnect.backend.awsadapter.DdbAdapter;
-//import com.uconnect.backend.helper.BaseIntTest;
-//import com.uconnect.backend.helper.MockData;
-//import com.uconnect.backend.helper.UserTestUtil;
-//import com.uconnect.backend.user.model.User;
-//import lombok.extern.slf4j.Slf4j;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Order;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.test.web.servlet.MockMvc;
-//
-//import static org.hamcrest.Matchers.containsString;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotEquals;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//
-//@SpringBootTest(classes = UConnectBackendApplication.class)
-//@AutoConfigureMockMvc
-//@Slf4j
-//public class EmailVerificationTest extends BaseIntTest {
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @Autowired
-//    private String userTableName;
-//
-//    @Autowired
-//    private String emailVerificationTableName;
-//
-//    @Autowired
-//    private DdbAdapter ddbAdapter;
-//
-//    @Autowired
-//    private ObjectMapper mapper;
-//
-//    @MockBean
-//    private AmazonSimpleEmailService sesClient;
-//
-//    private static User validUser;
-//
-//    private static boolean init = true;
-//
-//    @BeforeEach
-//    public void setup() {
-//        if (init) {
-//            // Populate test data
-//            ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class);
-//            validUser = MockData.generateValidUser();
-//
-//            init = false;
-//        }
-//    }
-//
-//    @Test
-//    @Order(1)
-//    public void testUserExists() throws Exception {
-//        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, true, ddbAdapter, userTableName);
-//
-//        String response = UserTestUtil.getUser(mockMvc, validUser.getUsername(), validUser.getUsername(), token)
-//                .andReturn().getResponse().getContentAsString();
-//
-//        User returnedUser = mapper.readValue(response, User.class);
-//        // make sure password is taken out
-//        assertNotEquals(validUser.getPassword(), returnedUser.getPassword());
-//        assertEquals(validUser.getUsername(), returnedUser.getUsername());
-//        assertEquals(validUser.getFirstName(), returnedUser.getFirstName());
-//        assertEquals(validUser.getLastName(), returnedUser.getLastName());
-//    }
-//
-//    @Test
-//    @Order(2)
-//    public void testUserNotFound() throws Exception {
-//        String invalidUsername = "no@exist.org";
-//
-//        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false, ddbAdapter, userTableName);
-//        UserTestUtil.getUser(mockMvc, validUser.getUsername(), invalidUsername, token)
-//                .andExpect(status().isNotFound())
-//                .andExpect(content().string(containsString("Requested user either does not exist or is not available at this time")));
-//    }
-//}
+package integration;
+
+import com.uconnect.backend.helper.AuthenticationTestUtil;
+import com.uconnect.backend.helper.BaseIntTest;
+import com.uconnect.backend.helper.MockData;
+import com.uconnect.backend.helper.UserTestUtil;
+import com.uconnect.backend.user.model.EmailVerification;
+import com.uconnect.backend.user.model.User;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+public class EmailVerificationTest extends BaseIntTest {
+
+    private static User validUser;
+
+    private static boolean init = true;
+
+    @BeforeEach
+    public void setup() {
+        if (init) {
+            // Populate test data
+            setupDdb();
+
+            init = false;
+        }
+        validUser = MockData.generateValidUser();
+    }
+
+    @Test
+    public void testVerificationSuccess() throws Exception {
+        AuthenticationTestUtil.createUserTraditionalSuccess(mockMvc, validUser);
+        assertEquals("notVerified", UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false,
+                ddbAdapter, userTableName));
+
+        // simulating email retrieval is too complicated, hack the db for verification code
+        EmailVerification codeModel = EmailVerification
+                .builder()
+                .emailAddress(validUser.getUsername())
+                .build();
+        codeModel = ddbAdapter
+                .query(emailVerificationTableName, codeModel, EmailVerification.class)
+                .get(0);
+
+        UserTestUtil.verifyUser(mockMvc, codeModel)
+                .andExpect(status().isAccepted());
+        // make sure entry is deleted
+        assertEquals(0, ddbAdapter.query(emailVerificationTableName, codeModel, EmailVerification.class).size());
+
+        // attempt to log in again, now the user should be verified
+        String token = UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false,
+                ddbAdapter, userTableName);
+        AuthenticationTestUtil.verifyAuthenticationSuccess(mockMvc, token, validUser.getUsername());
+    }
+
+    @Test
+    public void testFailureNoVerificationInProgress() throws Exception {
+        EmailVerification codeModel = EmailVerification
+                .builder()
+                .emailAddress(validUser.getUsername())
+                .verificationCode("antimatter")
+                .build();
+
+        // make sure entry does not exist
+        assertEquals(0, ddbAdapter.query(emailVerificationTableName, codeModel, EmailVerification.class).size());
+
+        UserTestUtil.verifyUser(mockMvc, codeModel)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(
+                        "Verification failed. Please contact us if this happens repeatedly")));
+    }
+
+    @Test
+    public void testFailureIncorrectCode() throws Exception {
+        testFailure("definitely not it");
+    }
+
+    @Test
+    public void testFailureNullCodeProvided() throws Exception {
+        testFailure(null);
+    }
+
+    @Test
+    public void testFailureEmptyCodeProvided() throws Exception {
+        testFailure("");
+    }
+
+    private void testFailure(String code) throws Exception {
+        AuthenticationTestUtil.createUserTraditionalSuccess(mockMvc, validUser);
+        assertEquals("notVerified", UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false,
+                ddbAdapter, userTableName));
+
+        EmailVerification codeModel = EmailVerification
+                .builder()
+                .emailAddress(validUser.getUsername())
+                .verificationCode(code)
+                .build();
+
+        // make sure entry exists
+        assertEquals(1, ddbAdapter.query(emailVerificationTableName, codeModel, EmailVerification.class).size());
+
+        UserTestUtil.verifyUser(mockMvc, codeModel)
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString(
+                        "Verification failed. Please contact us if this happens repeatedly")));
+
+        // make sure entry still exists
+        assertEquals(1, ddbAdapter.query(emailVerificationTableName, codeModel, EmailVerification.class).size());
+
+        // attempt to log in again, nothing should change
+        assertEquals("notVerified", UserTestUtil.getTokenForTraditionalUser(mockMvc, validUser, false,
+                ddbAdapter, userTableName));
+    }
+}

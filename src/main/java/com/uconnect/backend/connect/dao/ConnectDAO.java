@@ -97,14 +97,14 @@ public class ConnectDAO {
 
         // Remove receiver from sender's sent list
         if (!(sender.getSent().contains(receiverUsername))) {
-            return -1; // sender has already sent a request to receiver
+            return -1; // sender has never sent a request to receiver
         } else {
             sender.getSent().remove(receiverUsername);
         }
 
         // Remove sender from receiver's pending list
         if (!(receiver.getPending().contains(senderUsername))) {
-            return -2; // should not get here in theory
+            return -2; // receiver has never received a request from sender
         } else {
             receiver.getPending().remove(senderUsername);
         }
@@ -173,7 +173,7 @@ public class ConnectDAO {
         int requests = sender.getRequests();
         if (requests > 9) {
             log.info("User " + senderUsername + " has " + requests + " requests, which is more than the maximum");
-            return -3; // sender has too many requests (should not happen)
+            return -5; // sender has too many requests (should not happen)
         } else {
             sender.setRequests(++requests);
         }

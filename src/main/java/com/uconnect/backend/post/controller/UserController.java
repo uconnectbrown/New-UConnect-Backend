@@ -1,13 +1,12 @@
-package com.uconnect.backend.user.controller;
+package com.uconnect.backend.post.controller;
 
+import com.uconnect.backend.post.model.Post;
+import com.uconnect.backend.post.service.UserService;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
 import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
-import com.uconnect.backend.user.model.User;
-import com.uconnect.backend.user.model.UserCreationType;
-import com.uconnect.backend.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,12 +19,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuth
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -76,19 +70,19 @@ public class UserController {
      * - connections -- List<String>
      * - requests -- int
      *
-     * @param user The request deserialized into a User object after validation
+     * @param post The request deserialized into a User object after validation
      * @return An HTTP response
      */
     @PostMapping(value = "/v1/user/signup/createNewUserTraditional")
-    public ResponseEntity<String> createNewUser(@Valid @RequestBody User user) {
+    public ResponseEntity<String> createNewUser(@Valid @RequestBody Post post) {
         try {
-            String username = user.getUsername();
-            String rawPassword = user.getPassword();
+            String username = post.getUsername();
+            String rawPassword = post.getPassword();
 
-            user.setPassword(passwordEncoder.encode(rawPassword));
-            user.setCreationType(UserCreationType.TRADITIONAL);
+            post.setPassword(passwordEncoder.encode(rawPassword));
+            post.setCreationType(UserCreationType.TRADITIONAL);
 
-            int result = userService.createNewUser(user);
+            int result = userService.createNewUser(post);
 
             // TODO: Give user a default profile picture
 
@@ -246,10 +240,10 @@ public class UserController {
     }
 
     @PostMapping("/v1/user/{username}")
-    public ResponseEntity<User> getUser(@PathVariable String username) {
-        User foundUser = userService.loadUserByUsername(username);
-        foundUser.setPassword("");
+    public ResponseEntity<Post> getUser(@PathVariable String username) {
+        Post foundPost = userService.loadUserByUsername(username);
+        foundPost.setPassword("");
 
-        return ResponseEntity.status(HttpStatus.OK).body(foundUser);
+        return ResponseEntity.status(HttpStatus.OK).body(foundPost);
     }
 }

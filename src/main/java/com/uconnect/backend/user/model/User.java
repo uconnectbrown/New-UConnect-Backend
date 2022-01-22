@@ -74,6 +74,9 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private String pronouns;
 
+    @DynamoDBAttribute
+    private String profilePicture;
+
     @DynamoDBTypeConverted(converter = LocationConverter.class)
     @DynamoDBAttribute
     private Location location;
@@ -96,6 +99,12 @@ public class User implements UserDetails {
 
     @DynamoDBAttribute
     private int requests;
+
+    @DynamoDBAttribute
+    private Set<String> courses;
+
+    @DynamoDBAttribute
+    private Set<String> receivedRequests;
 
     @EqualsAndHashCode.Exclude
     @DynamoDBAttribute
@@ -129,4 +138,3 @@ public class User implements UserDetails {
         return true;
     }
 }
-

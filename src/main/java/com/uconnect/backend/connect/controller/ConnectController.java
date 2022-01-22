@@ -203,6 +203,10 @@ public class ConnectController {
                 msg = "No relation exists between " + currentUsername + " and " + otherUsername;
                 break;
             case -1:
+                status = HttpStatus.NOT_FOUND;
+                msg = "User not found";
+                break;
+            case -2:
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
                 msg = "Unexpected error";
                 break;

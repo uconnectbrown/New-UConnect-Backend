@@ -11,7 +11,7 @@ public class MockData {
     /**
      * Generate a single User with valid fields.
      *
-     * @return A randomly generated User with an @brown.edu username.
+     * @return A randomly generated User with an {@literal@}brown.edu username.
      */
     public static User generateValidUser() {
         String email = randomAlphanumeric(7) + "@brown.edu";

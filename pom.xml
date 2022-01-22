@@ -44,8 +44,8 @@
 
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
-            <version>1.12.138</version>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <version>1.12.141</version>
         </dependency>
 
         <dependency>

@@ -1,6 +1,7 @@
 package com.uconnect.backend.awsadapter;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.ConversionSchemas;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
@@ -19,16 +20,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @Slf4j
 public class DdbAdapter {
-    private String userTableName;
+    private final String userTableName;
 
-    private String emailIndexName;
+    private final String emailIndexName;
 
     private final AmazonDynamoDB ddbClient;
+
+    private final Map<String, DynamoDBMapper> mapperCache;
 
     private DynamoDBMapper mapper;
 
@@ -37,6 +42,7 @@ public class DdbAdapter {
         this.ddbClient = ddbClient;
         this.userTableName = userTableName;
         this.emailIndexName = emailIndexName;
+        mapperCache = new HashMap<>();
     }
 
     public boolean createTableIfNotExists(String tableName, Class<?> clazz, long rcu, long wcu) {
@@ -108,12 +114,19 @@ public class DdbAdapter {
     }
 
     private void setMapperTableName(String tableName) {
-        DynamoDBMapperConfig config = DynamoDBMapperConfig
-                .builder()
-                .withTableNameOverride(DynamoDBMapperConfig.TableNameOverride.withTableNameReplacement(tableName))
-                .build();
+        DynamoDBMapper cachedMapper = mapperCache.get(tableName);
+        if (cachedMapper == null) {
+            DynamoDBMapperConfig config = DynamoDBMapperConfig
+                    .builder()
+                    .withTableNameOverride(DynamoDBMapperConfig.TableNameOverride.withTableNameReplacement(tableName))
+                    .withConversionSchema(ConversionSchemas.V2)
+                    .build();
+            cachedMapper = new DynamoDBMapper(ddbClient, config);
 
-        mapper = new DynamoDBMapper(ddbClient, config);
+            mapperCache.put(tableName, cachedMapper);
+        }
+
+        mapper = cachedMapper;
     }
 
     public User findByUsername(String username) throws UserNotFoundException {

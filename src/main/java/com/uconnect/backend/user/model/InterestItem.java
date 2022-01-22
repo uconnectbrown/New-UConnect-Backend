@@ -11,10 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @DynamoDBDocument
-public class Location {
-    private String country;
-
-    private String state;
-
-    private String city;
+public class InterestItem {
+    private int index;
+    private String interest;
 }

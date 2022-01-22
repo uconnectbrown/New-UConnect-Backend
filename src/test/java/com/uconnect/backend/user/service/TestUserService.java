@@ -40,7 +40,7 @@ public class TestUserService extends BaseUnitTest {
     public void setup() {
         if (!init) {
             user = MockData.generateValidUser();
-            userService = new UserService(dao, jwtUtility, null);
+            userService = new UserService(dao, jwtUtility, null, null);
             pending = Collections.singleton(MockData.generateValidUser().getUsername());
             connections = Collections.singleton(MockData.generateValidUser().getUsername());
             user.setPending(pending);

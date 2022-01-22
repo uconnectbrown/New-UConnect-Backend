@@ -27,6 +27,9 @@ public class TestUserDAO extends BaseUnitTest {
     @Autowired
     private String userTableName;
 
+    @Autowired
+    private String emailVerificationTableName;
+
     @Mock
     private DdbAdapter ddbAdapter;
 
@@ -48,7 +51,7 @@ public class TestUserDAO extends BaseUnitTest {
             connections = Collections.singleton(MockData.generateValidUser().getUsername());
             user.setPending(pending);
             user.setConnections(connections);
-            dao = new UserDAO(ddbAdapter, userTableName);
+            dao = new UserDAO(ddbAdapter, userTableName, emailVerificationTableName);
         }
     }
 
@@ -83,12 +86,6 @@ public class TestUserDAO extends BaseUnitTest {
     public void testGetPasswordByUsername() throws UserNotFoundException {
         when(ddbAdapter.findByUsername(user.getUsername())).thenReturn(user);
         assertEquals(user.getPassword(), dao.getPasswordByUsername(user.getUsername()));
-    }
-
-    @Test
-    public void testSaveUser() {
-        dao.saveUser(user);
-        verify(ddbAdapter).save(userTableName, user);
     }
 
     @Test

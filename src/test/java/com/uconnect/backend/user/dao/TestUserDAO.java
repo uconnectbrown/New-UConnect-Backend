@@ -3,6 +3,7 @@ package com.uconnect.backend.user.dao;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class TestUserDAO extends BaseUnitTest {
     @Mock
     private DdbAdapter ddbAdapter;
 
-    private UserDAO dao;    
+    private UserDAO dao;
 
     private User user;
 
@@ -87,6 +88,7 @@ public class TestUserDAO extends BaseUnitTest {
     @Test
     public void testSaveUser() {
         dao.saveUser(user);
+        verify(ddbAdapter).save(userTableName, user);
     }
 
     @Test
@@ -103,7 +105,7 @@ public class TestUserDAO extends BaseUnitTest {
         assertEquals(-1, dao.deleteUser(user.getUsername()));
     }
 
-    // failure somewhere down the line
+    // deletion failure. user exists but ddbadapter/ddb failed to delete.
     @Test
     public void testDeleteFailure() throws UserNotFoundException {
         when(ddbAdapter.findByUsername(user.getUsername())).thenReturn(user);

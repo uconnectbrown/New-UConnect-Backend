@@ -100,27 +100,26 @@ public class TestCheckStatus extends BaseConnectControllerUnitTest {
         testCheckStatus(request, status().isOk(), msg);
     }
 
-    // TODO: add a test for when exception handler for usernotfound is added
-    // @Test
-    // public void testUserNotFound() throws Exception {
-    // when(connectService.checkStatus(current.getUsername(), other.getUsername()))
-    // .thenReturn(-4);
-    // String msg = "Operation unsuccessful: user not found";
-    // mockMvc
-    // .perform(MockMvcRequestBuilders
-    // .post("/v1/connect/checkStatus")
-    // .content(mapper.writeValueAsString(request))
-    // .contentType(MediaType.APPLICATION_JSON)
-    // .accept(MediaType.APPLICATION_JSON))
-    // .andExpect(status().isNotFound())
-    // .andExpect(content().string(msg))
-    // .andReturn();
-    // }
+    @Test
+    public void testUserNotFound() throws Exception {
+        when(connectService.checkStatus(current.getUsername(), other.getUsername()))
+                .thenReturn(-1);
+        String msg = "User not found";
+        mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/connect/checkStatus")
+                        .content(mapper.writeValueAsString(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(msg))
+                .andReturn();
+    }
 
     @Test
     public void testUnexpectedException() throws Exception {
         when(connectService.checkStatus(current.getUsername(), other.getUsername()))
-                .thenReturn(-1);
+                .thenReturn(-2);
         String msg = "Unexpected error";
         testCheckStatus(request, status().isInternalServerError(), msg);
     }

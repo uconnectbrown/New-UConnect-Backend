@@ -21,10 +21,10 @@ public class ConnectService {
     /**
      * Calls request() from ConnectDAO.
      * <p>
-     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot
-     * be found. Otherwise, returns the exit code of ConnectDAO.request().
+     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot be found.
+     * Otherwise, returns the exit code of ConnectDAO.request().
      *
-     * @param senderUsername   The username of the sender
+     * @param senderUsername The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
      */
@@ -43,10 +43,10 @@ public class ConnectService {
     /**
      * Calls undoRequest() from ConnectDAO.
      * <p>
-     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot
-     * be found. Otherwise, returns the exit code of ConnectDAO.undoRequest().
+     * Returns -5 if an unexpected exception occurs, and returns -4 if user cannot be found.
+     * Otherwise, returns the exit code of ConnectDAO.undoRequest().
      *
-     * @param senderUsername   The username of the sender
+     * @param senderUsername The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
      */
@@ -65,10 +65,10 @@ public class ConnectService {
     /**
      * Calls accept() from ConnectDAO.
      * <p>
-     * Returns -6 if an unexpected exception occurs. Otherwise, returns the
-     * exit code of ConnectDAO.accept().
+     * Returns -7 if an unexpected exception occurs, and returns -6 if a user cannot be found.
+     * Otherwise, returns the exit code of ConnectDAO.accept().
      * 
-     * @param senderUsername   The username of the sender
+     * @param senderUsername The username of the sender
      * @param receiverUsername The username of the receiver
      * @return An exit code
      */
@@ -87,19 +87,22 @@ public class ConnectService {
     /**
      * Calls checkStatus() from ConnectDAO.
      * <p>
-     * Returns -1 if an unexpected exception occurs. Otherwise, returns the
-     * exit code of ConnectDAO.checkStauts().
+     * Returns -1 if an unexpected exception occurs. Otherwise, returns the exit code of
+     * ConnectDAO.checkStauts().
      * 
      * @param currentUsername The username of the current user
-     * @param otherUsername   The username of the other user
+     * @param otherUsername The username of the other user
      * @return An exit code
      */
     public int checkStatus(String currentUsername, String otherUsername) {
         try {
             return dao.checkStatus(currentUsername, otherUsername);
+        } catch (UserNotFoundException e) {
+            log.error("user not found: {}", e);
+            return -1;
         } catch (Exception e) {
             log.error("Unexpected error: {}", e);
-            return -1;
+            return -2;
         }
     }
 }

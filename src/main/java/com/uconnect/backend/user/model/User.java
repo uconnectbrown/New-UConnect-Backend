@@ -7,29 +7,28 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperFieldModel.DynamoDBAttributeType;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverted;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.uconnect.backend.user.converters.LocationConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Digits;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @DynamoDBTable(tableName = "placeholder")
 public class User implements UserDetails {
@@ -43,6 +42,7 @@ public class User implements UserDetails {
     private UserCreationType creationType;
 
     // username = email
+    @EqualsAndHashCode.Include
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "emailIndex")
     @Email(message = "Email is not valid")
@@ -64,7 +64,7 @@ public class User implements UserDetails {
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYear")
-    @Size(min = 4, max = 4, message = "Class year must be between 1000 and 9999 (inclusive)")
+    @Digits(integer = 4, fraction = 1, message = "Class year must be a number with at most 4 integral digits and 1 fractional digit")
     private String classYear;
 
     // {concentration1, concentration2}
@@ -74,13 +74,46 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private String pronouns;
 
-    @DynamoDBTypeConverted(converter = LocationConverter.class)
+    @DynamoDBAttribute
+    private Date createdAt;
+
+    @DynamoDBAttribute
+    private String imageUrl;
+
+    @DynamoDBAttribute
+    @Size(max = 250, message = "User bio cannot be longer than 250 characters")
+    private String bio;
+
+    @DynamoDBAttribute
+    @Size(max = 20, message = "Greek life name cannot be longer than 20 characters")
+    private String greekLife;
+
     @DynamoDBAttribute
     private Location location;
 
-    // {interest1, interest2, interest3}
     @DynamoDBAttribute
-    private List<String> interests;
+    private List<InterestItem> interests1;
+
+    @DynamoDBAttribute
+    private List<InterestItem> interests2;
+
+    @DynamoDBAttribute
+    private List<InterestItem> interests3;
+
+    @DynamoDBAttribute
+    private Set<Course> courses;
+
+    @DynamoDBAttribute
+    private Set<String> groups;
+
+    @DynamoDBAttribute
+    private Set<String> pickupSports;
+
+    @DynamoDBAttribute
+    private Set<String> varsitySports;
+
+    @DynamoDBAttribute
+    private Set<String> instruments;
 
     // list of usernames (emails)
     @DynamoDBAttribute
@@ -97,11 +130,16 @@ public class User implements UserDetails {
     @DynamoDBAttribute
     private int requests;
 
+    @DynamoDBAttribute
+    private Set<String> receivedRequests;
+
     // no validation needed, always manually set to false for new users
     @DynamoDBAttribute
     private boolean isVerified;
 
-    @EqualsAndHashCode.Exclude
+    @DynamoDBAttribute
+    private boolean isProfileCompleted;
+
     @DynamoDBAttribute
     private List<? extends GrantedAuthority> authorities;
 

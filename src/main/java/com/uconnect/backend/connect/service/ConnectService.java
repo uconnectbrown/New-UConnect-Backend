@@ -87,8 +87,8 @@ public class ConnectService {
     /**
      * Calls checkStatus() from ConnectDAO.
      * <p>
-     * Returns -1 if an unexpected exception occurs. Otherwise, returns the exit code of
-     * ConnectDAO.checkStauts().
+     * Returns -2 if an unexpected exception occurs, and returns -1 if a user cannot
+     * be found. Otherwise, returns the exit code of ConnectDAO.checkStatus().
      * 
      * @param currentUsername The username of the current user
      * @param otherUsername The username of the other user

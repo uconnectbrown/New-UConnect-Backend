@@ -31,6 +31,9 @@ public class DbTableProperties {
     // counter table
     private String counter;
 
+    // course table
+    private String course;
+
     @Bean(name = "userTableName")
     public String getUserTableName() {
         return user;
@@ -89,5 +92,10 @@ public class DbTableProperties {
     @Bean(name = "counterTableName")
     public String getCounter() {
         return counter;
+    }
+
+    @Bean(name = "courseTableName")
+    public String getCourseTableName() {
+        return course;
     }
 }

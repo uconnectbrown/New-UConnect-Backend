@@ -17,6 +17,7 @@ db-table-name:
   eventBoardIndexIndex: "indexIndex"
   eventBoardTitleIndex: "titleIndex"
   counter: "prod-counter"
+  course: "prod-userCourse"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

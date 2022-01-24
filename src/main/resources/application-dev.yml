@@ -5,7 +5,7 @@ db-setting:
   localdbport: 8000
 
 db-table-name:
-  user: FIX-ME
+  user: "dev-userInfo"
   emailIndex: 'emailIndex'
   emailVerification: "dev-emailVerification"
   eventBoardEventHidden: "dev-eventBoardEvent-hidden"
@@ -17,6 +17,7 @@ db-table-name:
   eventBoardIndexIndex: "indexIndex"
   eventBoardTitleIndex: "titleIndex"
   counter: "dev-counter"
+  course: "dev-userCourse"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

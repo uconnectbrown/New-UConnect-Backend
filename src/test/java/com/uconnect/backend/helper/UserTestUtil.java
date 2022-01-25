@@ -45,8 +45,26 @@ public class UserTestUtil {
                         .accept(MediaType.APPLICATION_JSON));
     }
 
+    public static User getUserModel(MockMvc mockMvc, String requestUsername, String queryUsername, String token) throws Exception {
+        String response = getUser(mockMvc, requestUsername, queryUsername, token)
+                .andReturn().getResponse().getContentAsString();
+        return MAPPER.readValue(response, User.class);
+    }
+
+    public static ResultActions updateUser(MockMvc mockMvc, String requestSenderUsername, User newRecord, String token)
+            throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .post("/v1/user/updateUser")
+                        .header("Username", requestSenderUsername)
+                        .header("Authorization", String.format("%s %s", "Bearer", token))
+                        .content(MAPPER.writeValueAsString(newRecord))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+    }
+
     /**
-     * Directly modify the database to verify a user. User with caution!
+     * Directly modify the database to verify a user. Use with caution!
      *
      * @param ddbAdapter
      * @param username

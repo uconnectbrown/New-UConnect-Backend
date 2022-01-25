@@ -88,25 +88,23 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    // TODO: Redesign updateUser API @Jake
-    // /**
-    //  * Updates an existing user.
-    //  * <p>
-    //  * Returns -2 in case of unexpected exception.
-    //  * 
-    //  * @param username    The username of the user to update
-    //  * @param rawPassword The raw password of the user to update
-    //  * @param user        The user to update
-    //  * @return An exit code
-    //  */
-    // public int updateUser(String username, String rawPassword, User user) {
-    //     try {
-    //         return dao.updateUser(username, rawPassword, user);
-    //     } catch (Exception e) {
-    //         log.error("Unexpected exception while updating existing user " + username + ": {}", e);
-    //         return -2;
-    //     }
-    // }
+    public void updateUser(User newRecord) throws UserNotFoundException {
+        // bubble up exception if user not found
+        User oldRecord = dao.getUserByUsername(newRecord.getUsername());
+
+        // these fields cannot be modified by users, setting to null retains the old value
+        newRecord.setId(oldRecord.getId());
+        newRecord.setAuthorities(null);
+        newRecord.setVerified(oldRecord.isVerified());
+        newRecord.setCreationType(null);
+        newRecord.setProfileCompleted(oldRecord.isProfileCompleted());
+        newRecord.setCreatedAt(null);
+        if (UserCreationType.O_AUTH.equals(oldRecord.getCreationType())) {
+            newRecord.setPassword(null);
+        }
+
+        dao.saveUser(newRecord);
+    }
 
     /**
      * Deletes a user.

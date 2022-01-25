@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.Set;
 
 @Slf4j
@@ -88,9 +89,15 @@ public class UserController {
 
         userService.authorizeEmailDomain(username);
 
+        if (rawPassword == null) {
+            return new ResponseEntity<>(
+                    "Failed to create a new account for " + username + ", password cannot be null",
+                    HttpStatus.BAD_REQUEST);
+        }
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setCreationType(UserCreationType.TRADITIONAL);
         user.setVerified(false);
+        user.setCreatedAt(new Date());
 
         int result = userService.createNewUser(user);
 
@@ -152,33 +159,18 @@ public class UserController {
         return new OAuthJwtResponse(token, authenticatedUsername);
     }
 
-    // TODO: Redesign updateUser API @Jake
-    // @PostMapping("/v1/user/updateUser")
-    // public ResponseEntity<String> updateUser(@Valid @RequestBody User user) {
-    // String username = user.getUsername();
-    // String rawPassword = user.getPassword();
+    @PostMapping("/v1/user/updateUser")
+    public ResponseEntity<String> updateUser(@Valid @RequestBody User user) throws UserNotFoundException {
+        String username = user.getUsername();
+        requestPermissionUtility.authorizeUser(username);
 
-    // int result = userService.createNewUser(username, rawPassword, user);
+        if (user.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+        userService.updateUser(user);
 
-    // switch (result) {
-    // case 0:
-    // return new ResponseEntity<>("Successfully updated user " + username,
-    // HttpStatus.ACCEPTED);
-    // case -1:
-    // return new ResponseEntity<>(
-    // "Failed to update details for " + username + ", USERNAME/EMAIL does not
-    // exist",
-    // HttpStatus.BAD_REQUEST);
-    // case -2:
-    // return new ResponseEntity<>("Unexpected exception occurred when updating
-    // details for " + username,
-    // HttpStatus.INTERNAL_SERVER_ERROR);
-    // default:
-    // return new ResponseEntity<>("should not see this response, call your mother
-    // for me if you do",
-    // HttpStatus.I_AM_A_TEAPOT);
-    // }
-    // }
+        return ResponseEntity.ok(String.format("Successfully updated user %s", username));
+    }
 
     @PostMapping("/api/userControl/deleteUser")
     public ResponseEntity<String> deleteUser(@RequestHeader(name = "Username") String username) {

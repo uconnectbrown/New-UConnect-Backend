@@ -118,6 +118,7 @@ public class DdbAdapter {
                     .builder()
                     .withTableNameOverride(DynamoDBMapperConfig.TableNameOverride.withTableNameReplacement(tableName))
                     .withConversionSchema(ConversionSchemas.V2)
+                    .withSaveBehavior(DynamoDBMapperConfig.SaveBehavior.UPDATE_SKIP_NULL_ATTRIBUTES)
                     .build();
             cachedMapper = new DynamoDBMapper(ddbClient, config);
 

@@ -107,7 +107,7 @@ public class User implements UserDetails {
     private Set<String> groups;
 
     @DynamoDBAttribute
-    private Set<String> pickupSports;
+    private Set<String> pickUpSports;
 
     @DynamoDBAttribute
     private Set<String> varsitySports;

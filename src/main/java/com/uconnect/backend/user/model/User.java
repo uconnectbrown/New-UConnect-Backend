@@ -9,12 +9,12 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperFieldModel.D
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTyped;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uconnect.backend.security.authority.UserAuthority;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Digits;
@@ -141,7 +141,7 @@ public class User implements UserDetails {
     private boolean isProfileCompleted;
 
     @DynamoDBAttribute
-    private List<? extends GrantedAuthority> authorities;
+    private List<UserAuthority> authorities;
 
     @Override
     @JsonIgnore

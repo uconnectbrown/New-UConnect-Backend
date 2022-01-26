@@ -138,12 +138,16 @@ public class UserService implements UserDetailsService {
     }
 
     public String generateTraditionalJWT(String username) {
-
         final User user = loadUserByUsername(username);
+
+        if (!UserCreationType.TRADITIONAL.equals(user.getCreationType())) {
+            throw new UnmatchedUserCreationTypeException(UserCreationType.TRADITIONAL);
+        }
 
         if (!user.isVerified()) {
             return "notVerified";
         }
+
         return jwtUtility.generateToken(user);
     }
 

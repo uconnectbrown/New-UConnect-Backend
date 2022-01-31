@@ -190,6 +190,12 @@ public class GoogleOAuthTest extends BaseIntTest {
         AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")));
+
+        // fail with null password
+        request.setPassword(null);
+        AuthenticationTestUtil.loginTraditional(mockMvc, request)
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(containsString("Invalid credentials / Account disabled / Account locked")));
     }
 
     @Test

@@ -3,7 +3,7 @@ package com.uconnect.backend.search.controller;
 import java.util.Set;
 import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.search.service.SearchService;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class SearchController {
     }
 
     /**
-     * Gets the students in a course.
+     * Gets the students in acourse.
      * <p>
      * Responses:
      * <ul>
@@ -41,7 +41,8 @@ public class SearchController {
      * @return a set of student usernames
      */ 
     @GetMapping("/v1/search/getStudents")
-    public ResponseEntity<Set<String>> getStudents(@RequestHeader(name = "Course") String name) {
+    public ResponseEntity<Set<String>> getStudents(@RequestHeader(name = "Course") String name, @RequestHeader(name = "Username") String username) {
+        requestPermissionUtility.authorizeUser(username);
         try {
             Set<String> students = searchService.getStudents(name);
             return new ResponseEntity<>(students, HttpStatus.OK);

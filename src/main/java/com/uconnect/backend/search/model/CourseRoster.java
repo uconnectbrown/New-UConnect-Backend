@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
-@DynamoDBTable(tableName = "placeholder")
+@DynamoDBTable(tableName = "course-placeholder")
 public class CourseRoster {
     @DynamoDBHashKey
     private String name;

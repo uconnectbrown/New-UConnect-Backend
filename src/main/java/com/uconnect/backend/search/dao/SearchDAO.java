@@ -13,11 +13,14 @@ public class SearchDAO {
 
     private final DdbAdapter ddbAdapter;
 
+    private final String userTableName;
+
     private final String courseTableName;
 
     @Autowired
     public SearchDAO(DdbAdapter ddbAdapter, String userTableName, String courseTableName) {
         this.ddbAdapter = ddbAdapter;
+        this.userTableName = userTableName;
         this.courseTableName = courseTableName;
     }
 
@@ -32,7 +35,7 @@ public class SearchDAO {
         return res.get(0);
     }
 
-    public Set<String> getStudents(String name) throws CourseNotFoundException {
+    public Set<String> getStudentsByCourse(String name) throws CourseNotFoundException {
         CourseRoster course = findCourseRosterByName(name);
         return course.getStudents();
     }

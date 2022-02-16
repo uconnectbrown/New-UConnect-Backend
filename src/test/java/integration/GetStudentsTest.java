@@ -27,7 +27,7 @@ public class GetStudentsTest extends BaseIntTest {
 
     private User validUser = MockData.generateValidUser();
 
-    private boolean init = true;
+    private static boolean init = true;
 
     @BeforeEach
     public void setup() {
@@ -52,8 +52,7 @@ public class GetStudentsTest extends BaseIntTest {
 
         return mockMvc
                 .perform(MockMvcRequestBuilders
-                        .get("/v1/search/getStudents")
-                        .header("Course", course)
+                        .get(String.format("/v1/search/getStudentsByCourse/%s", course))
                         .header("Authorization", String.format("Bearer %s", token))
                         .header("Username", validUser.getUsername())
                         .contentType(MediaType.APPLICATION_JSON)

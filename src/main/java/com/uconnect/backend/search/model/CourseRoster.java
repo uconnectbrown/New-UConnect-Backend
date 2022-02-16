@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @DynamoDBTable(tableName = "course-placeholder")
 public class CourseRoster {
+    @EqualsAndHashCode.Include
     @DynamoDBHashKey
     private String name;
     

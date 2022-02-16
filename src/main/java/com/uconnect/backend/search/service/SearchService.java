@@ -16,7 +16,7 @@ public class SearchService {
         this.dao = dao;
     }
     
-    public Set<String> getStudents(String name) throws CourseNotFoundException {
-        return dao.getStudents(name);
+    public Set<String> getStudentsByCourse(String name) throws CourseNotFoundException {
+        return dao.getStudentsByCourse(name);
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class SearchController {
     }
 
     /**
-     * Gets the students in acourse.
+     * Gets the students in a course.
      * <p>
      * Responses:
      * <ul>
@@ -40,11 +40,11 @@ public class SearchController {
      * @param name the name of the course
      * @return a set of student usernames
      */ 
-    @GetMapping("/v1/search/getStudents")
-    public ResponseEntity<Set<String>> getStudents(@RequestHeader(name = "Course") String name, @RequestHeader(name = "Username") String username) {
-        requestPermissionUtility.authorizeUser(username);
+    @GetMapping("/v1/search/getStudentsByCourse/{name}")
+    public ResponseEntity<Set<String>> getStudentsByCourse(@PathVariable("name") String name) {
+        log.info("Received a query for students in course: %s", name);
         try {
-            Set<String> students = searchService.getStudents(name);
+            Set<String> students = searchService.getStudentsByCourse(name);
             return new ResponseEntity<>(students, HttpStatus.OK);
         } catch (CourseNotFoundException e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

@@ -1,7 +1,7 @@
 package com.uconnect.backend.security.util;
 
 import com.uconnect.backend.exception.UnauthorizedUserRequestException;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.user.model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

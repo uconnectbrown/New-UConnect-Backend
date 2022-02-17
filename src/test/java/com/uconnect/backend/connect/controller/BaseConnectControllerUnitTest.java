@@ -2,7 +2,7 @@ package com.uconnect.backend.connect.controller;
 
 import com.uconnect.backend.connect.service.ConnectService;
 import com.uconnect.backend.helper.BaseUnitTest;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.user.service.UserService;
 
 import org.springframework.boot.test.mock.mockito.MockBean;

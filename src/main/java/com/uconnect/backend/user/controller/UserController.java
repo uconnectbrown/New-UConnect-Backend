@@ -4,7 +4,7 @@ import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;

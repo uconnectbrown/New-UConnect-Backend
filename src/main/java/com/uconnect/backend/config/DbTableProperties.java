@@ -9,11 +9,26 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Setter
 public class DbTableProperties {
+    // user table
     private String user;
-
+    // user table index
     private String emailIndex;
 
+    // email verification table
     private String emailVerification;
+
+    // event board tables
+    private String eventBoardEventHidden;
+    private String eventBoardEventPublished;
+    private String eventBoardCommentHidden;
+    private String eventBoardCommentPublished;
+    // event board indices (names shared by hidden and published tables)
+    private String eventBoardAuthorIndex;
+    private String eventBoardHostIndex;
+    private String eventBoardIndexIndex;
+
+    // counter table
+    private String counter;
 
     @Bean(name = "userTableName")
     public String getUserTableName() {
@@ -28,5 +43,45 @@ public class DbTableProperties {
     @Bean(name = "emailVerificationTableName")
     public String getEmailVerificationTableName() {
         return emailVerification;
+    }
+
+    @Bean(name = "eventBoardEventHiddenTableName")
+    public String getEventBoardEventHidden() {
+        return eventBoardEventHidden;
+    }
+
+    @Bean(name = "eventBoardEventPublishedTableName")
+    public String getEventBoardEventPublished() {
+        return eventBoardEventPublished;
+    }
+
+    @Bean(name = "eventBoardCommentHiddenTableName")
+    public String getEventBoardCommentHidden() {
+        return eventBoardCommentHidden;
+    }
+
+    @Bean(name = "eventBoardCommentPublishedTableName")
+    public String getEventBoardCommentPublished() {
+        return eventBoardCommentPublished;
+    }
+
+    @Bean(name = "eventBoardAuthorIndexName")
+    public String getEventBoardAuthorIndex() {
+        return eventBoardAuthorIndex;
+    }
+
+    @Bean(name = "eventBoardHostIndexName")
+    public String getEventBoardHostIndex() {
+        return eventBoardHostIndex;
+    }
+
+    @Bean(name = "eventBoardIndexIndexName")
+    public String getEventBoardIndexIndex() {
+        return eventBoardIndexIndex;
+    }
+
+    @Bean(name = "counterTableName")
+    public String getCounter() {
+        return counter;
     }
 }

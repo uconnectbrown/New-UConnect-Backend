@@ -57,6 +57,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/v1/user/authenticate/**");
         web.ignoring().antMatchers("/v1/user/signup/**");
+        web.ignoring().antMatchers("/v1/event-board/anonymous/**");
     }
 
     @Override

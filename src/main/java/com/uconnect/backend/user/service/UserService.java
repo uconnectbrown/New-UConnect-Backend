@@ -70,7 +70,7 @@ public class UserService implements UserDetailsService {
      * @param user A user object to populate the remainder of the user's data
      * @return An exit code
      */
-    public int createNewUser(User user) {
+    public synchronized int createNewUser(User user) {
         try {
             String username = user.getUsername();
             dao.getUserByUsername(username);

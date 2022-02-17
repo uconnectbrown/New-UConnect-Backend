@@ -8,6 +8,14 @@ db-table-name:
   user: FIX-ME
   emailIndex: 'emailIndex'
   emailVerification: "dev-emailVerification"
+  eventBoardEventHidden: "dev-eventBoardEvent-hidden"
+  eventBoardCommentHidden: "dev-eventBoardComment-hidden"
+  eventBoardEventPublished: "dev-eventBoardEvent-hidden"
+  eventBoardCommentPublished: "dev-eventBoardComment-published"
+  eventBoardAuthorIndex: "authorIndex"
+  eventBoardHostIndex: "hostIndex"
+  eventBoardIndexIndex: "indexIndex"
+  counter: "dev-counter"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.ScanResultPage;
 import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
@@ -92,6 +93,18 @@ public class DdbAdapter {
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
 
         return mapper.scan(clazz, scanExpression);
+    }
+
+    public <T> List<T> scan(String tableName, DynamoDBScanExpression scanExpression, Class<T> clazz) {
+        setMapperTableName(tableName);
+
+        return mapper.scan(clazz, scanExpression);
+    }
+
+    public <T> ScanResultPage<T> scanPage(String tableName, DynamoDBScanExpression scanExpression, Class<T> clazz) {
+        setMapperTableName(tableName);
+
+        return mapper.scanPage(clazz, scanExpression);
     }
 
     public <T> List<T> query(String tableName, T item, Class<T> clazz) {

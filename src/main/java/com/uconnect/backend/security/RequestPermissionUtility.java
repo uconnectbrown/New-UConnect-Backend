@@ -1,4 +1,4 @@
-package com.uconnect.backend.security.jwt.util;
+package com.uconnect.backend.security;
 
 import com.uconnect.backend.exception.UnauthorizedUserRequestException;
 import com.uconnect.backend.user.model.User;

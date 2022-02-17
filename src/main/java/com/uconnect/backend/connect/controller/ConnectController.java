@@ -1,7 +1,7 @@
 package com.uconnect.backend.connect.controller;
 
 import com.uconnect.backend.connect.service.ConnectService;
-import com.uconnect.backend.security.jwt.util.RequestPermissionUtility;
+import com.uconnect.backend.security.RequestPermissionUtility;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

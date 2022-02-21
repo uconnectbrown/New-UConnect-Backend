@@ -1,16 +1,22 @@
 package com.uconnect.backend.postingboard.service;
 
+import com.uconnect.backend.exception.EventBoardEventNotFoundException;
 import com.uconnect.backend.postingboard.dao.CounterDAO;
 import com.uconnect.backend.postingboard.dao.EventBoardDAO;
 import com.uconnect.backend.postingboard.model.Event;
+import com.uconnect.backend.postingboard.model.GetEventResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class EventBoardService {
 
     private static final String ANONYMOUS_AUTHOR = "Anonymous Author";
     private static final String ANONYMOUS_HOST = "Anonymous Host";
+    private static final int MAX_SCAN_COUNT = 50;
 
     private final EventBoardDAO eventBoardDAO;
 
@@ -37,5 +43,30 @@ public class EventBoardService {
         event.setIndex(index);
 
         eventBoardDAO.savePublishedEvent(event);
+    }
+
+    public Event getPublishedEventByIndex(long index) throws EventBoardEventNotFoundException {
+        return eventBoardDAO.getPublishedEventByIndex(index);
+    }
+
+    public GetEventResponse getLatestPublishedEvents(long startIndex, int eventCount) {
+        eventCount = Math.min(eventCount, MAX_SCAN_COUNT);
+        if (startIndex < 1) {
+            startIndex = Long.MAX_VALUE;
+        }
+        startIndex = Math.min(startIndex, counterDAO.getNextEventBoardIndex() - 1);
+        List<Event> acc = new ArrayList<>(eventCount);
+
+        while (startIndex >= 0 && acc.size() < eventCount) {
+            try {
+                Event result = eventBoardDAO.getPublishedEventByIndex(startIndex);
+                acc.add(result);
+            } catch (EventBoardEventNotFoundException ignored) {
+            }
+
+            --startIndex;
+        }
+
+        return new GetEventResponse(acc, startIndex);
     }
 }

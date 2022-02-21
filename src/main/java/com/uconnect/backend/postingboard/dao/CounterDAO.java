@@ -27,6 +27,10 @@ public class CounterDAO {
         return doIncrement(EVENT_BOARD_INDEX_NAME);
     }
 
+    public long getNextEventBoardIndex() {
+        return getNextCounterValue(EVENT_BOARD_INDEX_NAME);
+    }
+
     private void initCounter(String counterName) {
         Counter indexCounter = Counter.builder()
                 .name(counterName)
@@ -38,20 +42,30 @@ public class CounterDAO {
     }
 
     private long doIncrement(String counterName) {
-        Counter counter = Counter.builder()
-                .name(counterName)
-                .build();
+        Counter counter = new Counter();
+        counter.setName(counterName);
+
+        long currCount = getNextCounterValue(counterName);
+
+        counter.setValue(++currCount);
+        ddbAdapter.save(counterTableName, counter);
+
+        return currCount;
+    }
+
+    private long getNextCounterValue(String counterName) {
+        Counter counter = new Counter();
+        counter.setName(counterName);
         List<Counter> counterList = ddbAdapter.query(counterTableName, counter, Counter.class);
 
         if (counterList.isEmpty()) {
             log.warn("{} does not exist in the counter table, initializing to default value (0)", counterName);
             initCounter(counterName);
+
+            counter.setValue(0);
+            counterList.add(counter);
         }
 
-        long currCount = counterList.get(0).getValue();
-        counter.setValue(++currCount);
-        ddbAdapter.save(counterTableName, counter);
-
-        return currCount;
+        return counterList.get(0).getValue();
     }
 }

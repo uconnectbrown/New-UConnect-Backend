@@ -1,14 +1,19 @@
 package com.uconnect.backend.postingboard.controller;
 
+import com.uconnect.backend.exception.EventBoardEventNotFoundException;
 import com.uconnect.backend.postingboard.model.Event;
+import com.uconnect.backend.postingboard.model.GetEventRequest;
+import com.uconnect.backend.postingboard.model.GetEventResponse;
 import com.uconnect.backend.postingboard.service.EventBoardService;
 import com.uconnect.backend.security.RequestPermissionUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
@@ -28,19 +33,30 @@ public class EventBoardController {
         this.requestPermissionUtility = requestPermissionUtility;
     }
 
-    @PostMapping("/anonymous/new/event")
+    @PostMapping("/anonymous/event/new")
     public ResponseEntity<String> createNewAnonymousEvent(@Valid @RequestBody Event event) {
         eventBoardService.saveAnonymousEvent(event);
 
         return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");
     }
 
-    @PostMapping("/verified/new/event")
+    @PostMapping("/verified/event/new")
     public ResponseEntity<String> createNewVerifiedEvent(@Valid @RequestBody Event event) {
         requestPermissionUtility.authorizeUser(event.getAuthor());
 
         eventBoardService.saveVerifiedEvent(event);
 
-        return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");
+        return ResponseEntity.ok("Verified event submitted. You should see it live in just a moment.");
+    }
+
+    // letting unauthenticated users see all events for now, change to /verified to tighten up control
+    @GetMapping("/anonymous/event/get")
+    public Event getEventByIndex(@RequestParam long index) throws EventBoardEventNotFoundException {
+        return eventBoardService.getPublishedEventByIndex(index);
+    }
+
+    @PostMapping("/anonymous/event/get-latest")
+    public GetEventResponse getLatestPublishedEvents(@RequestBody GetEventRequest request) {
+        return eventBoardService.getLatestPublishedEvents(request.getStartIndex(), request.getEventCount());
     }
 }

@@ -86,4 +86,10 @@ public class ExceptionHandlers {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 String.format("%s: %s", e.getMessage(), e.getEmailAddress()));
     }
+
+    @ExceptionHandler(EventBoardEventNotFoundException.class)
+    public ResponseEntity<String> handleEventBoardEventNotFoundException(EventBoardEventNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                String.format("Event with this index does not exist: %s", e.getIndex()));
+    }
 }

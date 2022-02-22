@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetEventResponse {
+public class GetEventsResponse {
     private List<Event> events;
 
     private long lastQueriedIndex;

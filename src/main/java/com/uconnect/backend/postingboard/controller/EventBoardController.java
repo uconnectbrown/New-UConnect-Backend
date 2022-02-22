@@ -2,8 +2,8 @@ package com.uconnect.backend.postingboard.controller;
 
 import com.uconnect.backend.exception.EventBoardEventNotFoundException;
 import com.uconnect.backend.postingboard.model.Event;
-import com.uconnect.backend.postingboard.model.GetEventRequest;
-import com.uconnect.backend.postingboard.model.GetEventResponse;
+import com.uconnect.backend.postingboard.model.GetEventsRequest;
+import com.uconnect.backend.postingboard.model.GetEventsResponse;
 import com.uconnect.backend.postingboard.service.EventBoardService;
 import com.uconnect.backend.security.RequestPermissionUtility;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class EventBoardController {
     }
 
     @PostMapping("/anonymous/event/get-latest")
-    public GetEventResponse getLatestPublishedEvents(@RequestBody GetEventRequest request) {
+    public GetEventsResponse getLatestPublishedEvents(@RequestBody GetEventsRequest request) {
         return eventBoardService.getLatestPublishedEvents(request.getStartIndex(), request.getEventCount());
     }
 }

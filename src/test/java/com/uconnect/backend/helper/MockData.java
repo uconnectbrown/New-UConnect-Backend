@@ -27,10 +27,10 @@ public class MockData {
 
     public static Event generateValidEventBoardEvent() {
         return Event.builder()
-                .description(RandomStringUtils.random(100))
+                .description(RandomStringUtils.randomAlphanumeric(100))
                 .timestamp(new Date())
                 .startTime(new Date(new Date().getTime() + 5000))
-                .title(RandomStringUtils.random(25))
+                .title(RandomStringUtils.randomAlphanumeric(25))
                 .build();
     }
 }

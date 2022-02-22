@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // if anyone finds this in the future and tries to optimize: these tests are NOT thread-safe, do not run them in parallel
-public class EventBoardTest extends BaseIntTest {
+public class EventBoardSubmitTest extends BaseIntTest {
 
     private static User verifiedUser;
 
@@ -146,7 +146,7 @@ public class EventBoardTest extends BaseIntTest {
         Event firstEvent = events.get(0);
         for (int i = 1; i < numDupEvents; i++) {
             Event currEvent = events.get(i);
-            verifySameEvents(firstEvent, currEvent);
+            EventBoardTestUtil.verifySameEvents(firstEvent, currEvent);
             assertEquals(firstEvent.getIndex() + i, currEvent.getIndex());
         }
     }
@@ -199,7 +199,7 @@ public class EventBoardTest extends BaseIntTest {
         event.setHost(EventBoardService.ANONYMOUS_HOST);
         event.setIndex(-1);
         event.setAnonymous(true);
-        verifySameEvents(event, actualEvent);
+        EventBoardTestUtil.verifySameEvents(event, actualEvent);
 
         return actualEvent;
     }
@@ -212,20 +212,9 @@ public class EventBoardTest extends BaseIntTest {
         assertFalse(actualEvent.isAnonymous());
         event.setIndex(getNextEventIndex() - 1);
         event.setAnonymous(false);
-        verifySameEvents(event, actualEvent);
+        EventBoardTestUtil.verifySameEvents(event, actualEvent);
 
         return actualEvent;
-    }
-
-    private void verifySameEvents(Event e1, Event e2) {
-        assertEquals(e1.getTitle(), e2.getTitle());
-        assertEquals(e1.getAuthor(), e2.getAuthor());
-        assertEquals(e1.getHost(), e2.getHost());
-        assertEquals(e1.getDescription(), e2.getDescription());
-        // ignore last three digits due to time precision
-        assertEquals(e1.getTimestamp().getTime() / 1000, e2.getTimestamp().getTime() / 1000);
-        assertEquals(e1.getStartTime(), e2.getStartTime());
-        assertEquals(e1.isAnonymous(), e2.isAnonymous());
     }
 
     private long getNextEventIndex() {

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetEventRequest {
+public class GetEventsRequest {
     private long startIndex;
 
     private int eventCount;

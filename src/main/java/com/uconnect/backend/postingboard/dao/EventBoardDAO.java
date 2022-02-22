@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 @Slf4j
 public class EventBoardDAO {
@@ -51,11 +53,18 @@ public class EventBoardDAO {
 
     public Event getPublishedEventByIndex(long index) throws EventBoardEventNotFoundException {
         Event event = Event.builder().index(index).build();
-        for (Event e : ddbAdapter.queryGSI(eventPublishedTableName, indexIndexName, event, Event.class)) {
-            return e;
+        List<Event> eventList = ddbAdapter.queryGSI(eventPublishedTableName, indexIndexName, event, Event.class);
+
+        if (eventList.isEmpty()) {
+            log.info("Event with index {} queried but not found", index);
+            throw new EventBoardEventNotFoundException("Event does not exist", index);
         }
 
-        log.info("Event with index {} queried but not found", index);
-        throw new EventBoardEventNotFoundException("Event does not exist", index);
+        // TODO: add alarm here if there are multiple items mapped to the same index
+        if (eventList.size() > 1) {
+            log.error("Multiple event board posts are mapped to the same index. This is bad, correct it ASAP. Index: {}", index);
+        }
+
+        return eventList.get(0);
     }
 }

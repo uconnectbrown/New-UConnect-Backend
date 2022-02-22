@@ -10,7 +10,7 @@ db-table-name:
   emailVerification: "prod-emailVerification"
   eventBoardEventHidden: "prod-eventBoardEvent-hidden"
   eventBoardCommentHidden: "prod-eventBoardComment-hidden"
-  eventBoardEventPublished: "prod-eventBoardEvent-hidden"
+  eventBoardEventPublished: "prod-eventBoardEvent-published"
   eventBoardCommentPublished: "prod-eventBoardComment-published"
   eventBoardAuthorIndex: "authorIndex"
   eventBoardHostIndex: "hostIndex"

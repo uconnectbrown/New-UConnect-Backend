@@ -26,6 +26,7 @@ public class DbTableProperties {
     private String eventBoardAuthorIndex;
     private String eventBoardHostIndex;
     private String eventBoardIndexIndex;
+    private String eventBoardTitleIndex;
 
     // counter table
     private String counter;
@@ -78,6 +79,11 @@ public class DbTableProperties {
     @Bean(name = "eventBoardIndexIndexName")
     public String getEventBoardIndexIndex() {
         return eventBoardIndexIndex;
+    }
+
+    @Bean(name = "eventBoardTitleIndexName")
+    public String getEventBoardTitleIndex() {
+        return eventBoardTitleIndex;
     }
 
     @Bean(name = "counterTableName")

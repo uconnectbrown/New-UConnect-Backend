@@ -35,7 +35,7 @@ public class EventBoardController {
 
     @PostMapping("/anonymous/event/new")
     public ResponseEntity<String> createNewAnonymousEvent(@Valid @RequestBody Event event) {
-        eventBoardService.saveAnonymousEvent(event);
+        eventBoardService.newAnonymousEvent(event);
 
         return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");
     }
@@ -44,7 +44,7 @@ public class EventBoardController {
     public ResponseEntity<String> createNewVerifiedEvent(@Valid @RequestBody Event event) {
         requestPermissionUtility.authorizeUser(event.getAuthor());
 
-        eventBoardService.saveVerifiedEvent(event);
+        eventBoardService.newVerifiedEvent(event);
 
         return ResponseEntity.ok("Verified event submitted. You should see it live in just a moment.");
     }

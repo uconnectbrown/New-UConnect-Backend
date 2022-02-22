@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class EventBoardService {
 
-    private static final String ANONYMOUS_AUTHOR = "Anonymous Author";
-    private static final String ANONYMOUS_HOST = "Anonymous Host";
+    public static final String ANONYMOUS_AUTHOR = "Anonymous Author";
+    public static final String ANONYMOUS_HOST = "Anonymous Host";
     private static final int MAX_SCAN_COUNT = 50;
 
     private final EventBoardDAO eventBoardDAO;
@@ -28,7 +29,8 @@ public class EventBoardService {
         this.counterDAO = counterDAO;
     }
 
-    public void saveAnonymousEvent(Event event) {
+    public void newAnonymousEvent(Event event) {
+        event.setTimestamp(new Date());
         event.setAnonymous(true);
         event.setAuthor(ANONYMOUS_AUTHOR);
         event.setHost(ANONYMOUS_HOST);
@@ -37,7 +39,8 @@ public class EventBoardService {
         eventBoardDAO.saveHiddenEvent(event);
     }
 
-    public void saveVerifiedEvent(Event event) {
+    public void newVerifiedEvent(Event event) {
+        event.setTimestamp(new Date());
         event.setAnonymous(false);
         long index = counterDAO.incrementEventBoardIndex() - 1;
         event.setIndex(index);

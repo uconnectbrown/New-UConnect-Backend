@@ -15,6 +15,7 @@ db-table-name:
   eventBoardAuthorIndex: "authorIndex"
   eventBoardHostIndex: "hostIndex"
   eventBoardIndexIndex: "indexIndex"
+  eventBoardTitleIndex: "titleIndex"
   counter: "prod-counter"
 
 ses:

@@ -3,6 +3,9 @@ package com.uconnect.backend.helper;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.uconnect.backend.UConnectBackendApplication;
 import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.postingboard.model.Comment;
+import com.uconnect.backend.postingboard.model.Counter;
+import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.user.model.EmailVerification;
 import com.uconnect.backend.user.model.User;
 import lombok.SneakyThrows;
@@ -28,24 +31,40 @@ public class BaseIntTest {
     @Autowired
     public DdbAdapter ddbAdapter;
 
+    // user info table
     @Autowired
     public String userTableName;
-
     @Autowired
     public String emailIndexName;
 
     @Autowired
     public String emailVerificationTableName;
 
+    // event posting board tables
+    @Autowired
+    public String eventBoardEventHiddenTableName;
+    @Autowired
+    public String eventBoardEventPublishedTableName;
+    @Autowired
+    public String eventBoardCommentHiddenTableName;
+    @Autowired
+    public String eventBoardCommentPublishedTableName;
+
+    // counter table
+    @Autowired
+    public String counterTableName;
+
     @MockBean
     public AmazonSimpleEmailService sesClient;
 
     @SneakyThrows
     public void setupDdb() {
-        if (ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class)
-                && ddbAdapter.createOnDemandTableIfNotExists(emailVerificationTableName, EmailVerification.class)) {
-            // wait for the new tables to become available
-            Thread.sleep(5);
-        }
+        ddbAdapter.createOnDemandTableIfNotExists(userTableName, User.class);
+        ddbAdapter.createOnDemandTableIfNotExists(emailVerificationTableName, EmailVerification.class);
+        ddbAdapter.createOnDemandTableIfNotExists(eventBoardCommentPublishedTableName, Comment.class);
+        ddbAdapter.createOnDemandTableIfNotExists(eventBoardCommentHiddenTableName, Comment.class);
+        ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventPublishedTableName, Event.class);
+        ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventHiddenTableName, Event.class);
+        ddbAdapter.createOnDemandTableIfNotExists(counterTableName, Counter.class);
     }
 }

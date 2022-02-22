@@ -1,5 +1,6 @@
 package com.uconnect.backend.postingboard.dao;
 
+import com.google.common.collect.ImmutableList;
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.postingboard.model.Counter;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import java.util.List;
 @Repository
 @Slf4j
 public class CounterDAO {
-    private static final String EVENT_BOARD_INDEX_NAME = "eventBoardIndex";
+    public static final String EVENT_BOARD_INDEX_NAME = "eventBoardIndex";
 
     private final DdbAdapter ddbAdapter;
 
@@ -63,7 +64,7 @@ public class CounterDAO {
             initCounter(counterName);
 
             counter.setValue(0);
-            counterList.add(counter);
+            counterList = ImmutableList.of(counter);
         }
 
         return counterList.get(0).getValue();

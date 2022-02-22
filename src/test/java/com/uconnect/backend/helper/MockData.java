@@ -1,8 +1,10 @@
 package com.uconnect.backend.helper;
 
+import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.user.model.User;
+import org.apache.commons.lang3.RandomStringUtils;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import java.util.Date;
 
 /**
  * Very rudimentary mock data generator for lack of a better one.
@@ -14,12 +16,21 @@ public class MockData {
      * @return A randomly generated User with an {@literal@}brown.edu username.
      */
     public static User generateValidUser() {
-        String email = randomAlphanumeric(7) + "@brown.edu";
+        String email = RandomStringUtils.randomAlphanumeric(7) + "@brown.edu";
         return User.builder()
                 .username(email)
-                .password(randomAlphanumeric(15))
-                .firstName(randomAlphanumeric(7))
-                .lastName(randomAlphanumeric(7))
+                .password(RandomStringUtils.randomAlphanumeric(15))
+                .firstName(RandomStringUtils.randomAlphanumeric(7))
+                .lastName(RandomStringUtils.randomAlphanumeric(7))
+                .build();
+    }
+
+    public static Event generateValidEventBoardEvent() {
+        return Event.builder()
+                .description(RandomStringUtils.random(100))
+                .timestamp(new Date())
+                .startTime(new Date(new Date().getTime() + 5000))
+                .title(RandomStringUtils.random(25))
                 .build();
     }
 }

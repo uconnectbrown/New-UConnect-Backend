@@ -35,6 +35,9 @@ public class DbTableProperties {
     // course table
     private String course;
 
+    // class year index
+    private String classYearIndex;
+
     @Bean(name = "userTableName")
     public String getUserTableName() {
         return user;
@@ -103,5 +106,10 @@ public class DbTableProperties {
     @Bean(name = "courseTableName")
     public String getCourseTableName() {
         return course;
+    }
+
+    @Bean(name = "classYearIndexName")
+    public String getClassYearIndexName() {
+        return classYearIndex;
     }
 }

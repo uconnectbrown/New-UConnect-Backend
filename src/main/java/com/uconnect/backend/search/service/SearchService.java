@@ -19,4 +19,18 @@ public class SearchService {
     public Set<String> getStudentsByCourse(String name) throws CourseNotFoundException {
         return dao.getStudentsByCourse(name);
     }
+
+    public Set<String> getStudentsByClassYear(String year) throws IllegalArgumentException {
+        // Ensure that the year is valid
+        try {
+            if (year.length() != 4) {
+                throw new IllegalArgumentException("Year must be four digits.");
+            } 
+            Integer.valueOf(year);
+            Set<String> students = dao.getStudentsByClassYear(year);
+            return students;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Year must be a number.");
+        }
+    }
 }

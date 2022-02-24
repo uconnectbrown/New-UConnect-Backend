@@ -71,6 +71,6 @@ public class BaseIntTest {
         ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventPublishedTableName, Event.class);
         ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventHiddenTableName, Event.class);
         ddbAdapter.createOnDemandTableIfNotExists(counterTableName, Counter.class);
-        ddbAdapter.createOnDemandTableIfNotExists(courseTableName, CourseRoster.class)
+        ddbAdapter.createOnDemandTableIfNotExists(courseTableName, CourseRoster.class);
     }
 }

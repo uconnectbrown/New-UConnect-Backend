@@ -54,4 +54,14 @@ public class SearchController {
         }
     }
 
+    @GetMapping("/v1/search/getStudentsByClassYear/{year}")
+    public ResponseEntity<Set<String>> getStudentsByClassYear(@PathVariable("year") String year) {
+        try {
+            Set<String> students = searchService.getStudentsByClassYear(year);
+            return new ResponseEntity<>(students, HttpStatus.OK);
+        } catch (Exception e) {
+            // TODO: error checking
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

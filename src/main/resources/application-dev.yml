@@ -19,6 +19,7 @@ db-table-name:
   eventBoardCommentParentIdIndex: "parentIdIndex"
   counter: "dev-counter"
   course: "dev-userCourse"
+  classYearIndex: "classYear"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

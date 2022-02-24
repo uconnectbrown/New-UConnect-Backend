@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-public class GetStudentsTest extends BaseIntTest {
+public class GetStudentsByCourseTest extends BaseIntTest {
 
     private ObjectMapper mapper = new ObjectMapper();
 

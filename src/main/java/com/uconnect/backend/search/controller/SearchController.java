@@ -55,13 +55,15 @@ public class SearchController {
     }
 
     @GetMapping("/v1/search/getStudentsByClassYear/{year}")
-    public ResponseEntity<Set<String>> getStudentsByClassYear(@PathVariable("year") String year) {
+    public ResponseEntity<?> getStudentsByClassYear(@PathVariable("year") String year) {
         try {
             Set<String> students = searchService.getStudentsByClassYear(year);
             return new ResponseEntity<>(students, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Invalid class year provided.", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            // TODO: error checking
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("Unexpected exception encountered when trying to get students in class year: {}", year);
+            return new ResponseEntity<>("Unexpected exception occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

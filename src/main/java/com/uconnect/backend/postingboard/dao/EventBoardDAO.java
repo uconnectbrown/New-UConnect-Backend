@@ -1,7 +1,9 @@
 package com.uconnect.backend.postingboard.dao;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
+import com.uconnect.backend.exception.EventBoardCommentNotFoundException;
 import com.uconnect.backend.exception.EventBoardEventNotFoundException;
+import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +31,12 @@ public class EventBoardDAO {
 
     private final String indexIndexName;
 
+    private final String commentParentIdIndexName;
+
     @Autowired
     public EventBoardDAO(DdbAdapter ddbAdapter, String eventBoardEventHiddenTableName, String eventBoardEventPublishedTableName,
                          String eventBoardCommentHiddenTableName, String eventBoardCommentPublishedTableName, String eventBoardAuthorIndexName,
-                         String eventBoardHostIndexName, String eventBoardIndexIndexName) {
+                         String eventBoardHostIndexName, String eventBoardIndexIndexName, String eventBoardCommentParentIdIndexName) {
         this.ddbAdapter = ddbAdapter;
         this.eventHiddenTableName = eventBoardEventHiddenTableName;
         this.eventPublishedTableName = eventBoardEventPublishedTableName;
@@ -41,8 +45,12 @@ public class EventBoardDAO {
         this.authorIndexName = eventBoardAuthorIndexName;
         this.hostIndexName = eventBoardHostIndexName;
         this.indexIndexName = eventBoardIndexIndexName;
+        this.commentParentIdIndexName = eventBoardCommentParentIdIndexName;
     }
 
+    // -----------
+    // ---Event---
+    // -----------
     public void saveHiddenEvent(Event event) {
         ddbAdapter.save(eventHiddenTableName, event);
     }
@@ -66,5 +74,49 @@ public class EventBoardDAO {
         }
 
         return eventList.get(0);
+    }
+
+    public Event getPublishedEventById(String id) throws EventBoardEventNotFoundException {
+        Event event = Event.builder().id(id).build();
+        List<Event> eventList = ddbAdapter.query(eventPublishedTableName, event, Event.class);
+
+        if (eventList.isEmpty()) {
+            log.info("Event with id {} queried but not found", id);
+            throw new EventBoardEventNotFoundException("Event does not exist");
+        }
+
+        return eventList.get(0);
+    }
+
+    // -------------
+    // ---Comment---
+    // -------------
+    public void saveHiddenComment(Comment comment) {
+        ddbAdapter.save(commentHiddenTableName, comment);
+    }
+
+    public void savePublishedComment(Comment comment) {
+        ddbAdapter.save(commentPublishedTableName, comment);
+    }
+
+    public Comment getPublishedCommentById(String id) throws EventBoardCommentNotFoundException {
+        Comment comment = Comment.builder().id(id).build();
+        List<Comment> commentList = ddbAdapter.query(eventPublishedTableName, comment, Comment.class);
+
+        if (commentList.isEmpty()) {
+            log.info("Comment with id {} queried but not found", id);
+            throw new EventBoardCommentNotFoundException("Comment does not exist");
+        }
+
+        return commentList.get(0);
+    }
+
+    public List<Comment> getPublishedCommentsByParentId(String parentId) {
+        Comment parent = Comment.builder().parentId(parentId).build();
+        List<Comment> comments = ddbAdapter.queryGSI(eventPublishedTableName, commentParentIdIndexName, parent, Comment.class);
+        // force paginated list to fetch all
+        comments.size();
+
+        return comments;
     }
 }

@@ -1,8 +1,11 @@
 package com.uconnect.backend.postingboard.service;
 
+import com.uconnect.backend.exception.EventBoardCommentNotFoundException;
+import com.uconnect.backend.exception.EventBoardCommentParentNotFoundException;
 import com.uconnect.backend.exception.EventBoardEventNotFoundException;
 import com.uconnect.backend.postingboard.dao.CounterDAO;
 import com.uconnect.backend.postingboard.dao.EventBoardDAO;
+import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class EventBoardService {
         this.counterDAO = counterDAO;
     }
 
+    // -----------
+    // ---Event---
+    // -----------
     public void newAnonymousEvent(Event event) {
         event.setTimestamp(new Date());
         event.setAnonymous(true);
@@ -49,7 +55,10 @@ public class EventBoardService {
     }
 
     public Event getPublishedEventByIndex(long index) throws EventBoardEventNotFoundException {
-        return eventBoardDAO.getPublishedEventByIndex(index);
+        Event event = eventBoardDAO.getPublishedEventByIndex(index);
+        event.setComments(getPublishedCommentsByParentId(event.getId()));
+
+        return event;
     }
 
     public GetEventsResponse getLatestPublishedEvents(long startIndex, int eventCount) {
@@ -64,6 +73,7 @@ public class EventBoardService {
         while (startIndex >= 0 && acc.size() < eventCount) {
             try {
                 Event result = eventBoardDAO.getPublishedEventByIndex(startIndex);
+                result.setComments(getPublishedCommentsByParentId(result.getId()));
                 acc.add(result);
             } catch (EventBoardEventNotFoundException ignored) {
             }
@@ -73,5 +83,65 @@ public class EventBoardService {
 
         long lastQueriedIndex = acc.isEmpty() ? -1 : startIndex + 1;
         return new GetEventsResponse(acc, lastQueriedIndex);
+    }
+
+    // -------------
+    // ---Comment---
+    // -------------
+    public void newAnonymousComment(Comment comment) throws EventBoardCommentParentNotFoundException {
+        String parentId = comment.getParentId();
+        verifyCommentParentExists(parentId);
+
+        comment.setTimestamp(new Date());
+        comment.setAnonymous(true);
+        comment.setAuthor(ANONYMOUS_AUTHOR);
+        comment.setCommentPresent(true);
+        eventBoardDAO.saveHiddenComment(comment);
+    }
+
+    public void newVerifiedComment(Comment comment) throws EventBoardCommentParentNotFoundException {
+        String parentId = comment.getParentId();
+        verifyCommentParentExists(parentId);
+
+        comment.setTimestamp(new Date());
+        comment.setAnonymous(false);
+        comment.setCommentPresent(true);
+        eventBoardDAO.savePublishedComment(comment);
+    }
+
+    public List<Comment> getPublishedCommentsByParentId(String parentId) {
+        List<Comment> comments = eventBoardDAO.getPublishedCommentsByParentId(parentId);
+        populateChildrenComments(comments);
+
+        return comments;
+    }
+
+    private void verifyCommentParentExists(String parentId) throws EventBoardCommentParentNotFoundException {
+        try {
+            // commenting on an event
+            eventBoardDAO.getPublishedEventById(parentId);
+        } catch (EventBoardEventNotFoundException e) {
+            try {
+                // commenting on a comment
+                eventBoardDAO.getPublishedCommentById(parentId);
+            } catch (EventBoardCommentNotFoundException ce) {
+                throw new EventBoardCommentParentNotFoundException();
+            }
+        }
+    }
+
+    private void populateChildrenComments(List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return;
+        }
+
+        for (Comment comment : comments) {
+            if (comment != null && comment.isCommentPresent()) {
+                List<Comment> children = eventBoardDAO.getPublishedCommentsByParentId(comment.getId());
+                comment.setComments(children);
+
+                populateChildrenComments(children);
+            }
+        }
     }
 }

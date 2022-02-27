@@ -16,6 +16,7 @@ db-table-name:
   eventBoardHostIndex: "hostIndex"
   eventBoardIndexIndex: "indexIndex"
   eventBoardTitleIndex: "titleIndex"
+  eventBoardCommentParentIdIndex: "parentIdIndex"
   counter: "prod-counter"
   course: "prod-userCourse"
 

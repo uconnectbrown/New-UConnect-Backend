@@ -1,6 +1,8 @@
 package com.uconnect.backend.postingboard.controller;
 
+import com.uconnect.backend.exception.EventBoardCommentParentNotFoundException;
 import com.uconnect.backend.exception.EventBoardEventNotFoundException;
+import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.postingboard.model.GetEventsRequest;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
@@ -17,11 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Date;
 
 @Slf4j
 @RestController
 @RequestMapping("/v1/event-board")
 public class EventBoardController {
+
+    public static final String ANONYMOUS_AUTHOR = "Anonymous Author";
+    public static final String ANONYMOUS_HOST = "Anonymous Host";
 
     private final EventBoardService eventBoardService;
 
@@ -33,8 +39,16 @@ public class EventBoardController {
         this.requestPermissionUtility = requestPermissionUtility;
     }
 
+    // -----------
+    // ---Event---
+    // -----------
     @PostMapping("/anonymous/event/new")
     public ResponseEntity<String> createNewAnonymousEvent(@Valid @RequestBody Event event) {
+        event.setTimestamp(new Date());
+        event.setAnonymous(true);
+        event.setAuthor(ANONYMOUS_AUTHOR);
+        event.setHost(ANONYMOUS_HOST);
+        event.setIndex(-1);
         eventBoardService.newAnonymousEvent(event);
 
         return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");
@@ -58,5 +72,24 @@ public class EventBoardController {
     @PostMapping("/anonymous/event/get-latest")
     public GetEventsResponse getLatestPublishedEvents(@RequestBody GetEventsRequest request) {
         return eventBoardService.getLatestPublishedEvents(request.getStartIndex(), request.getEventCount());
+    }
+
+    // -------------
+    // ---Comment---
+    // -------------
+    @PostMapping("/anonymous/comment/new")
+    public ResponseEntity<String> createNewAnonymousComment(@Valid @RequestBody Comment comment) throws EventBoardCommentParentNotFoundException {
+        eventBoardService.newAnonymousComment(comment);
+
+        return ResponseEntity.ok("Anonymous comment submitted. Please wait for one of our staff members to approve it.");
+    }
+
+    @PostMapping("/verified/comment/new")
+    public ResponseEntity<String> createNewVerifiedComment(@Valid @RequestBody Comment comment) throws EventBoardCommentParentNotFoundException {
+        requestPermissionUtility.authorizeUser(comment.getAuthor());
+
+        eventBoardService.newVerifiedComment(comment);
+
+        return ResponseEntity.ok("Verified event submitted. You should see it live in just a moment.");
     }
 }

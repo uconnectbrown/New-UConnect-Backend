@@ -90,6 +90,12 @@ public class ExceptionHandlers {
     @ExceptionHandler(EventBoardEventNotFoundException.class)
     public ResponseEntity<String> handleEventBoardEventNotFoundException(EventBoardEventNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                String.format("Event with this index does not exist: %s", e.getIndex()));
+                "Event does not exist");
+    }
+
+    @ExceptionHandler(EventBoardCommentParentNotFoundException.class)
+    public ResponseEntity<String> handleEventBoardCommentParentNotFoundException(EventBoardCommentParentNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                "Cannot comment on a parent that does not exist");
     }
 }

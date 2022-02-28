@@ -41,6 +41,10 @@ public class DbTableProperties {
     // concentration table
     private String concentration;
 
+    // first/last name buckets
+    private String firstNameBucketIndex;
+    private String lastNameBucketIndex;
+
     @Bean(name = "userTableName")
     public String getUserTableName() {
         return user;
@@ -119,5 +123,15 @@ public class DbTableProperties {
     @Bean(name = "concentrationTableName")
     public String getConcentrationTableName() {
         return concentration;
+    }
+
+    @Bean(name = "firstNameBucketIndexName")
+    public String getFirstNameBucketIndex() {
+        return firstNameBucketIndex;
+    }
+
+    @Bean(name = "lastNameBucketIndexName")
+    public String getLastNameBucketIndex() {
+        return lastNameBucketIndex;
     }
 }

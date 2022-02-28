@@ -60,12 +60,24 @@ public class User implements UserDetails {
     private String firstName;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey
+    private Character firstNameBucket;
+
+    @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "lastName")
     @Size(min = 1, max = 32, message = "Last name length must be between 1 and 32 characters (inclusive)")
     private String lastName;
 
     @DynamoDBAttribute
+<<<<<<< HEAD
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYearIndex")
+=======
+    @DynamoDBIndexHashKey
+    private Character lastNameBucket;
+
+    @DynamoDBAttribute
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYear")
+>>>>>>> Add first and last name buckets to user model and add beans for GSIs
     @Digits(integer = 4, fraction = 1, message = "Class year must be a number with at most 4 integral digits and 1 fractional digit")
     private String classYear;
 

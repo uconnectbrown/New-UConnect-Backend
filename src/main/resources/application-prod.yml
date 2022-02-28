@@ -21,6 +21,8 @@ db-table-name:
   course: "prod-userCourse"
   classYearIndex: "classYearIndex"
   concentration: "prod-concentration"
+  firstNameBucketIndex: "prod-firstNameBucketIndex"
+  lastNameBucketIndex: "prod-lastNameBucketIndex"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

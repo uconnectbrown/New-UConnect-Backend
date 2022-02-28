@@ -1,12 +1,15 @@
 package com.uconnect.backend.search.service;
 
 import java.util.Set;
+import com.uconnect.backend.exception.ConcentrationNotFoundException;
 import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.search.dao.SearchDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class SearchService {
 
     private final SearchDAO dao;
@@ -32,5 +35,9 @@ public class SearchService {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Year must be a number.");
         }
+    }
+
+    public Set<String> getStudentsByConcentration(String name) throws ConcentrationNotFoundException {
+        return dao.getStudentsByConcentration(name);
     }
 }

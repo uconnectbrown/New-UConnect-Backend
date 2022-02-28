@@ -20,9 +20,9 @@ import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DdbAdapter {
@@ -41,7 +41,7 @@ public class DdbAdapter {
         this.ddbClient = ddbClient;
         this.userTableName = userTableName;
         this.emailIndexName = emailIndexName;
-        mapperCache = new HashMap<>();
+        mapperCache = new ConcurrentHashMap<>();
     }
 
     public boolean createTableIfNotExists(String tableName, Class<?> clazz, long rcu, long wcu) {

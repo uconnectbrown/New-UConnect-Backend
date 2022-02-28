@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // if anyone finds this in the future and tries to optimize: these tests are NOT thread-safe, do not run them in parallel
-public class EventBoardSubmitTest extends BaseIntTest {
+public class EventBoardSubmitEventTest extends BaseIntTest {
 
     private static User verifiedUser;
 
@@ -97,7 +97,7 @@ public class EventBoardSubmitTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setId("naughty string");
 
-        EventBoardTestUtil.submitAnonymous(mockMvc, event)
+        EventBoardTestUtil.submitEventAnonymous(mockMvc, event)
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(
                         containsString("New events are assigned random IDs")));
@@ -137,7 +137,7 @@ public class EventBoardSubmitTest extends BaseIntTest {
 
         int numDupEvents = 5;
         for (int i = 0; i < numDupEvents; i++) {
-            EventBoardTestUtil.submitVerified(mockMvc, event, verifiedUser.getUsername(), token)
+            EventBoardTestUtil.submitEventVerified(mockMvc, event, verifiedUser.getUsername(), token)
                     .andExpect(status().isOk());
         }
 
@@ -159,7 +159,7 @@ public class EventBoardSubmitTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor("Jeremiah");
 
-        EventBoardTestUtil.submitVerified(mockMvc, event, verifiedUser.getUsername(), token)
+        EventBoardTestUtil.submitEventVerified(mockMvc, event, verifiedUser.getUsername(), token)
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(
                         containsString("You are not authorized to make that request. We've got our eyes on you!")));
@@ -174,14 +174,14 @@ public class EventBoardSubmitTest extends BaseIntTest {
      */
     @SneakyThrows
     private void testSuccessSubmitAnon(Event event) {
-        EventBoardTestUtil.submitAnonymous(mockMvc, event)
+        EventBoardTestUtil.submitEventAnonymous(mockMvc, event)
                 .andExpect(status().isOk());
         verifyNewAnonEvent(event);
     }
 
     @SneakyThrows
     private void testSuccessSubmitVerified(Event event) {
-        EventBoardTestUtil.submitVerified(mockMvc, event, verifiedUser.getUsername(), token)
+        EventBoardTestUtil.submitEventVerified(mockMvc, event, verifiedUser.getUsername(), token)
                 .andExpect(status().isOk());
         verifyNewVerifiedEvent(event);
     }

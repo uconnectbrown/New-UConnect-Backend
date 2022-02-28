@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class Comment {
     private String author;
 
     @DynamoDBAttribute
+    @Size(max = 1000, min = 1, message = "Comment content length must be between 1 and 1000 characters")
     private String content;
 
     @DynamoDBAttribute

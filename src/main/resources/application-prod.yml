@@ -20,6 +20,7 @@ db-table-name:
   counter: "prod-counter"
   course: "prod-userCourse"
   classYearIndex: "classYear"
+  concentration: "prod-concentration"
 
 ses:
   sesFromAddress: team@uconnectbrown.com

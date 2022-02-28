@@ -38,6 +38,9 @@ public class DbTableProperties {
     // class year index
     private String classYearIndex;
 
+    // concentration table
+    private String concentration;
+
     @Bean(name = "userTableName")
     public String getUserTableName() {
         return user;
@@ -111,5 +114,10 @@ public class DbTableProperties {
     @Bean(name = "classYearIndexName")
     public String getClassYearIndexName() {
         return classYearIndex;
+    }
+
+    @Bean(name = "concentrationTableName")
+    public String getConcentrationTableName() {
+        return concentration;
     }
 }

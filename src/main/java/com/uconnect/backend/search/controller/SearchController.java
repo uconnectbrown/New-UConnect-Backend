@@ -1,6 +1,7 @@
 package com.uconnect.backend.search.controller;
 
 import java.util.Set;
+import com.uconnect.backend.exception.ConcentrationNotFoundException;
 import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.search.service.SearchService;
 import com.uconnect.backend.security.RequestPermissionUtility;
@@ -64,6 +65,20 @@ public class SearchController {
         } catch (Exception e) {
             log.error("Unexpected exception encountered when trying to get students in class year: {}", year);
             return new ResponseEntity<>("Unexpected exception occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/v1/search/getStudentsByConcentration/{concentration}")
+    public ResponseEntity<?> getStudentsByConcentration(@PathVariable("concentration") String concentration) {
+        try {
+            Set<String> students = searchService.getStudentsByConcentration(concentration);
+            return new ResponseEntity<>(students, HttpStatus.OK);
+        } catch (ConcentrationNotFoundException e) {
+            log.info("Could not find concentration: {}", concentration);
+            return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Unexpected exception encountered when trying to get students in concentration {}: {}", concentration, e);
+            return new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

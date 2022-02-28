@@ -58,7 +58,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAnonymous(false);
                 e.setTitle(String.valueOf(i));
 
-                EventBoardTestUtil.submitVerified(mockMvc, e, verifiedUser.getUsername(), token).andExpect(status().isOk());
+                EventBoardTestUtil.submitEventVerified(mockMvc, e, verifiedUser.getUsername(), token).andExpect(status().isOk());
                 expectedEventsPublished.add(e);
             }
 
@@ -70,7 +70,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAnonymous(true);
                 e.setTitle(String.valueOf(i));
 
-                EventBoardTestUtil.submitAnonymous(mockMvc, e).andExpect(status().isOk());
+                EventBoardTestUtil.submitEventAnonymous(mockMvc, e).andExpect(status().isOk());
                 expectedEventsHidden.add(e);
             }
 

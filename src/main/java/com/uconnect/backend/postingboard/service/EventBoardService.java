@@ -95,6 +95,7 @@ public class EventBoardService {
         comment.setTimestamp(new Date());
         comment.setAnonymous(true);
         comment.setAuthor(ANONYMOUS_AUTHOR);
+        // TODO: fix this and save the parent comment as isCommentPresent
         comment.setCommentPresent(true);
         eventBoardDAO.saveHiddenComment(comment);
     }
@@ -105,6 +106,7 @@ public class EventBoardService {
 
         comment.setTimestamp(new Date());
         comment.setAnonymous(false);
+        // TODO: fix this and save the parent comment as isCommentPresent
         comment.setCommentPresent(true);
         eventBoardDAO.savePublishedComment(comment);
     }

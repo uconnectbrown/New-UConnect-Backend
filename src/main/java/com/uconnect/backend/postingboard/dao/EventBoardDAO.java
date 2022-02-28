@@ -101,7 +101,7 @@ public class EventBoardDAO {
 
     public Comment getPublishedCommentById(String id) throws EventBoardCommentNotFoundException {
         Comment comment = Comment.builder().id(id).build();
-        List<Comment> commentList = ddbAdapter.query(eventPublishedTableName, comment, Comment.class);
+        List<Comment> commentList = ddbAdapter.query(commentPublishedTableName, comment, Comment.class);
 
         if (commentList.isEmpty()) {
             log.info("Comment with id {} queried but not found", id);
@@ -113,7 +113,7 @@ public class EventBoardDAO {
 
     public List<Comment> getPublishedCommentsByParentId(String parentId) {
         Comment parent = Comment.builder().parentId(parentId).build();
-        List<Comment> comments = ddbAdapter.queryGSI(eventPublishedTableName, commentParentIdIndexName, parent, Comment.class);
+        List<Comment> comments = ddbAdapter.queryGSI(commentPublishedTableName, commentParentIdIndexName, parent, Comment.class);
         // force paginated list to fetch all
         comments.size();
 

@@ -1,5 +1,6 @@
 package com.uconnect.backend.helper;
 
+import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.user.model.User;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -31,6 +32,20 @@ public class MockData {
                 .timestamp(new Date())
                 .startTime(new Date(new Date().getTime() + 5000))
                 .title(RandomStringUtils.randomAlphanumeric(25))
+                .build();
+    }
+
+    public static Comment generateValidEventBoardComment(String parentId) {
+        Comment comment = generateValidEventBoardComment();
+        comment.setParentId(parentId);
+
+        return comment;
+    }
+
+    public static Comment generateValidEventBoardComment() {
+        return Comment.builder()
+                .content(RandomStringUtils.randomAlphanumeric((int) (Math.random() * 200) + 1))
+                .timestamp(new Date())
                 .build();
     }
 }

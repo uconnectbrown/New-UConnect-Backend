@@ -75,7 +75,7 @@ public class SearchController {
             return new ResponseEntity<>(students, HttpStatus.OK);
         } catch (ConcentrationNotFoundException e) {
             log.info("Could not find concentration: {}", concentration);
-            return new ResponseEntity<>(e.toString(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Could not find concentration: " + concentration, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error("Unexpected exception encountered when trying to get students in concentration {}: {}", concentration, e);
             return new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Date;
 
 @Slf4j
 @RestController
@@ -44,11 +43,6 @@ public class EventBoardController {
     // -----------
     @PostMapping("/anonymous/event/new")
     public ResponseEntity<String> createNewAnonymousEvent(@Valid @RequestBody Event event) {
-        event.setTimestamp(new Date());
-        event.setAnonymous(true);
-        event.setAuthor(ANONYMOUS_AUTHOR);
-        event.setHost(ANONYMOUS_HOST);
-        event.setIndex(-1);
         eventBoardService.newAnonymousEvent(event);
 
         return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");

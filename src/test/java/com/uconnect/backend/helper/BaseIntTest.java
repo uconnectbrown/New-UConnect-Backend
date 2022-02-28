@@ -6,6 +6,7 @@ import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Counter;
 import com.uconnect.backend.postingboard.model.Event;
+import com.uconnect.backend.search.model.Concentration;
 import com.uconnect.backend.search.model.CourseRoster;
 import com.uconnect.backend.user.model.EmailVerification;
 import com.uconnect.backend.user.model.User;
@@ -59,6 +60,10 @@ public class BaseIntTest {
     @Autowired
     public String courseTableName;
 
+    // concentration table
+    @Autowired
+    public String concentrationTableName;
+
     @MockBean
     public AmazonSimpleEmailService sesClient;
 
@@ -72,5 +77,6 @@ public class BaseIntTest {
         ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventHiddenTableName, Event.class);
         ddbAdapter.createOnDemandTableIfNotExists(counterTableName, Counter.class);
         ddbAdapter.createOnDemandTableIfNotExists(courseTableName, CourseRoster.class);
+        ddbAdapter.createOnDemandTableIfNotExists(concentrationTableName, Concentration.class);
     }
 }

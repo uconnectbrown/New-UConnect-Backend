@@ -69,15 +69,11 @@ public class User implements UserDetails {
     private String lastName;
 
     @DynamoDBAttribute
-<<<<<<< HEAD
-    @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYearIndex")
-=======
     @DynamoDBIndexHashKey
     private Character lastNameBucket;
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYear")
->>>>>>> Add first and last name buckets to user model and add beans for GSIs
     @Digits(integer = 4, fraction = 1, message = "Class year must be a number with at most 4 integral digits and 1 fractional digit")
     private String classYear;
 

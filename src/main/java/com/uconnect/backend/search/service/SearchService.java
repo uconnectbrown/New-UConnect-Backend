@@ -4,6 +4,7 @@ import java.util.Set;
 import com.uconnect.backend.exception.ConcentrationNotFoundException;
 import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.search.dao.SearchDAO;
+import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -44,5 +45,17 @@ public class SearchService {
 
     public Set<String> getStudentsByConcentration(String name) throws ConcentrationNotFoundException {
         return dao.getStudentsByConcentration(name);
+    }
+
+    public Set<User> getStudentsByName(String name) throws IllegalArgumentException {
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty string.");
+        }
+
+        char bucket = name.charAt(0);
+        Set<User> firstNameMatches = dao.getStudentsInFirstNameBucket(bucket);
+        Set<User> lastNameMatches = dao.getStudentsInLastNameBucket(bucket);
+        firstNameMatches.addAll(lastNameMatches);
+        return firstNameMatches;
     }
 }

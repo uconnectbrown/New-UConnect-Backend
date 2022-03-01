@@ -5,6 +5,7 @@ import com.uconnect.backend.exception.ConcentrationNotFoundException;
 import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.search.service.SearchService;
 import com.uconnect.backend.security.RequestPermissionUtility;
+import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -78,6 +79,17 @@ public class SearchController {
         } catch (Exception e) {
             log.error("Unexpected exception encountered when trying to get students in concentration {}: {}", concentration, e);
             return new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/v1/search/getStudentsByName/{name}")
+    public ResponseEntity<?> getStudentsByName(@PathVariable("name") String name) {
+        try {
+            Set<User> students = searchService.getStudentsByName(name);
+            return new ResponseEntity<>(students, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Unexpected exception encountered when trying to get students with name {}: {}", name, e);
+            return new ResponseEntity<>("Unexpected exception occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -40,20 +40,25 @@ public class EventBoardGetTest extends BaseIntTest {
     @Autowired
     private String eventBoardTitleIndexName;
 
-    @Autowired
-    private String counterTableName;
-
     @BeforeEach
     public void setup() throws Exception {
         if (init) {
             setupDdb();
             verifiedUser = MockData.generateValidUser();
             token = UserTestUtil.getTokenForTraditionalUser(mockMvc, verifiedUser, true, ddbAdapter, userTableName);
+            User verifiedUserNoPassword = User.builder()
+                    .username(verifiedUser.getUsername())
+                    .firstName(verifiedUser.getFirstName())
+                    .lastName(verifiedUser.getLastName())
+                    .password("")
+                    .imageUrl(verifiedUser.getImageUrl())
+                    .build();
 
             expectedEventsPublished = new ArrayList<>(numEventsPublished);
             for (int i = 0; i < numEventsPublished; i++) {
                 Event e = MockData.generateValidEventBoardEvent();
                 e.setAuthor(verifiedUser.getUsername());
+                e.setAuthorInfo(verifiedUserNoPassword);
                 e.setHost(verifiedHost);
                 e.setAnonymous(false);
                 e.setTitle(String.valueOf(i));
@@ -63,10 +68,16 @@ public class EventBoardGetTest extends BaseIntTest {
                 expectedEventsPublished.add(e);
             }
 
+            User anonUser = User.builder()
+                    .username(EventBoardService.ANONYMOUS_AUTHOR)
+                    .firstName(EventBoardService.ANONYMOUS_AUTHOR)
+                    .imageUrl(EventBoardService.ANONYMOUS_AUTHOR_IMAGE_URL)
+                    .build();
             expectedEventsHidden = new ArrayList<>(numEventsHidden);
             for (int i = 0; i < numEventsHidden; i++) {
                 Event e = MockData.generateValidEventBoardEvent();
                 e.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
+                e.setAuthorInfo(anonUser);
                 e.setHost(EventBoardService.ANONYMOUS_HOST);
                 e.setAnonymous(true);
                 e.setTitle(String.valueOf(i));

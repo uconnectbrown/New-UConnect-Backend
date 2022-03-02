@@ -5,6 +5,7 @@ import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.postingboard.model.GetEventsRequest;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
+import com.uconnect.backend.user.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -111,6 +112,7 @@ public class EventBoardTestUtil {
     public static void verifySameEvents(Event e1, Event e2) {
         assertEquals(e1.getTitle(), e2.getTitle());
         assertEquals(e1.getAuthor(), e2.getAuthor());
+        haveSameAuthorInfo(e1.getAuthorInfo(), e2.getAuthorInfo());
         assertEquals(e1.getHost(), e2.getHost());
         assertEquals(e1.getDescription(), e2.getDescription());
         // ignore last five digits due to time precision
@@ -126,6 +128,7 @@ public class EventBoardTestUtil {
         assertEquals(c1.isAnonymous(), c2.isAnonymous());
         // ignore last 6 digits due to time precision
         assertEquals(c1.getTimestamp().getTime() / 100_000, c2.getTimestamp().getTime() / 100_000);
+        haveSameAuthorInfo(c1.getAuthorInfo(), c2.getAuthorInfo());
         haveSameComments(c1.getComments(), c2.getComments());
     }
 
@@ -148,5 +151,18 @@ public class EventBoardTestUtil {
 
             verifySameComments(c1, c2);
         }
+    }
+
+    private static void haveSameAuthorInfo(User a1, User a2) {
+        if (a1 == null && a2 == null) {
+            return;
+        }
+        if (a1 == null || a2 == null) {
+            fail();
+        }
+        assertEquals(a1.getUsername(), a2.getUsername());
+        assertEquals(a1.getFirstName(), a2.getFirstName());
+        assertEquals(a1.getPassword(), a2.getPassword());
+        assertEquals(a1.getImageUrl(), a2.getImageUrl());
     }
 }

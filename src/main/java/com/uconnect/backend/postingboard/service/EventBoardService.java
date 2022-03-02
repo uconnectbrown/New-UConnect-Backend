@@ -3,11 +3,15 @@ package com.uconnect.backend.postingboard.service;
 import com.uconnect.backend.exception.EventBoardCommentNotFoundException;
 import com.uconnect.backend.exception.EventBoardCommentParentNotFoundException;
 import com.uconnect.backend.exception.EventBoardEventNotFoundException;
+import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.postingboard.dao.CounterDAO;
 import com.uconnect.backend.postingboard.dao.EventBoardDAO;
 import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
+import com.uconnect.backend.user.dao.UserDAO;
+import com.uconnect.backend.user.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +20,12 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
 public class EventBoardService {
 
     public static final String ANONYMOUS_AUTHOR = "Anonymous Author";
+    // TODO: fill
+    public static final String ANONYMOUS_AUTHOR_IMAGE_URL = "https://i.imgur.com/op52w9Q.jpeg";
     public static final String ANONYMOUS_HOST = "Anonymous Host";
     public static final int MAX_SCAN_COUNT = 50;
 
@@ -26,10 +33,13 @@ public class EventBoardService {
 
     private final CounterDAO counterDAO;
 
+    private final UserDAO userDAO;
+
     @Autowired
-    public EventBoardService(EventBoardDAO eventBoardDAO, CounterDAO counterDAO) {
+    public EventBoardService(EventBoardDAO eventBoardDAO, CounterDAO counterDAO, UserDAO userDAO) {
         this.eventBoardDAO = eventBoardDAO;
         this.counterDAO = counterDAO;
+        this.userDAO = userDAO;
     }
 
     // -----------
@@ -56,7 +66,7 @@ public class EventBoardService {
 
     public Event getPublishedEventByIndex(long index) throws EventBoardEventNotFoundException {
         Event event = eventBoardDAO.getPublishedEventByIndex(index);
-        event.setComments(getPublishedCommentsByParentId(event.getId()));
+        fillAuthorInfoAndComments(event);
 
         return event;
     }
@@ -73,7 +83,7 @@ public class EventBoardService {
         while (startIndex >= 0 && acc.size() < eventCount) {
             try {
                 Event result = eventBoardDAO.getPublishedEventByIndex(startIndex);
-                result.setComments(getPublishedCommentsByParentId(result.getId()));
+                fillAuthorInfoAndComments(result);
                 acc.add(result);
             } catch (EventBoardEventNotFoundException ignored) {
             }
@@ -138,12 +148,44 @@ public class EventBoardService {
         }
 
         for (Comment comment : comments) {
-            if (comment != null && comment.isCommentPresent()) {
-                List<Comment> children = eventBoardDAO.getPublishedCommentsByParentId(comment.getId());
-                comment.setComments(children);
+            if (comment != null) {
+                comment.setAuthorInfo(getAuthorInfo(comment.getAuthor()));
 
-                populateChildrenComments(children);
+                if (comment.isCommentPresent()) {
+                    List<Comment> children = eventBoardDAO.getPublishedCommentsByParentId(comment.getId());
+                    comment.setComments(children);
+
+                    populateChildrenComments(children);
+                }
             }
         }
+    }
+
+    private void fillAuthorInfoAndComments(Event event) {
+        event.setAuthorInfo(getAuthorInfo(event.getAuthor()));
+        event.setComments(getPublishedCommentsByParentId(event.getId()));
+    }
+
+    private User getAuthorInfo(String username) {
+        User user = User.builder()
+                .username(username)
+                .firstName(ANONYMOUS_AUTHOR)
+                .imageUrl(ANONYMOUS_AUTHOR_IMAGE_URL)
+                .build();
+        if (ANONYMOUS_AUTHOR.equals(username)) {
+            return user;
+        }
+
+        try {
+            User rawUser = userDAO.getUserByUsername(username);
+            rawUser.setPassword("");
+
+            user = rawUser;
+        } catch (UserNotFoundException e) {
+            log.warn("Username \"{}\" not found while trying to fill an Event's author info, someone should verify this " +
+                    "user was actually deleted", username);
+        }
+
+        return user;
     }
 }

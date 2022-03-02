@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.uconnect.backend.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -71,6 +72,9 @@ public class Event {
     @DynamoDBAttribute
     @Size(max = 50, message = "Event location cannot exceed 50 characters")
     private String location;
+
+    @DynamoDBIgnore
+    private User authorInfo;
 
     @DynamoDBIgnore
     private List<Comment> comments;

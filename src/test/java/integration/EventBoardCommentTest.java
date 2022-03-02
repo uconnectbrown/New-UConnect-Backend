@@ -27,6 +27,8 @@ public class EventBoardCommentTest extends BaseIntTest {
 
     private static User verifiedUser;
 
+    private static User verifiedUserNoPassword;
+
     private static String token;
 
     private static String parentEventId;
@@ -47,6 +49,13 @@ public class EventBoardCommentTest extends BaseIntTest {
             setupDdb();
 
             verifiedUser = MockData.generateValidUser();
+            verifiedUserNoPassword = User.builder()
+                    .username(verifiedUser.getUsername())
+                    .firstName(verifiedUser.getFirstName())
+                    .lastName(verifiedUser.getLastName())
+                    .imageUrl(verifiedUser.getImageUrl())
+                    .password("")
+                    .build();
 
             token = UserTestUtil.getTokenForTraditionalUser(mockMvc, verifiedUser, true, ddbAdapter, userTableName);
 
@@ -113,6 +122,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitVerified() {
         Comment comment = MockData.generateValidEventBoardComment(parentEventId);
+        comment.setAnonymous(false);
         comment.setAuthor(verifiedUser.getUsername());
 
         testSuccessSubmitVerified(comment);
@@ -154,6 +164,7 @@ public class EventBoardCommentTest extends BaseIntTest {
         for (int i = 0; i < numComments; i++) {
             Comment comment = MockData.generateValidEventBoardComment(parentEventId);
             comment.setAuthor(verifiedUser.getUsername());
+            comment.setAuthorInfo(verifiedUserNoPassword);
             comment.setAnonymous(false);
             comment.setComments(new ArrayList<>());
             expectedComments.add(comment);
@@ -249,6 +260,7 @@ public class EventBoardCommentTest extends BaseIntTest {
         for (int i = 0; i < numChildren; i++) {
             Comment comment = MockData.generateValidEventBoardComment();
             comment.setAuthor(verifiedUser.getUsername());
+            comment.setAuthorInfo(verifiedUserNoPassword);
             comment.setAnonymous(false);
             comment.setCommentPresent(true);
             comments.add(comment);

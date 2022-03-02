@@ -2,6 +2,7 @@ package com.uconnect.backend.connect.dao;
 
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ConnectDAO {
     private final DdbAdapter ddbAdapter;
 
+
     private final String userTableName;
 
     @Autowired
     public ConnectDAO(DdbAdapter ddbAdapter, String userTableName) {
         this.ddbAdapter = ddbAdapter;
         this.userTableName = userTableName;
+
     }
 
     /**
@@ -40,6 +43,7 @@ public class ConnectDAO {
      * @throws UserNotFoundException If the user is not found
      */
     public int request(String senderUsername, String receiverUsername) throws UserNotFoundException {
+
         User sender = ddbAdapter.findByUsername(senderUsername);
         User receiver = ddbAdapter.findByUsername(receiverUsername);
 

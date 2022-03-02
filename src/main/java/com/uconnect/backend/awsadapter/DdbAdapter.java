@@ -28,14 +28,13 @@ import java.util.Map;
 public class DdbAdapter {
     private final String userTableName;
 
-    private final String emailIndexName;
-
     private final AmazonDynamoDB ddbClient;
 
     private final Map<String, DynamoDBMapper> mapperCache;
 
     private DynamoDBMapper mapper;
 
+    private String emailIndexName;
     @Autowired
     public DdbAdapter(AmazonDynamoDB ddbClient, String userTableName, String emailIndexName) {
         this.ddbClient = ddbClient;
@@ -150,7 +149,6 @@ public class DdbAdapter {
         }
         return res.get(0);
     }
-
     public User findById(String id) throws UserNotFoundException {
         setMapperTableName(userTableName);
         User user = mapper.load(User.class, id);
@@ -164,4 +162,7 @@ public class DdbAdapter {
         setMapperTableName(userTableName);
         return (mapper.load(User.class, id) != null);
     }
+
+
+
 }

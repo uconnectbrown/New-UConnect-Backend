@@ -25,6 +25,7 @@ public class UserTestUtil {
             verifyUserHack(ddbAdapter, user.getUsername(), userTableName);
         }
 
+
         JwtRequest request = new JwtRequest(user.getUsername(), user.getPassword());
         MvcResult result = AuthenticationTestUtil.loginTraditional(mockMvc, request)
                 .andExpect(status().isOk())

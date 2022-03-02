@@ -23,11 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 public class TestUserDAO extends BaseUnitTest {
-    @Autowired
-    private String userTableName;
 
-    @Autowired
-    private String emailVerificationTableName;
+    private String userTableName = "testTableName";
+
+
+    private String emailVerificationTableName = "testEmailVerificationTableName";
+
+    private String emailIndexName = "testEmailIndex";
+
+
+
 
     @Mock
     private DdbAdapter ddbAdapter;
@@ -40,6 +45,8 @@ public class TestUserDAO extends BaseUnitTest {
 
     private Set<String> connections;
 
+
+
     private boolean init = false;
 
     @BeforeEach
@@ -50,12 +57,15 @@ public class TestUserDAO extends BaseUnitTest {
             connections = Collections.singleton(MockData.generateValidUser().getUsername());
             user.setPending(pending);
             user.setConnections(connections);
-            dao = new UserDAO(ddbAdapter, userTableName, emailVerificationTableName);
+
+            //emailIndexName = Collections.singleton(MockData.generateValidUser().getId());
+            dao = new UserDAO(ddbAdapter, userTableName, emailVerificationTableName, emailIndexName);
         }
     }
 
     @Test
     public void testGetUserByUsername() throws UserNotFoundException {
+
         when(ddbAdapter.findByUsername(user.getUsername())).thenReturn(user);
         assertEquals(user, dao.getUserByUsername(user.getUsername()));
     }
@@ -112,11 +122,13 @@ public class TestUserDAO extends BaseUnitTest {
     @Test
     public void testGetPending() throws UserNotFoundException {
         when(ddbAdapter.findByUsername(user.getUsername())).thenReturn(user);
+        System.out.println((dao.getUserByUsername(user.getUsername())));
         assertEquals(pending, dao.getPending(user.getUsername()));
     }
 
     @Test
     public void testGetPendingNotFound() throws UserNotFoundException {
+        System.out.println(user);
         when(ddbAdapter.findByUsername(user.getUsername()))
             .thenThrow(UserNotFoundException.class);
         assertNull(dao.getPending(user.getUsername()));

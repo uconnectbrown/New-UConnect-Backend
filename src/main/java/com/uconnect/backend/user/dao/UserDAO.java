@@ -1,5 +1,6 @@
 package com.uconnect.backend.user.dao;
 
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.uconnect.backend.awsadapter.DdbAdapter;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.user.model.EmailVerification;
@@ -17,12 +18,14 @@ public class UserDAO {
     private final String userTableName;
 
     private final String emailVerificationTableName;
+    private final String emailIndexName;
 
     @Autowired
-    public UserDAO(DdbAdapter ddbAdapter, String userTableName, String emailVerificationTableName) {
+    public UserDAO(DdbAdapter ddbAdapter, String userTableName, String emailVerificationTableName, String emailIndexName) {
         this.ddbAdapter = ddbAdapter;
         this.userTableName = userTableName;
         this.emailVerificationTableName = emailVerificationTableName;
+        this.emailIndexName = emailIndexName;
 
         if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
                 "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
@@ -33,15 +36,29 @@ public class UserDAO {
     }
 
     public User getUserByUsername(String username) throws UserNotFoundException {
-        return ddbAdapter.findByUsername(username);
-    }
+            User desiredUser = new User();
+            desiredUser.setUsername(username);
+            List<User> res = ddbAdapter.queryGSI(userTableName, emailIndexName, desiredUser, User.class);
+            if (res.isEmpty()) {
+                throw new UserNotFoundException("User not found with username " + username);
+            }
+            System.out.println(res.get(0));
+            return res.get(0);
+        }
+
 
     public User getUserById(String id) throws UserNotFoundException {
-        return ddbAdapter.findById(id);
+        User user = User.builder().id(id).build();
+        List<User> userList = ddbAdapter.query(userTableName, user, User.class);
+        if (userList.isEmpty()) {
+            throw new UserNotFoundException("User not found with ID " + id);
+        }
+
+        return userList.get(0);
     }
 
     public String getPasswordByUsername(String username) throws UserNotFoundException {
-        User user = ddbAdapter.findByUsername(username);
+        User user = getUserByUsername(username);
 
         return user.getPassword();
     }
@@ -65,12 +82,12 @@ public class UserDAO {
      */
     public int deleteUser(String username) {
         try {
-            User userToDelete = ddbAdapter.findByUsername(username);
+            User userToDelete = getUserByUsername(username);
             String id = userToDelete.getId();
             ddbAdapter.delete(userTableName, userToDelete);
 
             // successfully created a new user
-            return ddbAdapter.existsById(id) ? -2 : 0;
+            return UserExistsById(id) ? -2 : 0;
         } catch (UserNotFoundException e) {
             // username does not exist
             return -1;
@@ -86,7 +103,7 @@ public class UserDAO {
      */
     public Set<String> getPending(String username) {
         try {
-            User user = ddbAdapter.findByUsername(username);
+            User user = getUserByUsername(username);
             return user.getPending();
         } catch (UserNotFoundException e) {
             // user does not exist
@@ -103,7 +120,7 @@ public class UserDAO {
      */
     public Set<String> getConnections(String username) {
         try {
-            User user = ddbAdapter.findByUsername(username);
+            User user = getUserByUsername(username);
             return user.getConnections();
         } catch (UserNotFoundException e) {
             // user does not exist
@@ -143,5 +160,11 @@ public class UserDAO {
         }
 
         return verifications.get(0).getVerificationCode();
+    }
+    //same as above
+    public boolean UserExistsById(String id) {
+        User user = User.builder().id(id).build();
+        List<User> userList = ddbAdapter.query(userTableName, user, User.class );
+        return !userList.isEmpty();
     }
 }

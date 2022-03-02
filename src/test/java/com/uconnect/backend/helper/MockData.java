@@ -18,11 +18,15 @@ public class MockData {
      */
     public static User generateValidUser() {
         String email = RandomStringUtils.randomAlphanumeric(7) + "@brown.edu";
+        String firstName = RandomStringUtils.randomAlphanumeric(7);
+        String lastName = RandomStringUtils.randomAlphanumeric(7);
         return User.builder()
                 .username(email)
                 .password(RandomStringUtils.randomAlphanumeric(15))
-                .firstName(RandomStringUtils.randomAlphanumeric(7))
-                .lastName(RandomStringUtils.randomAlphanumeric(7))
+                .firstName(firstName)
+                .firstNameBucket(Character.toLowerCase(firstName.charAt(0)))
+                .lastName(lastName)
+                .lastNameBucket(Character.toLowerCase(lastName.charAt(0)))
                 .build();
     }
 

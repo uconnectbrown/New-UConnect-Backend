@@ -60,7 +60,7 @@ public class User implements UserDetails {
     private String firstName;
 
     @DynamoDBAttribute
-    @DynamoDBIndexHashKey
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "firstNameBucketIndex")
     private Character firstNameBucket;
 
     @DynamoDBAttribute
@@ -69,7 +69,7 @@ public class User implements UserDetails {
     private String lastName;
 
     @DynamoDBAttribute
-    @DynamoDBIndexHashKey
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "lastNameBucketIndex")
     private Character lastNameBucket;
 
     @DynamoDBAttribute

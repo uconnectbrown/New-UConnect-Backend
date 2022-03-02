@@ -52,7 +52,7 @@ public class SearchService {
             throw new IllegalArgumentException("Name cannot be empty string.");
         }
 
-        char bucket = name.charAt(0);
+        char bucket = Character.toLowerCase(name.charAt(0));
         Set<User> firstNameMatches = dao.getStudentsInFirstNameBucket(bucket);
         Set<User> lastNameMatches = dao.getStudentsInLastNameBucket(bucket);
         firstNameMatches.addAll(lastNameMatches);

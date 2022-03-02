@@ -88,7 +88,7 @@ public class SearchController {
             Set<User> students = searchService.getStudentsByName(name);
             return new ResponseEntity<>(students, HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Unexpected exception encountered when trying to get students with name {}: {}", name, e);
+            log.error("Unexpected exception encountered when trying to get students with name {}: {}", name, e.toString());
             return new ResponseEntity<>("Unexpected exception occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

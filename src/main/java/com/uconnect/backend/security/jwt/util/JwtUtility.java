@@ -69,7 +69,7 @@ public class JwtUtility implements Serializable {
             final String username = getUsernameFromToken(token);
 
             if (username == null || !username.equals(user.getUsername())) {
-                log.info("JWT token \"{}\" failed to validate for user \"{}\". Username in token: \"{}\"", token, user.getUsername(),
+                log.info("JWT token \n\"{}\"\nfailed to validate for user \"{}\". \nUsername in token: \"{}\"", token, user.getUsername(),
                         username);
                 return false;
             }
@@ -77,10 +77,10 @@ public class JwtUtility implements Serializable {
             return true;
         } catch (Exception e) {
             if (user == null || user.getUsername() == null) {
-                log.info("JWT token \"{}\" failed to validate. No username provided. Exception: {}", token,
+                log.info("JWT token \n\"{}\"\nfailed to validate. \nNo username provided. \nException: {}", token,
                         e.getMessage());
             } else {
-                log.info("JWT token \"{}\" failed to validate for user \"{}\". Exception: {}", token, user.getUsername(),
+                log.info("JWT token \n\"{}\"\nfailed to validate for user \"{}\". \nException: {}", token, user.getUsername(),
                         e.getMessage());
             }
             return false;

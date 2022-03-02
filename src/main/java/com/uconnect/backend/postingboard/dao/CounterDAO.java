@@ -22,6 +22,11 @@ public class CounterDAO {
     public CounterDAO(DdbAdapter ddbAdapter, String counterTableName) {
         this.ddbAdapter = ddbAdapter;
         this.counterTableName = counterTableName;
+        if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
+                "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
+            // mirror prod tables if booting up locally for manual testing
+            ddbAdapter.createOnDemandTableIfNotExists(counterTableName, Counter.class);
+        }
     }
 
     synchronized public long incrementEventBoardIndex() {

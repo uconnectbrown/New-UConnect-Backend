@@ -46,6 +46,15 @@ public class EventBoardDAO {
         this.hostIndexName = eventBoardHostIndexName;
         this.indexIndexName = eventBoardIndexIndexName;
         this.commentParentIdIndexName = eventBoardCommentParentIdIndexName;
+
+        if ("dev".equals(System.getenv("SPRING_PROFILES_ACTIVE")) &&
+                "true".equals(System.getenv("IS_MANUAL_TESTING"))) {
+            // mirror prod tables if booting up locally for manual testing
+            ddbAdapter.createOnDemandTableIfNotExists(eventBoardCommentPublishedTableName, Comment.class);
+            ddbAdapter.createOnDemandTableIfNotExists(eventBoardCommentHiddenTableName, Comment.class);
+            ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventPublishedTableName, Event.class);
+            ddbAdapter.createOnDemandTableIfNotExists(eventBoardEventHiddenTableName, Event.class);
+        }
     }
 
     // -----------

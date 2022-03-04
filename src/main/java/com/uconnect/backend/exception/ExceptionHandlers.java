@@ -93,9 +93,9 @@ public class ExceptionHandlers {
                 "Event does not exist");
     }
 
-    @ExceptionHandler(EventBoardCommentParentNotFoundException.class)
-    public ResponseEntity<String> handleEventBoardCommentParentNotFoundException(EventBoardCommentParentNotFoundException e) {
+    @ExceptionHandler(EventBoardEntityNotFoundException.class)
+    public ResponseEntity<String> handleEventBoardEntityNotFoundException(EventBoardEntityNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                "Cannot comment on a parent that does not exist");
+                "Request event board entity (event/comment) does not exist");
     }
 }

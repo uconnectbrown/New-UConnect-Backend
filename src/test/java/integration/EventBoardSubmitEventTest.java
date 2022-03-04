@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+import static com.uconnect.backend.postingboard.service.EventBoardService.EMPTY_REACTION_COLLECTION;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -146,7 +147,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event firstEvent = events.get(0);
         for (int i = 1; i < numDupEvents; i++) {
             Event currEvent = events.get(i);
-            EventBoardTestUtil.verifySameEvents(firstEvent, currEvent);
+            EventBoardTestUtil.verifySameEventsSkipReactions(firstEvent, currEvent);
             assertEquals(firstEvent.getIndex() + i, currEvent.getIndex());
         }
     }
@@ -199,7 +200,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         event.setHost(EventBoardService.ANONYMOUS_HOST);
         event.setIndex(-1);
         event.setAnonymous(true);
-        EventBoardTestUtil.verifySameEvents(event, actualEvent);
+        EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;
     }
@@ -212,7 +213,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         assertFalse(actualEvent.isAnonymous());
         event.setIndex(getNextEventIndex() - 1);
         event.setAnonymous(false);
-        EventBoardTestUtil.verifySameEvents(event, actualEvent);
+        EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;
     }

@@ -101,7 +101,7 @@ public class EventBoardGetTest extends BaseIntTest {
     public void testSuccessGetByIndex() {
         int index = (int) (Math.random() * numEventsPublished);
         Event foundEvent = EventBoardTestUtil.getEventObjByIndex(mockMvc, index, verifiedUser.getUsername(), token);
-        EventBoardTestUtil.verifySameEvents(expectedEventsPublished.get(index), foundEvent);
+        EventBoardTestUtil.verifySameEventsSkipReactions(expectedEventsPublished.get(index), foundEvent);
     }
 
     @Test
@@ -220,7 +220,7 @@ public class EventBoardGetTest extends BaseIntTest {
         while (actualIndex < count) {
             Event expected = expectedEventsPublished.get(expectedIndex);
             Event actual = actualEvents.get(actualIndex);
-            EventBoardTestUtil.verifySameEvents(expected, actual);
+            EventBoardTestUtil.verifySameEventsSkipReactions(expected, actual);
 
             ++actualIndex;
             --expectedIndex;

@@ -57,7 +57,7 @@ public class Comment {
     private boolean anonymous;
 
     @DynamoDBAttribute
-    private int likes;
+    private ReactionCollection reactions;
 
     @DynamoDBAttribute
     private boolean commentPresent;

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.uconnect.backend.postingboard.service.EventBoardService.EMPTY_REACTION_COLLECTION;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -166,7 +167,6 @@ public class EventBoardCommentTest extends BaseIntTest {
             comment.setAuthor(verifiedUser.getUsername());
             comment.setAuthorInfo(verifiedUserNoPassword);
             comment.setAnonymous(false);
-            comment.setComments(new ArrayList<>());
             expectedComments.add(comment);
 
             EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
@@ -178,7 +178,7 @@ public class EventBoardCommentTest extends BaseIntTest {
         assertEquals(numComments, actualComments.size());
         try {
             for (int i = 1; i < numComments; i++) {
-                EventBoardTestUtil.verifySameComments(expectedComments.get(i), actualComments.get(i));
+                EventBoardTestUtil.verifySameCommentsSkipReactions(expectedComments.get(i), actualComments.get(i));
             }
         } finally {
             for (Comment comment : actualComments) {
@@ -224,7 +224,7 @@ public class EventBoardCommentTest extends BaseIntTest {
 
         comment.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
         comment.setAnonymous(true);
-        EventBoardTestUtil.verifySameComments(comment, actualComment);
+        EventBoardTestUtil.verifySameCommentsSkipReactions(comment, actualComment);
 
         return actualComment;
     }
@@ -236,7 +236,7 @@ public class EventBoardCommentTest extends BaseIntTest {
 
         assertFalse(actualComment.isAnonymous());
         comment.setAnonymous(false);
-        EventBoardTestUtil.verifySameComments(comment, actualComment);
+        EventBoardTestUtil.verifySameCommentsSkipReactions(comment, actualComment);
 
         return actualComment;
     }
@@ -263,6 +263,7 @@ public class EventBoardCommentTest extends BaseIntTest {
             comment.setAuthorInfo(verifiedUserNoPassword);
             comment.setAnonymous(false);
             comment.setCommentPresent(true);
+            comment.setReactions(EMPTY_REACTION_COLLECTION);
             comments.add(comment);
             comment.setComments(buildRandomCommentTree(minDepth, maxDepth, maxNumChildren, newLevelPercentage, currDepth + 1));
         }
@@ -284,7 +285,8 @@ public class EventBoardCommentTest extends BaseIntTest {
             comment.setParentId(parentId);
             comment.setContent("curse the recursive tree");
 
-            EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token);
+            EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
+                    .andExpect(status().isOk());
             String thisId = ddbAdapter.queryGSI(eventBoardCommentPublishedTableName, eventBoardCommentParentIdIndexName, comment, Comment.class)
                     .get(i).getId();
             comment.setId(thisId);

@@ -26,6 +26,13 @@ public class MockData {
                 .build();
     }
 
+    public static Event generateValidEventBoardEvent(String author) {
+        Event event = generateValidEventBoardEvent();
+        event.setAuthor(author);
+
+        return event;
+    }
+
     public static Event generateValidEventBoardEvent() {
         return Event.builder()
                 .description(RandomStringUtils.randomAlphanumeric(100))

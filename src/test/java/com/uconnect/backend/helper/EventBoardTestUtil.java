@@ -5,17 +5,21 @@ import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
 import com.uconnect.backend.postingboard.model.GetEventsRequest;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
+import com.uconnect.backend.postingboard.model.ReactionCollection;
 import com.uconnect.backend.user.model.User;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class EventBoardTestUtil {
     public static final ObjectMapper MAPPER = new ObjectMapper();
@@ -70,6 +74,7 @@ public class EventBoardTestUtil {
 
     public static Event getEventObjByIndex(MockMvc mockMvc, long index, String username, String token) throws Exception {
         MvcResult result = getEventByIndex(mockMvc, index, username, token)
+                .andExpect(status().isOk())
                 .andReturn();
 
         return MAPPER.readValue(result.getResponse().getContentAsString(), Event.class);
@@ -80,11 +85,18 @@ public class EventBoardTestUtil {
      * Add them as headers once/if these endpoints become authenticated.
      */
     public static ResultActions getEventByIndex(MockMvc mockMvc, long index, String username, String token) throws Exception {
-        return mockMvc
-                .perform(MockMvcRequestBuilders
-                        .get(String.format("/v1/event-board/anonymous/event/get?index=%s", index))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON));
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders
+                .get(String.format("/v1/event-board/anonymous/event/get?index=%s", index))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(username)) {
+            builder.header("Username", username);
+        }
+        if (StringUtils.isNotBlank(token)) {
+            builder.header("Authorization", String.format("%s %s", "Bearer", token));
+        }
+
+        return mockMvc.perform(builder);
     }
 
     public static GetEventsResponse getLatestEventsResponse(MockMvc mockMvc, long startIndex, int count, String username, String token) throws Exception {
@@ -104,12 +116,24 @@ public class EventBoardTestUtil {
         return mockMvc
                 .perform(MockMvcRequestBuilders
                         .post("/v1/event-board/anonymous/event/get-latest")
+                        .header("Username", username)
+                        .header("Authorization", String.format("%s %s", "Bearer", token))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON));
     }
 
-    public static void verifySameEvents(Event e1, Event e2) {
+    public static ResultActions react(MockMvc mockMvc, String id, String type, String username, String token) throws Exception {
+        return mockMvc
+                .perform(MockMvcRequestBuilders
+                        .get(String.format("/v1/event-board/verified/react?id=%s&reactionType=%s", id, type))
+                        .header("Username", username)
+                        .header("Authorization", String.format("%s %s", "Bearer", token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON));
+    }
+
+    public static void verifySameEventsSkipReactions(Event e1, Event e2) {
         assertEquals(e1.getTitle(), e2.getTitle());
         assertEquals(e1.getAuthor(), e2.getAuthor());
         haveSameAuthorInfo(e1.getAuthorInfo(), e2.getAuthorInfo());
@@ -122,7 +146,7 @@ public class EventBoardTestUtil {
         haveSameComments(e1.getComments(), e2.getComments());
     }
 
-    public static void verifySameComments(Comment c1, Comment c2) {
+    public static void verifySameCommentsSkipReactions(Comment c1, Comment c2) {
         assertEquals(c1.getAuthor(), c2.getAuthor());
         assertEquals(c1.getContent(), c2.getContent());
         assertEquals(c1.isAnonymous(), c2.isAnonymous());
@@ -136,7 +160,6 @@ public class EventBoardTestUtil {
         if (l1 == null && l2 == null) {
             return;
         }
-
         if (l1 == null || l2 == null) {
             fail();
         }
@@ -149,8 +172,24 @@ public class EventBoardTestUtil {
             Comment c1 = l1.get(i);
             Comment c2 = l2.get(i);
 
-            verifySameComments(c1, c2);
+            verifySameCommentsSkipReactions(c1, c2);
         }
+    }
+
+    public static void haveSameReactions(ReactionCollection r1, ReactionCollection r2) {
+        if (r1 == null && r2 == null) {
+            return;
+        }
+        if (r1 == null || r2 == null) {
+            fail();
+        }
+
+        assertEquals(r1.getLikeUsernames(), r2.getLikeUsernames());
+        assertEquals(r1.getLikeCount(), r2.getLikeCount());
+        assertEquals(r1.getLoveUsernames(), r2.getLoveUsernames());
+        assertEquals(r1.getLoveCount(), r2.getLoveCount());
+        assertEquals(r1.getInterestedUsernames(), r2.getInterestedUsernames());
+        assertEquals(r1.getInterestedCount(), r2.getInterestedCount());
     }
 
     private static void haveSameAuthorInfo(User a1, User a2) {

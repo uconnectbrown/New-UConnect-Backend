@@ -67,7 +67,7 @@ public class Event {
     private long index;
 
     @DynamoDBAttribute
-    private int likes;
+    private ReactionCollection reactions;
 
     @DynamoDBAttribute
     @Size(max = 50, message = "Event location cannot exceed 50 characters")

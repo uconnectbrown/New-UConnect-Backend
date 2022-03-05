@@ -61,7 +61,7 @@ public class SearchController {
             Set<String> students = searchService.getStudentsByClassYear(year);
             return new ResponseEntity<>(students, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Invalid class year provided.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             log.error("Unexpected exception encountered when trying to get students in class year: {}", year);
             return new ResponseEntity<>("Unexpected exception occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -74,7 +74,6 @@ public class SearchController {
             Set<String> students = searchService.getStudentsByConcentration(concentration);
             return new ResponseEntity<>(students, HttpStatus.OK);
         } catch (ConcentrationNotFoundException e) {
-            log.info("Could not find concentration: {}", concentration);
             return new ResponseEntity<>("Could not find concentration: " + concentration, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             log.error("Unexpected exception encountered when trying to get students in concentration {}: {}", concentration, e);

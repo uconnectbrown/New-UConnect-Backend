@@ -11,8 +11,10 @@ import com.uconnect.backend.search.model.CourseRoster;
 import com.uconnect.backend.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import lombok.extern.slf4j.Slf4j;
 
 @Repository
+@Slf4j
 public class SearchDAO {
 
     private final DdbAdapter ddbAdapter;
@@ -43,6 +45,7 @@ public class SearchDAO {
                 ddbAdapter.query(courseTableName, desiredCourse,
                         CourseRoster.class);
         if (res.isEmpty()) {
+            log.info("Could not find course: {}", name);
             throw new CourseNotFoundException(
                     "Course with name " + name + " not found.");
         }
@@ -54,6 +57,7 @@ public class SearchDAO {
         desiredConcentration.setName(name);
         List<Concentration> res = ddbAdapter.query(concentrationTableName, desiredConcentration, Concentration.class);
         if (res.isEmpty()) {
+            log.info("Could not find concentration: {}", name);
             throw new ConcentrationNotFoundException("Concentration not found: " + name);
         }
         return res.get(0);

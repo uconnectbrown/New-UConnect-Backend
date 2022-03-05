@@ -55,7 +55,7 @@ public class SearchController {
         }
     }
 
-    @GetMapping("/v1/search/getStudentsByClassYear/{year}")
+    @GetMapping("/v1/search/class-year/{year}")
     public ResponseEntity<?> getStudentsByClassYear(@PathVariable("year") String year) {
         try {
             Set<String> students = searchService.getStudentsByClassYear(year);
@@ -68,7 +68,7 @@ public class SearchController {
         }
     }
 
-    @GetMapping("/v1/search/getStudentsByConcentration/{concentration}")
+    @GetMapping("/v1/search/concentration/{concentration}")
     public ResponseEntity<?> getStudentsByConcentration(@PathVariable("concentration") String concentration) {
         try {
             Set<String> students = searchService.getStudentsByConcentration(concentration);

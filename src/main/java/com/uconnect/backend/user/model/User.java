@@ -65,7 +65,7 @@ public class User implements UserDetails {
     private String lastName;
 
     @DynamoDBAttribute
-    @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYear")
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYearIndex")
     @Digits(integer = 4, fraction = 1, message = "Class year must be a number with at most 4 integral digits and 1 fractional digit")
     private String classYear;
 

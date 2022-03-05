@@ -23,11 +23,15 @@ public class GetStudentsByConcentrationTest extends BaseIntTest {
     @Autowired
     private ObjectMapper mapper;
 
-    private Concentration validConcentration = new Concentration();
+    private static Concentration validConcentration = Concentration.builder().name("BEO").build();
 
-    private Set<String> students = new HashSet<>();
+    private static Concentration validConcentrationWithSpaces = Concentration.builder().name("Computer Science").build();
 
-    private User validUser = MockData.generateValidUser();
+    private static Concentration validConcentrationWithSpecialChars = Concentration.builder().name("Art of Kitchen, Bathroom, and Basement").build();
+
+    private static Set<String> students = new HashSet<>();
+
+    private static User validUser = MockData.generateValidUser();
 
     private static boolean init = true;
 
@@ -35,14 +39,21 @@ public class GetStudentsByConcentrationTest extends BaseIntTest {
     public void setup() {
         if (init) {
             setupDdb();
+
+            for (int i = 0; i < 10; i++) {
+                students.add(MockData.generateValidUser().getUsername());
+            }
+            validConcentration.setStudents(students);
+            validConcentrationWithSpaces.setStudents(students);
+            validConcentrationWithSpecialChars.setStudents(students);
+
+            ddbAdapter.save(concentrationTableName, validConcentration);
+            ddbAdapter.save(concentrationTableName, validConcentrationWithSpaces);
+            ddbAdapter.save(concentrationTableName,
+                    validConcentrationWithSpecialChars);
+
             init = false;
         }
-        for (int i = 0; i < 10; i++) {
-            students.add(MockData.generateValidUser().getUsername());
-        }
-        validConcentration.setName("testConcentration");
-        validConcentration.setStudents(students);
-        ddbAdapter.save(concentrationTableName, validConcentration);
     }
 
     private MvcResult testGetStudents(String concentration,
@@ -80,8 +91,19 @@ public class GetStudentsByConcentrationTest extends BaseIntTest {
 
     @Test
     public void testValid() throws Exception {
-        testGetStudents(validConcentration.getName(), status().isOk(),
-                validConcentration.getStudents());
+        testGetStudents(validConcentration.getName(), status().isOk(), validConcentrationWithSpaces.getStudents());
+    }
+
+    @Test
+    public void testNameWithSpaces() throws Exception {
+        testGetStudents(validConcentrationWithSpaces.getName(), status().isOk(),
+                validConcentrationWithSpaces.getStudents());
+    }
+
+    @Test
+    public void testNameWithSpecialChars() throws Exception {
+        testGetStudents(validConcentrationWithSpecialChars.getName(), status().isOk(),
+                validConcentrationWithSpecialChars.getStudents());
     }
 
     @Test

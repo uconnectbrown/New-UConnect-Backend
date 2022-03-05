@@ -27,13 +27,19 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
 
   private User validUser = MockData.generateValidUser();
 
-  private String validClassYear = "2023";
+  private String validIntegerClassYear = "2023";
+
+  private String validDoubleClassYear = "2023.5";
 
   private String otherValidClassYear = "2022";
 
   private String invalidClassYear = "3";
 
-  private Set<String> studentsInValidClassYear = new HashSet<>();
+  private String invalidDoubleClassYear = "1000.3";
+
+  private Set<String> studentsInValidIntegerClassYear = new HashSet<>();
+
+  private Set<String> studentsInValidDoubleClassYear = new HashSet<>();
 
   private Set<User> students = new HashSet<>();
 
@@ -48,19 +54,28 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
       init = false;
     }
     
-    // Add students with classYear == validClassYear
+    // Add students with classYear == validIntegerClassYear
     for (int i = 0; i < 5; i++) {
       User u = MockData.generateValidUser();
-      u.setClassYear(validClassYear);
-      studentsInValidClassYear.add(u.getUsername());
+      u.setClassYear(validIntegerClassYear);
+      studentsInValidIntegerClassYear.add(u.getUsername());
       students.add(u);
       ddbAdapter.save(userTableName, u); 
+    }
+
+    for (int i = 0; i < 5; i++) {
+      User u = MockData.generateValidUser();
+      u.setClassYear(validDoubleClassYear);
+      studentsInValidDoubleClassYear.add(u.getUsername());
+      students.add(u);
+      ddbAdapter.save(userTableName, u);
     }
 
     // Add students with random classYear in [1000, 1999]
     for (int i = 0; i < 5; i++) {
       User u = MockData.generateValidUser();
-      u.setClassYear(String.valueOf(1000 + rand.nextInt(1000)));
+      double randomClassYear = 1000 + rand.nextInt(1000) + (rand.nextInt(2) == 1 ? 0.5 : 0);
+      u.setClassYear(String.valueOf(randomClassYear));
       students.add(u);
       ddbAdapter.save(userTableName, u);
     }
@@ -100,8 +115,18 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
   }
 
   @Test
-  public void testValid() throws Exception {
-    testGetStudents(validClassYear, status().isOk(), studentsInValidClassYear);
+  public void testIntegerClassYearWithinBounds() throws Exception {
+    testGetStudents(validIntegerClassYear, status().isOk(), studentsInValidIntegerClassYear);
+  }
+
+  @Test
+  public void testDoubleClassYearWithinBounds() throws Exception {
+    testGetStudents(validDoubleClassYear, status().isOk(), studentsInValidDoubleClassYear);
+  }
+
+  @Test
+  public void testInvalidDoubleClassYear() throws Exception {
+    testGetStudents(invalidDoubleClassYear, status().isBadRequest(), "Year must be divisible by 0.5.");
   }
 
   @Test
@@ -110,7 +135,17 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
   }
   
   @Test
-  public void testInvalidClassYear() throws Exception {
-    testGetStudents(invalidClassYear, status().isBadRequest(), "Invalid class year provided.");
+  public void testClassYearOutOfBounds() throws Exception {
+    testGetStudents(invalidClassYear, status().isBadRequest(), "Year must be four digits.");
+  }
+
+  @Test
+  public void testClassYearNull() throws Exception {
+    testGetStudents(null, status().isBadRequest(), "Year cannot be null.");
+  }
+
+  @Test
+  public void testClassYearNan() throws Exception {
+    testGetStudents("nan", status().isBadRequest(), "Year must be a number.");
   }
 }

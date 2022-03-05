@@ -26,10 +26,15 @@ public class SearchService {
     public Set<String> getStudentsByClassYear(String year) throws IllegalArgumentException {
         // Ensure that the year is valid
         try {
-            if (year.length() != 4) {
+            if (year.equals("null")) {
+                throw new IllegalArgumentException("Year cannot be null.");
+            }
+            double yearDouble = Double.valueOf(year);
+            if (yearDouble < 1000 || yearDouble > 9999) {
                 throw new IllegalArgumentException("Year must be four digits.");
-            } 
-            Integer.valueOf(year);
+            } else if (yearDouble % 0.5 != 0) {
+                throw new IllegalArgumentException("Year must be divisible by 0.5.");
+            }
             Set<String> students = dao.getStudentsByClassYear(year);
             return students;
         } catch (NumberFormatException e) {

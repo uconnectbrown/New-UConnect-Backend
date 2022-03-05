@@ -41,7 +41,7 @@ public class SearchController {
      * @param name the name of the course
      * @return a set of student usernames
      */ 
-    @GetMapping("/v1/search/getStudentsByCourse/{name}")
+    @GetMapping("/v1/search/course/{name}")
     public ResponseEntity<Set<String>> getStudentsByCourse(@PathVariable("name") String name) {
         log.info("Received a query for students in course: %s", name);
         try {

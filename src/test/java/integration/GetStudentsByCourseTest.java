@@ -52,7 +52,7 @@ public class GetStudentsByCourseTest extends BaseIntTest {
 
         return mockMvc
                 .perform(MockMvcRequestBuilders
-                        .get(String.format("/v1/search/getStudentsByCourse/%s", course))
+                        .get(String.format("/v1/search/course/%s", course))
                         .header("Authorization", String.format("Bearer %s", token))
                         .header("Username", validUser.getUsername())
                         .contentType(MediaType.APPLICATION_JSON)

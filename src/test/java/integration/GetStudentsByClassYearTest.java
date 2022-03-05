@@ -104,7 +104,7 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
 
       return mockMvc
               .perform(MockMvcRequestBuilders
-                      .get(String.format("/v1/search/getStudentsByClassYear/%s", classYear))
+                      .get(String.format("/v1/search/class-year/%s", classYear))
                       .header("Authorization", String.format("Bearer %s", token))
                       .header("Username", validUser.getUsername())
                       .contentType(MediaType.APPLICATION_JSON)

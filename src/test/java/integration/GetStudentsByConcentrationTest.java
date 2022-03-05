@@ -2,9 +2,7 @@ package integration;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.helper.BaseIntTest;
@@ -12,7 +10,6 @@ import com.uconnect.backend.helper.MockData;
 import com.uconnect.backend.helper.UserTestUtil;
 import com.uconnect.backend.search.model.Concentration;
 import com.uconnect.backend.user.model.User;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +45,6 @@ public class GetStudentsByConcentrationTest extends BaseIntTest {
         ddbAdapter.save(concentrationTableName, validConcentration);
     }
 
-    @AfterEach
-    public void teardown() {
-        return;
-    }
-
     private MvcResult testGetStudents(String concentration,
             ResultMatcher status,
             Object expected)
@@ -74,7 +66,7 @@ public class GetStudentsByConcentrationTest extends BaseIntTest {
         return mockMvc
                 .perform(MockMvcRequestBuilders
                         .get(String.format(
-                                "/v1/search/getStudentsByConcentration/%s",
+                                "/v1/search/concentration/%s",
                                 concentration))
                         .header("Authorization",
                                 String.format("Bearer %s", token))

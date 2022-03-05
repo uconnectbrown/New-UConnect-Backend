@@ -11,7 +11,6 @@ import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.MockData;
 import com.uconnect.backend.helper.UserTestUtil;
 import com.uconnect.backend.user.model.User;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +24,27 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
   @Autowired
   private ObjectMapper mapper;
 
-  private User validUser = MockData.generateValidUser();
+  private static User validUser = MockData.generateValidUser();
 
-  private String validIntegerClassYear = "2023";
+  private static final String VALID_INTEGER_CLASS_YEAR = "2023";
 
-  private String validDoubleClassYear = "2023.5";
+  private static final String VALID_DOUBLE_CLASS_YEAR = "2023.5";
 
-  private String otherValidClassYear = "2022";
+  private static final String OTHER_VALID_INTEGER_CLASS_YEAR = "2022";
 
-  private String invalidClassYear = "3";
+  private static final String INVALID_INTEGER_CLASS_YEAR = "3";
 
-  private String invalidDoubleClassYear = "1000.3";
+  private static final String INVALID_DOUBLE_CLASS_YEAR = "1000.3";
 
-  private Set<String> studentsInValidIntegerClassYear = new HashSet<>();
+  private static final String NAN = "nan";
 
-  private Set<String> studentsInValidDoubleClassYear = new HashSet<>();
+  private static Set<String> studentsInValidIntegerClassYear = new HashSet<>();
 
-  private Set<User> students = new HashSet<>();
+  private static Set<String> studentsInValidDoubleClassYear = new HashSet<>();
 
-  private Random rand = new Random();
+  private static Set<User> students = new HashSet<>();
+
+  private static Random rand = new Random();
 
   private static boolean init = true;
   
@@ -51,40 +52,37 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
   public void setup() {
     if (init) {
       setupDdb();
+
+      // Add students with classYear == validIntegerClassYear
+      for (int i = 0; i < 5; i++) {
+        User u = MockData.generateValidUser();
+        u.setClassYear(VALID_INTEGER_CLASS_YEAR);
+        studentsInValidIntegerClassYear.add(u.getUsername());
+        students.add(u);
+        ddbAdapter.save(userTableName, u); 
+      }
+
+      for (int i = 0; i < 5; i++) {
+        User u = MockData.generateValidUser();
+        u.setClassYear(VALID_DOUBLE_CLASS_YEAR);
+        studentsInValidDoubleClassYear.add(u.getUsername());
+        students.add(u);
+        ddbAdapter.save(userTableName, u);
+      }
+
+      // Add students with random classYear in [1000, 1999]
+      for (int i = 0; i < 5; i++) {
+        User u = MockData.generateValidUser();
+        Double randomClassYear = 1000 + rand.nextInt(999) + (rand.nextInt(2) == 1 ? 0.5 : 0);
+        if (randomClassYear.equals(Double.valueOf(OTHER_VALID_INTEGER_CLASS_YEAR))) {
+          randomClassYear++;
+        }
+        u.setClassYear(String.valueOf(randomClassYear));
+        students.add(u);
+        ddbAdapter.save(userTableName, u);
+      }
+
       init = false;
-    }
-    
-    // Add students with classYear == validIntegerClassYear
-    for (int i = 0; i < 5; i++) {
-      User u = MockData.generateValidUser();
-      u.setClassYear(validIntegerClassYear);
-      studentsInValidIntegerClassYear.add(u.getUsername());
-      students.add(u);
-      ddbAdapter.save(userTableName, u); 
-    }
-
-    for (int i = 0; i < 5; i++) {
-      User u = MockData.generateValidUser();
-      u.setClassYear(validDoubleClassYear);
-      studentsInValidDoubleClassYear.add(u.getUsername());
-      students.add(u);
-      ddbAdapter.save(userTableName, u);
-    }
-
-    // Add students with random classYear in [1000, 1999]
-    for (int i = 0; i < 5; i++) {
-      User u = MockData.generateValidUser();
-      double randomClassYear = 1000 + rand.nextInt(1000) + (rand.nextInt(2) == 1 ? 0.5 : 0);
-      u.setClassYear(String.valueOf(randomClassYear));
-      students.add(u);
-      ddbAdapter.save(userTableName, u);
-    }
-  }
-
-  @AfterEach
-  public void teardown() {
-    for (User u : students) {
-      ddbAdapter.delete(userTableName, u);
     }
   }
 
@@ -116,27 +114,27 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
 
   @Test
   public void testIntegerClassYearWithinBounds() throws Exception {
-    testGetStudents(validIntegerClassYear, status().isOk(), studentsInValidIntegerClassYear);
+    testGetStudents(VALID_INTEGER_CLASS_YEAR, status().isOk(), studentsInValidIntegerClassYear);
   }
 
   @Test
   public void testDoubleClassYearWithinBounds() throws Exception {
-    testGetStudents(validDoubleClassYear, status().isOk(), studentsInValidDoubleClassYear);
+    testGetStudents(VALID_DOUBLE_CLASS_YEAR, status().isOk(), studentsInValidDoubleClassYear);
   }
 
   @Test
   public void testInvalidDoubleClassYear() throws Exception {
-    testGetStudents(invalidDoubleClassYear, status().isBadRequest(), "Year must be divisible by 0.5.");
+    testGetStudents(INVALID_DOUBLE_CLASS_YEAR, status().isBadRequest(), "Year must be divisible by 0.5.");
   }
 
   @Test
   public void testNotFound() throws Exception {
-    testGetStudents(otherValidClassYear, status().isOk(), Collections.emptySet());
+    testGetStudents(OTHER_VALID_INTEGER_CLASS_YEAR, status().isOk(), Collections.emptySet());
   }
   
   @Test
   public void testClassYearOutOfBounds() throws Exception {
-    testGetStudents(invalidClassYear, status().isBadRequest(), "Year must be four digits.");
+    testGetStudents(INVALID_INTEGER_CLASS_YEAR, status().isBadRequest(), "Year must be four digits.");
   }
 
   @Test
@@ -146,6 +144,6 @@ public class GetStudentsByClassYearTest extends BaseIntTest {
 
   @Test
   public void testClassYearNan() throws Exception {
-    testGetStudents("nan", status().isBadRequest(), "Year must be a number.");
+    testGetStudents(NAN, status().isBadRequest(), "Year must be a number.");
   }
 }

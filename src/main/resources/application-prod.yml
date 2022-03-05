@@ -19,7 +19,7 @@ db-table-name:
   eventBoardCommentParentIdIndex: "parentIdIndex"
   counter: "prod-counter"
   course: "prod-userCourse"
-  classYearIndex: "classYear"
+  classYearIndex: "classYearIndex"
   concentration: "prod-concentration"
 
 ses:

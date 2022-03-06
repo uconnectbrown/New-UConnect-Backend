@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.Set;
 
 @Slf4j
@@ -162,7 +163,8 @@ public class UserService implements UserDetailsService {
             user = User.builder()
                     .username(username)
                     .creationType(UserCreationType.O_AUTH)
-                    .isVerified(true)
+                    .verified(true)
+                    .createdAt(new Date())
                     .build();
 
             createNewUser(user);
@@ -244,7 +246,7 @@ public class UserService implements UserDetailsService {
         dao.setEmailVerificationCode(username, null);
     }
 
-    private boolean checkProfileComplete(User newRecord) {
+    public boolean checkProfileComplete(User newRecord) {
         return StringUtils.isNotBlank(newRecord.getUsername())
                 && StringUtils.isNotBlank(newRecord.getFirstName()) && StringUtils.isNotBlank(newRecord.getLastName())
                 && StringUtils.isNotBlank(newRecord.getClassYear())

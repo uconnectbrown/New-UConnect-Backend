@@ -7,13 +7,16 @@ import com.uconnect.backend.helper.AuthenticationTestUtil;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.MockData;
 import com.uconnect.backend.helper.UserTestUtil;
-import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.authority.UserAuthority;
+import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.user.model.Course;
 import com.uconnect.backend.user.model.InterestItem;
 import com.uconnect.backend.user.model.Location;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,18 +38,38 @@ public class UpdateUserTest extends BaseIntTest {
 
     private static User oldUser;
 
+    private static User simulatedOAuthUser;
+    private static String simulatedOAuthUserToken;
+
     private static boolean init = true;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception {
         if (init) {
             setupDdb();
+
+            simulatedOAuthUser = User.builder()
+                    .username("coon@brown.edu")
+                    .password("coon_and_friends")
+                    .creationType(UserCreationType.TRADITIONAL)
+                    .verified(true)
+                    .profileCompleted(false)
+                    .createdAt(new Date())
+                    .build();
+            simulatedOAuthUserToken = UserTestUtil.getTokenForTraditionalUser(mockMvc, simulatedOAuthUser, true, ddbAdapter, userTableName);
+            simulatedOAuthUser.setId(UserTestUtil.getUserModel(mockMvc, simulatedOAuthUser.getUsername(), simulatedOAuthUser.getUsername(),
+                    simulatedOAuthUserToken).getId());
 
             init = false;
         }
         oldUser = MockData.generateValidUser();
         oldUser.setCreationType(UserCreationType.TRADITIONAL);
         oldUser.setVerified(true);
+    }
+
+    @AfterEach
+    public void cleanup() {
+        ddbAdapter.save(userTableName, simulatedOAuthUser);
     }
 
     @Test
@@ -313,9 +336,9 @@ public class UpdateUserTest extends BaseIntTest {
                 .build();
 
         UserTestUtil.updateUser(mockMvc, username, newRecord, token)
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().string(
-                        "You are not authorized to make that request. We've got our eyes on you!"))
+                        "{\"username\":\"User object username cannot be null or empty\"}"))
                 .andReturn();
         User newUser = ddbAdapter.findByUsername(username);
         verifyUnchangedProperties(oldUser, newUser);
@@ -351,9 +374,9 @@ public class UpdateUserTest extends BaseIntTest {
         User newRecord = User.builder()
                 .username(username)
                 .authorities(ImmutableList.of(new UserAuthority("ADMIN")))
-                .isVerified(!oldUser.isVerified())
+                .verified(!oldUser.isVerified())
                 .creationType(UserCreationType.O_AUTH)
-                .isProfileCompleted(!oldUser.isProfileCompleted())
+                .profileCompleted(!oldUser.isProfileCompleted())
                 .createdAt(new Date())
                 .build();
 
@@ -379,6 +402,64 @@ public class UpdateUserTest extends BaseIntTest {
                 .andReturn();
         User newUser = ddbAdapter.findByUsername(username);
         verifyUnchangedProperties(oldUser, newUser);
+    }
+
+    // --------------------------
+    // - complete profile tests -
+    // --------------------------
+    @Test
+    @SneakyThrows
+    public void testSuccessCompleteProfile() {
+        Assertions.assertFalse(UserTestUtil.getUserModel(mockMvc, simulatedOAuthUser.getUsername(), simulatedOAuthUser.getUsername(),
+                simulatedOAuthUserToken).isProfileCompleted());
+
+        List<InterestItem> fakeInterests = ImmutableList.of(new InterestItem(), new InterestItem(), new InterestItem());
+        User completedUser = User.builder()
+                .username(simulatedOAuthUser.getUsername())
+                .firstName("Emma")
+                .lastName("Watson")
+                .classYear("2014")
+                .majors(ImmutableList.of("Dark Magic"))
+                .interests1(fakeInterests)
+                .interests2(fakeInterests)
+                .interests3(fakeInterests)
+                .build();
+
+        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).isProfileCompleted());
+    }
+
+    @Test
+    @SneakyThrows
+    public void testSuccessCompletedProfileStaysComplete() {
+        testSuccessCompleteProfile();
+
+        User completedUser = User.builder()
+                .username(simulatedOAuthUser.getUsername())
+                .majors(ImmutableList.of("Gender Studies"))
+                .build();
+
+        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).isProfileCompleted());
+    }
+
+    @Test
+    @SneakyThrows
+    public void testFailureCompleteProfileNoMajor() {
+        Assertions.assertFalse(UserTestUtil.getUserModel(mockMvc, simulatedOAuthUser.getUsername(), simulatedOAuthUser.getUsername(),
+                simulatedOAuthUserToken).isProfileCompleted());
+
+        List<InterestItem> fakeInterests = ImmutableList.of(new InterestItem(), new InterestItem(), new InterestItem());
+        User completedUser = User.builder()
+                .username(simulatedOAuthUser.getUsername())
+                .firstName("Emma")
+                .lastName("Watson")
+                .classYear("2014")
+                .majors(ImmutableList.of())
+                .interests1(fakeInterests)
+                .interests2(fakeInterests)
+                .interests3(fakeInterests)
+                .build();
+
+        Assertions.assertFalse(getUpdatedUser(completedUser, simulatedOAuthUserToken).isProfileCompleted());
     }
 
     // -----------

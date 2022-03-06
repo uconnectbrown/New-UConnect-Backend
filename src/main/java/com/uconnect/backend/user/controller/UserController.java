@@ -1,10 +1,10 @@
 package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
-import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
@@ -156,6 +156,7 @@ public class UserController {
         userService.authorizeEmailDomain(authenticatedUsername);
 
         String token = userService.generateOAuthJWT(authenticatedUsername);
+        log.info("Issued a token to user \"{}\" via OAuth", authenticatedUsername);
         return new OAuthJwtResponse(token, authenticatedUsername);
     }
 

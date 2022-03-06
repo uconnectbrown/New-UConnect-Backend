@@ -32,4 +32,4 @@ spring:
             client-id: 529455990235-nthg83dnb7rrb2f7640h5cj06d4bfsqd.apps.googleusercontent.com
             client-secret: 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
             client-authentication-method: client_secret_post
-            redirect-uri: https://uconnectbrown.com/auth/google/callback
+            redirect-uri: https://www.uconnectbrown.com/auth/google/callback

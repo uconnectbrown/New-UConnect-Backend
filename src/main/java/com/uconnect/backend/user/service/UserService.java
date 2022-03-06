@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationExch
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void updateUser(User newRecord) throws UserNotFoundException {
+    public synchronized void updateUser(User newRecord) throws UserNotFoundException {
         // bubble up exception if user not found
         User oldRecord = dao.getUserByUsername(newRecord.getUsername());
 
@@ -97,7 +98,7 @@ public class UserService implements UserDetailsService {
         newRecord.setAuthorities(null);
         newRecord.setVerified(oldRecord.isVerified());
         newRecord.setCreationType(null);
-        newRecord.setProfileCompleted(oldRecord.isProfileCompleted());
+        newRecord.setProfileCompleted(checkProfileComplete(newRecord) || oldRecord.isProfileCompleted());
         newRecord.setCreatedAt(null);
         if (UserCreationType.O_AUTH.equals(oldRecord.getCreationType())) {
             newRecord.setPassword(null);
@@ -241,5 +242,15 @@ public class UserService implements UserDetailsService {
         user.setVerified(true);
         dao.saveUser(user);
         dao.setEmailVerificationCode(username, null);
+    }
+
+    private boolean checkProfileComplete(User newRecord) {
+        return StringUtils.isNotBlank(newRecord.getUsername())
+                && StringUtils.isNotBlank(newRecord.getFirstName()) && StringUtils.isNotBlank(newRecord.getLastName())
+                && StringUtils.isNotBlank(newRecord.getClassYear())
+                && !CollectionUtils.isEmpty(newRecord.getMajors()) && StringUtils.isNotBlank(newRecord.getMajors().get(0))
+                && newRecord.getInterests1() != null && newRecord.getInterests1().size() == 3
+                && newRecord.getInterests2() != null && newRecord.getInterests2().size() == 3
+                && newRecord.getInterests3() != null && newRecord.getInterests3().size() == 3;
     }
 }

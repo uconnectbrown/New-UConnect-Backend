@@ -70,7 +70,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(ImmutableList.of("https://api.uconnectbrown.com", "http://localhost:3000"));
+        configuration.setAllowedOrigins(ImmutableList.of(
+                "https://www.uconnectbrown.com",
+                "https://uconnectbrown.com",
+                "https://api.uconnectbrown.com",
+                "http://localhost:3000"));
         configuration.setAllowedMethods(ImmutableList.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(ImmutableList.of("*"));

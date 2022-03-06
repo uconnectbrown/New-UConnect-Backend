@@ -1,10 +1,10 @@
 package com.uconnect.backend.user.controller;
 
 import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.security.jwt.model.JwtRequest;
 import com.uconnect.backend.security.jwt.model.JwtResponse;
 import com.uconnect.backend.security.jwt.model.OAuthJwtResponse;
-import com.uconnect.backend.security.RequestPermissionUtility;
 import com.uconnect.backend.security.oauth.OAuthRequest;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
@@ -96,7 +96,7 @@ public class UserController {
         }
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setCreationType(UserCreationType.TRADITIONAL);
-        user.setVerified(false);
+        user.setVerified(userService.checkProfileComplete(user));
         user.setCreatedAt(new Date());
 
         int result = userService.createNewUser(user);

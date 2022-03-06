@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class User implements UserDetails {
     @EqualsAndHashCode.Include
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "emailIndex")
+    @NotBlank(message = "User object username cannot be null or empty")
     @Email(message = "Email is not valid")
     private String username;
 
@@ -135,10 +137,10 @@ public class User implements UserDetails {
 
     // no validation needed, always manually set to false for new users
     @DynamoDBAttribute
-    private boolean isVerified;
+    private boolean verified;
 
     @DynamoDBAttribute
-    private boolean isProfileCompleted;
+    private boolean profileCompleted;
 
     @DynamoDBAttribute
     private List<UserAuthority> authorities;

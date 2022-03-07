@@ -11,8 +11,10 @@ phases:
   post_build:
     commands:
       - echo Build completed successfully
+      - echo Moving jar to project root
+      - cp target/UConnectBackend.jar UConnectBackend.jar
 artifacts:
   files:
-    - target/UConnectBackend.jar
+    - UConnectBackend.jar
     - .platform/**/*
-  discard-paths: yes
+  discard-paths: no

@@ -1,6 +1,19 @@
+container_commands:
+  01_fix_static_cors:
+    command: "/tmp/fix_static_cors.sh"
 files:
-  “/etc/nginx/conf.d/01-cors.conf”:
-    mode: “000644”
+  "/tmp/fix_static_cors.sh":
+    mode: "000755"
+    owner: root
+    group: root
+    content: |
+      #!/bin/bash
+      pushd $(/opt/elasticbeanstalk/bin/get-config container -k config_staging_dir)
+      echo "Adding CORS Config"
+      PROXY_CONF="#etc#nginx#conf.d#00_elastic_beanstalk_proxy.conf"
+      grep static_cors.config $PROXY_CONF || sed -i '/location \/static {/a \ \ \ \ include /etc/nginx/conf.d/static_cors.config;' $PROXY_CONF
+  "/etc/nginx/conf.d/static_cors.config":
+    mode: "000644"
     owner: root
     group: root
     content: |
@@ -38,6 +51,3 @@ files:
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
         add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
       }
-container_commands:
-  nginx_restart:
-    command: “sudo service nginx restart”

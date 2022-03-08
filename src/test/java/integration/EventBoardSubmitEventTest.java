@@ -14,9 +14,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import static com.uconnect.backend.postingboard.service.EventBoardService.EMPTY_REACTION_COLLECTION;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -143,6 +144,8 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         }
 
         List<Event> events = ddbAdapter.queryGSI(eventBoardEventPublishedTableName, eventBoardTitleIndexName, event, Event.class);
+        events = new ArrayList<>(events);
+        events.sort(Comparator.comparingLong(Event::getIndex));
         assertEquals(numDupEvents, events.size());
         Event firstEvent = events.get(0);
         for (int i = 1; i < numDupEvents; i++) {

@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -167,6 +169,11 @@ public class EventBoardTestUtil {
         if (l1.size() != l2.size()) {
             fail();
         }
+
+        l1 = new ArrayList<>(l1);
+        l1.sort(Comparator.comparing(Comment::getContent));
+        l2 = new ArrayList<>(l2);
+        l2.sort(Comparator.comparing(Comment::getContent));
 
         for (int i = 0; i < l1.size(); i++) {
             Comment c1 = l1.get(i);

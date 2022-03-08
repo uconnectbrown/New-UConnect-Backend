@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.uconnect.backend.postingboard.service.EventBoardService.EMPTY_REACTION_COLLECTION;
@@ -65,7 +66,7 @@ public class EventBoardCommentTest extends BaseIntTest {
             parentEvent.setAuthor(verifiedUser.getUsername());
             EventBoardTestUtil.submitEventVerified(mockMvc, parentEvent, verifiedUser.getUsername(), token);
             List<Event> events = ddbAdapter.queryGSI(eventBoardEventPublishedTableName, eventBoardTitleIndexName, parentEvent, Event.class);
-            assertFalse(events.isEmpty());
+            assertEquals(events.size(), 1);
             parentEventId = events.get(0).getId();
             parentEventIndex = events.get(0).getIndex();
 
@@ -174,8 +175,9 @@ public class EventBoardCommentTest extends BaseIntTest {
         }
 
         Event actualEvent = EventBoardTestUtil.getEventObjByIndex(mockMvc, parentEventIndex, verifiedUser.getUsername(), token);
-        List<Comment> actualComments = actualEvent.getComments();
+        List<Comment> actualComments = new ArrayList<>(actualEvent.getComments());
         assertEquals(numComments, actualComments.size());
+        actualComments.sort(Comparator.comparing(Comment::getTimestamp));
         try {
             for (int i = 1; i < numComments; i++) {
                 EventBoardTestUtil.verifySameCommentsSkipReactions(expectedComments.get(i), actualComments.get(i));
@@ -283,12 +285,13 @@ public class EventBoardCommentTest extends BaseIntTest {
         for (int i = 0; i < comments.size(); i++) {
             Comment comment = comments.get(i);
             comment.setParentId(parentId);
-            comment.setContent("curse the recursive tree");
 
             EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
                     .andExpect(status().isOk());
-            String thisId = ddbAdapter.queryGSI(eventBoardCommentPublishedTableName, eventBoardCommentParentIdIndexName, comment, Comment.class)
-                    .get(i).getId();
+            List<Comment> dbComments = new ArrayList<>(ddbAdapter.queryGSI(eventBoardCommentPublishedTableName,
+                    eventBoardCommentParentIdIndexName, comment, Comment.class));
+            dbComments.sort(Comparator.comparing(Comment::getTimestamp));
+            String thisId = dbComments.get(i).getId();
             comment.setId(thisId);
             submitComments(comment.getComments(), thisId);
         }

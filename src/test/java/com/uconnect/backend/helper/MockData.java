@@ -51,7 +51,7 @@ public class MockData {
 
     public static Comment generateValidEventBoardComment() {
         return Comment.builder()
-                .content(RandomStringUtils.randomAlphanumeric((int) (Math.random() * 200) + 1))
+                .content(RandomStringUtils.randomAlphanumeric(100))
                 .timestamp(new Date())
                 .build();
     }

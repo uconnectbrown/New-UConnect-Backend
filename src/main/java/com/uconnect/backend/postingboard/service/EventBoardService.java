@@ -95,7 +95,7 @@ public class EventBoardService {
     public GetEventsResponse getLatestPublishedEvents(long startIndex, int eventCount, String viwerUsername) {
         eventCount = Math.min(eventCount, MAX_SCAN_COUNT);
         eventCount = Math.max(eventCount, 0);
-        if (startIndex < 1) {
+        if (startIndex < 0) {
             startIndex = Long.MAX_VALUE;
         }
         startIndex = Math.min(startIndex, counterDAO.getNextEventBoardIndex() - 1);

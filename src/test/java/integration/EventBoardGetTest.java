@@ -125,6 +125,17 @@ public class EventBoardGetTest extends BaseIntTest {
      */
     @Test
     @SneakyThrows
+    // added after bug fix (UC-82), ensure 0 startIndex does not default to latest
+    public void testSuccessGetZeroIndexThroughLatest() {
+        int count = 10;
+        GetEventsResponse response = EventBoardTestUtil.getLatestEventsResponse(mockMvc, 0, count, verifiedUser.getUsername(),
+                token);
+        verifyPublishedEventList(response.getEvents(), 0, 1);
+        assertEquals(0, response.getLastQueriedIndex());
+    }
+
+    @Test
+    @SneakyThrows
     public void testSuccessGetLatest25() {
         int count = 25;
         GetEventsResponse response = EventBoardTestUtil.getLatestEventsResponse(mockMvc, -1, count, verifiedUser.getUsername(),

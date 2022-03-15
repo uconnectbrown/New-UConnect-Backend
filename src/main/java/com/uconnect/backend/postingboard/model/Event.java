@@ -13,6 +13,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -36,6 +38,7 @@ public class Event {
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "titleIndex")
+    @NotBlank(message = "New events must contain a title with at least one non-space character")
     @Size(max = 50, message = "Event title cannot exceed 50 characters")
     private String title;
 
@@ -45,9 +48,11 @@ public class Event {
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "hostIndex")
+    @Size(max = 100, message = "Event host cannot exceed 100 characters")
     private String host;
 
     @DynamoDBAttribute
+    @NotNull(message = "New events must contain a start time")
     private Date startTime;
 
     @DynamoDBAttribute
@@ -60,6 +65,7 @@ public class Event {
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "indexIndex")
     @EqualsAndHashCode.Include
+    // skip validation, set this to the correct value in controller/service
     private long index;
 
     @DynamoDBAttribute

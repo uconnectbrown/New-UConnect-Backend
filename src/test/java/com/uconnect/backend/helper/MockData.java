@@ -39,6 +39,7 @@ public class MockData {
                 .timestamp(new Date())
                 .startTime(new Date(new Date().getTime() + 5000))
                 .title(RandomStringUtils.randomAlphanumeric(25))
+                .host(RandomStringUtils.randomAlphanumeric(25))
                 .build();
     }
 

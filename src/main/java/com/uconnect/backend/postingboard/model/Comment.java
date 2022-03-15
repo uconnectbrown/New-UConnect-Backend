@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
@@ -35,7 +36,7 @@ public class Comment {
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "parentIdIndex")
     @EqualsAndHashCode.Include
-    @NotNull
+    @NotNull(message = "New comments must have a parent ID")
     private String parentId;
 
     @DynamoDBAttribute
@@ -46,6 +47,7 @@ public class Comment {
     private String author;
 
     @DynamoDBAttribute
+    @NotBlank(message = "New comments must contain at least one character as their content")
     @Size(max = 1000, min = 1, message = "Comment content length must be between 1 and 1000 characters")
     private String content;
 

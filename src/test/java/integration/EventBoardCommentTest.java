@@ -64,7 +64,8 @@ public class EventBoardCommentTest extends BaseIntTest {
             // get the auto generated id from ddb
             Event parentEvent = MockData.generateValidEventBoardEvent();
             parentEvent.setAuthor(verifiedUser.getUsername());
-            EventBoardTestUtil.submitEventVerified(mockMvc, parentEvent, verifiedUser.getUsername(), token);
+            EventBoardTestUtil.submitEventVerified(mockMvc, parentEvent, verifiedUser.getUsername(), token)
+                    .andExpect(status().isOk());
             List<Event> events = ddbAdapter.queryGSI(eventBoardEventPublishedTableName, eventBoardTitleIndexName, parentEvent, Event.class);
             assertEquals(events.size(), 1);
             parentEventId = events.get(0).getId();
@@ -205,6 +206,7 @@ public class EventBoardCommentTest extends BaseIntTest {
      */
     @SneakyThrows
     private void testSuccessSubmitAnon(Comment comment) {
+        // TODO: change util method to return the updated comment with uuid and verify it matches with actual comment's uuid
         EventBoardTestUtil.submitCommentAnonymous(mockMvc, comment)
                 .andExpect(status().isOk());
         Comment actualComment = verifyNewAnonComment(comment);

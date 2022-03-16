@@ -64,7 +64,7 @@ public class EventBoardService {
     // -----------
     // ---Event---
     // -----------
-    public void newAnonymousEvent(Event event) {
+    public Event newAnonymousEvent(Event event) {
         event.setTimestamp(new Date());
         event.setAnonymous(true);
         event.setAuthor(ANONYMOUS_AUTHOR);
@@ -72,17 +72,17 @@ public class EventBoardService {
         event.setIndex(-1);
         event.setReactions(EMPTY_REACTION_COLLECTION);
 
-        eventBoardDAO.saveHiddenEvent(event);
+        return eventBoardDAO.saveHiddenEvent(event);
     }
 
-    public void newVerifiedEvent(Event event) {
+    public Event newVerifiedEvent(Event event) {
         event.setTimestamp(new Date());
         event.setAnonymous(false);
         long index = counterDAO.incrementEventBoardIndex() - 1;
         event.setIndex(index);
         event.setReactions(EMPTY_REACTION_COLLECTION);
 
-        eventBoardDAO.savePublishedEvent(event);
+        return eventBoardDAO.savePublishedEvent(event);
     }
 
     public Event getPublishedEventByIndex(long index, String viewUsername) throws EventBoardEventNotFoundException {

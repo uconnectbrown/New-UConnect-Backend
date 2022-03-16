@@ -1,5 +1,7 @@
 package integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.EventBoardTestUtil;
 import com.uconnect.backend.helper.MockData;
@@ -13,6 +15,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,6 +44,9 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
 
     @Autowired
     private String counterTableName;
+
+    @Autowired
+    ObjectMapper mapper;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -178,15 +184,21 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
      */
     @SneakyThrows
     private void testSuccessSubmitAnon(Event event) {
-        EventBoardTestUtil.submitEventAnonymous(mockMvc, event)
-                .andExpect(status().isOk());
+        MvcResult result = EventBoardTestUtil.submitEventAnonymous(mockMvc, event)
+                .andExpect(status().isOk()).andReturn();
+        JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
+        event = mapper.treeToValue(node.get("entity"), Event.class);
+
         verifyNewAnonEvent(event);
     }
 
     @SneakyThrows
     private void testSuccessSubmitVerified(Event event) {
-        EventBoardTestUtil.submitEventVerified(mockMvc, event, verifiedUser.getUsername(), token)
-                .andExpect(status().isOk());
+        MvcResult result = EventBoardTestUtil.submitEventVerified(mockMvc, event, verifiedUser.getUsername(), token)
+                .andExpect(status().isOk()).andReturn();
+        JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
+        event = mapper.treeToValue(node.get("entity"), Event.class);
+
         verifyNewVerifiedEvent(event);
     }
 
@@ -195,7 +207,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
      * MIGHT modify certain fields of the input Event
      */
     private Event verifyNewAnonEvent(Event event) {
-        List<Event> events = ddbAdapter.queryGSI(eventBoardEventHiddenTableName, eventBoardTitleIndexName, event, Event.class);
+        List<Event> events = ddbAdapter.query(eventBoardEventHiddenTableName, event, Event.class);
         assertFalse(events.isEmpty());
         Event actualEvent = events.get(0);
 
@@ -209,7 +221,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
     }
 
     private Event verifyNewVerifiedEvent(Event event) {
-        List<Event> events = ddbAdapter.queryGSI(eventBoardEventPublishedTableName, eventBoardTitleIndexName, event, Event.class);
+        List<Event> events = ddbAdapter.query(eventBoardEventPublishedTableName, event, Event.class);
         assertFalse(events.isEmpty());
         Event actualEvent = events.get(0);
 

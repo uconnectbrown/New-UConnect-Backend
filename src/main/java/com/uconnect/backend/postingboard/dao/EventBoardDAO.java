@@ -104,12 +104,16 @@ public class EventBoardDAO {
     // -------------
     // ---Comment---
     // -------------
-    public void saveHiddenComment(Comment comment) {
+    public Comment saveHiddenComment(Comment comment) {
         ddbAdapter.save(commentHiddenTableName, comment);
+
+        return comment;
     }
 
-    public void savePublishedComment(Comment comment) {
+    public Comment savePublishedComment(Comment comment) {
         ddbAdapter.save(commentPublishedTableName, comment);
+
+        return comment;
     }
 
     public Comment getPublishedCommentById(String id) throws EventBoardCommentNotFoundException {

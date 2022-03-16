@@ -119,7 +119,7 @@ public class EventBoardService {
     // -------------
     // ---Comment---
     // -------------
-    public void newAnonymousComment(Comment comment) throws EventBoardEntityNotFoundException {
+    public Comment newAnonymousComment(Comment comment) throws EventBoardEntityNotFoundException {
         String parentId = comment.getParentId();
         // TODO: fix this and save the parent comment as isCommentPresent
         verifyEntityExists(parentId);
@@ -128,10 +128,10 @@ public class EventBoardService {
         comment.setAnonymous(true);
         comment.setAuthor(ANONYMOUS_AUTHOR);
         comment.setReactions(EMPTY_REACTION_COLLECTION);
-        eventBoardDAO.saveHiddenComment(comment);
+        return eventBoardDAO.saveHiddenComment(comment);
     }
 
-    public void newVerifiedComment(Comment comment) throws EventBoardEntityNotFoundException {
+    public Comment newVerifiedComment(Comment comment) throws EventBoardEntityNotFoundException {
         String parentId = comment.getParentId();
         // TODO: fix this and save the parent comment as isCommentPresent
         verifyEntityExists(parentId);
@@ -139,7 +139,7 @@ public class EventBoardService {
         comment.setTimestamp(new Date());
         comment.setAnonymous(false);
         comment.setReactions(EMPTY_REACTION_COLLECTION);
-        eventBoardDAO.savePublishedComment(comment);
+        return eventBoardDAO.savePublishedComment(comment);
     }
 
     public List<Comment> getPublishedCommentsByParentId(String parentId, String viewerUsername) {

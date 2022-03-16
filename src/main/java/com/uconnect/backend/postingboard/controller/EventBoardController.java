@@ -94,19 +94,24 @@ public class EventBoardController {
     // ---Comment---
     // -------------
     @PostMapping("/anonymous/comment/new")
-    public ResponseEntity<String> createNewAnonymousComment(@Valid @RequestBody Comment comment) throws EventBoardEntityNotFoundException {
-        eventBoardService.newAnonymousComment(comment);
+    public ResponseEntity<SubmissionResponse> createNewAnonymousComment(@Valid @RequestBody Comment comment) throws EventBoardEntityNotFoundException {
+        comment = eventBoardService.newAnonymousComment(comment);
 
-        return ResponseEntity.ok("Anonymous comment submitted. Please wait for one of our staff members to approve it.");
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new SubmissionResponse(
+                        "Anonymous comment submitted. Please wait for one of our staff members to approve it.",
+                        comment));
     }
 
     @PostMapping("/verified/comment/new")
-    public ResponseEntity<String> createNewVerifiedComment(@Valid @RequestBody Comment comment) throws EventBoardEntityNotFoundException {
+    public ResponseEntity<SubmissionResponse> createNewVerifiedComment(@Valid @RequestBody Comment comment) throws EventBoardEntityNotFoundException {
         requestPermissionUtility.authorizeUser(comment.getAuthor());
 
-        eventBoardService.newVerifiedComment(comment);
+        comment = eventBoardService.newVerifiedComment(comment);
 
-        return ResponseEntity.ok("Verified comment submitted. You should see it live in just a moment.");
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new SubmissionResponse("Verified comment submitted. You should see it live in just a moment.",
+                        comment));
     }
 
     @GetMapping("/verified/react")

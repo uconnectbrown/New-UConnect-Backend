@@ -1,5 +1,7 @@
 package integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uconnect.backend.helper.BaseIntTest;
 import com.uconnect.backend.helper.EventBoardTestUtil;
 import com.uconnect.backend.helper.MockData;
@@ -12,6 +14,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,6 +47,9 @@ public class EventBoardCommentTest extends BaseIntTest {
 
     @Autowired
     private String eventBoardCommentParentIdIndexName;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -206,23 +212,28 @@ public class EventBoardCommentTest extends BaseIntTest {
      */
     @SneakyThrows
     private void testSuccessSubmitAnon(Comment comment) {
-        // TODO: change util method to return the updated comment with uuid and verify it matches with actual comment's uuid
-        EventBoardTestUtil.submitCommentAnonymous(mockMvc, comment)
-                .andExpect(status().isOk());
+        MvcResult result = EventBoardTestUtil.submitCommentAnonymous(mockMvc, comment)
+                .andExpect(status().isOk()).andReturn();
+        JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
+        comment = mapper.treeToValue(node.get("entity"), Comment.class);
+
         Comment actualComment = verifyNewAnonComment(comment);
         ddbAdapter.delete(eventBoardCommentHiddenTableName, actualComment);
     }
 
     @SneakyThrows
     private void testSuccessSubmitVerified(Comment comment) {
-        EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
-                .andExpect(status().isOk());
+        MvcResult result = EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
+                .andExpect(status().isOk()).andReturn();
+        JsonNode node = mapper.readTree(result.getResponse().getContentAsString());
+        comment = mapper.treeToValue(node.get("entity"), Comment.class);
+
         Comment actualComment = verifyNewVerifiedComment(comment);
         ddbAdapter.delete(eventBoardCommentPublishedTableName, actualComment);
     }
 
     private Comment verifyNewAnonComment(Comment comment) {
-        List<Comment> comments = ddbAdapter.queryGSI(eventBoardCommentHiddenTableName, eventBoardCommentParentIdIndexName, comment, Comment.class);
+        List<Comment> comments = ddbAdapter.query(eventBoardCommentHiddenTableName, comment, Comment.class);
         assertFalse(comments.isEmpty());
         Comment actualComment = comments.get(0);
 
@@ -234,7 +245,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     }
 
     private Comment verifyNewVerifiedComment(Comment comment) {
-        List<Comment> comments = ddbAdapter.queryGSI(eventBoardCommentPublishedTableName, eventBoardCommentParentIdIndexName, comment, Comment.class);
+        List<Comment> comments = ddbAdapter.query(eventBoardCommentPublishedTableName, comment, Comment.class);
         assertFalse(comments.isEmpty());
         Comment actualComment = comments.get(0);
 

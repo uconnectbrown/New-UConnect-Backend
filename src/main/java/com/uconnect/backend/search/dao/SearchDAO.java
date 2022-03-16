@@ -45,6 +45,36 @@ public class SearchDAO {
         this.lastNameBucketIndexName = lastNameBucketIndexName;
     }
 
+    public void createCourseRosterIfNotExists(CourseRoster courseRoster) {
+        try {
+            findCourseRosterByName(courseRoster.getName());
+        } catch (CourseNotFoundException e) {
+            // Course does not exist
+            ddbAdapter.save(courseTableName, courseRoster);
+        }
+    }
+
+    public void createConcentrationIfNotExists(Concentration concentration) {
+        try {
+            findConcentrationByName(concentration.getName());
+        } catch (ConcentrationNotFoundException e) {
+            // Concentration does not exist
+            ddbAdapter.save(concentrationTableName, concentration);
+        }
+    }
+
+    public void addUserToCourseRoster(String username, String courseRosterName) throws CourseNotFoundException {
+        CourseRoster courseRoster = findCourseRosterByName(courseRosterName);
+        courseRoster.getStudents().add(username);
+        ddbAdapter.save(courseTableName, courseRoster);
+    }
+
+    public void addUserToConcentration(String username, String concentrationName) throws ConcentrationNotFoundException {
+        Concentration concentration = findConcentrationByName(concentrationName);
+        concentration.getStudents().add(username);
+        ddbAdapter.save(concentrationTableName, concentration);
+    }
+
     private CourseRoster findCourseRosterByName(String name)
             throws CourseNotFoundException {
         CourseRoster desiredCourse = new CourseRoster();

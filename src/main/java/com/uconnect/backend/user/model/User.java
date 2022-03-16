@@ -60,9 +60,17 @@ public class User implements UserDetails {
     private String firstName;
 
     @DynamoDBAttribute
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "firstNameBucketIndex")
+    private Character firstNameBucket;
+
+    @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "lastName")
     @Size(min = 1, max = 32, message = "Last name length must be between 1 and 32 characters (inclusive)")
     private String lastName;
+
+    @DynamoDBAttribute
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "lastNameBucketIndex")
+    private Character lastNameBucket;
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "classYearIndex")

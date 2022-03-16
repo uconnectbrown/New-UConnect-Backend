@@ -27,14 +27,22 @@ public class SearchDAO {
 
     private final String concentrationTableName;
 
+    private final String firstNameBucketIndexName;
+
+    private final String lastNameBucketIndexName;
+
     @Autowired
     public SearchDAO(DdbAdapter ddbAdapter, String userTableName,
-            String courseTableName, String classYearIndexName, String concentrationTableName) {
+            String courseTableName, String classYearIndexName,
+            String concentrationTableName, String firstNameBucketIndexName,
+            String lastNameBucketIndexName) {
         this.ddbAdapter = ddbAdapter;
         this.userTableName = userTableName;
         this.courseTableName = courseTableName;
         this.classYearIndexName = classYearIndexName;
         this.concentrationTableName = concentrationTableName;
+        this.firstNameBucketIndexName = firstNameBucketIndexName;
+        this.lastNameBucketIndexName = lastNameBucketIndexName;
     }
 
     private CourseRoster findCourseRosterByName(String name)
@@ -52,10 +60,12 @@ public class SearchDAO {
         return res.get(0);
     }
 
-    private Concentration findConcentrationByName(String name) throws ConcentrationNotFoundException {
+    private Concentration findConcentrationByName(String name)
+            throws ConcentrationNotFoundException {
         Concentration desiredConcentration = new Concentration();
         desiredConcentration.setName(name);
-        List<Concentration> res = ddbAdapter.query(concentrationTableName, desiredConcentration, Concentration.class);
+        List<Concentration> res = ddbAdapter.query(concentrationTableName,
+                desiredConcentration, Concentration.class);
         if (res.isEmpty()) {
             log.info("Could not find concentration: {}", name);
             throw new ConcentrationNotFoundException("Concentration not found: " + name);
@@ -81,8 +91,23 @@ public class SearchDAO {
         return ret;
     }
 
-    public Set<String> getStudentsByConcentration(String name) throws ConcentrationNotFoundException {
+    public Set<String> getStudentsByConcentration(String name)
+            throws ConcentrationNotFoundException {
         Concentration concentration = findConcentrationByName(name);
         return concentration.getStudents();
+    }
+
+    public Set<User> getStudentsInFirstNameBucket(char bucket) {
+        User query = new User();
+        query.setFirstNameBucket(bucket);
+        List<User> queryRes = ddbAdapter.queryGSI(userTableName, firstNameBucketIndexName, query, User.class);
+        return new HashSet<>(queryRes);
+    }
+
+    public Set<User> getStudentsInLastNameBucket(char bucket) {
+        User query = new User();
+        query.setLastNameBucket(bucket);
+        List<User> queryRes = ddbAdapter.queryGSI(userTableName, lastNameBucketIndexName, query, User.class);
+        return new HashSet<>(queryRes);
     }
 }

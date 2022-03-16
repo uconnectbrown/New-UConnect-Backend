@@ -6,6 +6,7 @@ import com.uconnect.backend.exception.RepeatedEventBoardReactionException;
 import com.uconnect.backend.exception.UnknownEventBoardReactionException;
 import com.uconnect.backend.postingboard.model.Comment;
 import com.uconnect.backend.postingboard.model.Event;
+import com.uconnect.backend.postingboard.model.SubmissionResponse;
 import com.uconnect.backend.postingboard.model.GetEventsRequest;
 import com.uconnect.backend.postingboard.model.GetEventsResponse;
 import com.uconnect.backend.postingboard.service.EventBoardService;
@@ -49,19 +50,23 @@ public class EventBoardController {
     // ---Event---
     // -----------
     @PostMapping("/anonymous/event/new")
-    public ResponseEntity<String> createNewAnonymousEvent(@Valid @RequestBody Event event) {
-        eventBoardService.newAnonymousEvent(event);
+    public ResponseEntity<SubmissionResponse> createNewAnonymousEvent(@Valid @RequestBody Event event) {
+        event = eventBoardService.newAnonymousEvent(event);
 
-        return ResponseEntity.ok("Anonymous event submitted. Please wait for one of our staff members to approve it.");
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new SubmissionResponse(
+                        "Anonymous event submitted. Please wait for one of our staff members to approve it.",
+                        event));
     }
 
     @PostMapping("/verified/event/new")
-    public ResponseEntity<String> createNewVerifiedEvent(@Valid @RequestBody Event event) {
+    public ResponseEntity<SubmissionResponse> createNewVerifiedEvent(@Valid @RequestBody Event event) {
         requestPermissionUtility.authorizeUser(event.getAuthor());
 
-        eventBoardService.newVerifiedEvent(event);
-
-        return ResponseEntity.ok("Verified event submitted. You should see it live in just a moment.");
+        event = eventBoardService.newVerifiedEvent(event);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new SubmissionResponse("Verified event submitted. You should see it live in just a moment.",
+                        event));
     }
 
     // letting unauthenticated users see all events for now, change to /verified to tighten up control

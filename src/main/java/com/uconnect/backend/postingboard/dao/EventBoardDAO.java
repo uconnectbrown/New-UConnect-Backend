@@ -60,12 +60,16 @@ public class EventBoardDAO {
     // -----------
     // ---Event---
     // -----------
-    public void saveHiddenEvent(Event event) {
+    public Event saveHiddenEvent(Event event) {
         ddbAdapter.save(eventHiddenTableName, event);
+
+        return event;
     }
 
-    public void savePublishedEvent(Event event) {
+    public Event savePublishedEvent(Event event) {
         ddbAdapter.save(eventPublishedTableName, event);
+
+        return event;
     }
 
     public Event getPublishedEventByIndex(long index) throws EventBoardEventNotFoundException {

@@ -2,12 +2,18 @@ package com.uconnect.backend.user.service;
 
 import com.google.common.collect.ImmutableSet;
 import com.uconnect.backend.awsadapter.SesAdapter;
+import com.uconnect.backend.exception.ConcentrationNotFoundException;
+import com.uconnect.backend.exception.CourseNotFoundException;
 import com.uconnect.backend.exception.DisallowedEmailDomainException;
 import com.uconnect.backend.exception.UnknownOAuthRegistrationException;
 import com.uconnect.backend.exception.UnmatchedUserCreationTypeException;
 import com.uconnect.backend.exception.UserNotFoundException;
+import com.uconnect.backend.search.dao.SearchDAO;
+import com.uconnect.backend.search.model.Concentration;
+import com.uconnect.backend.search.model.CourseRoster;
 import com.uconnect.backend.security.jwt.util.JwtUtility;
 import com.uconnect.backend.user.dao.UserDAO;
+import com.uconnect.backend.user.model.Course;
 import com.uconnect.backend.user.model.User;
 import com.uconnect.backend.user.model.UserCreationType;
 import lombok.NoArgsConstructor;
@@ -27,6 +33,8 @@ import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -36,22 +44,28 @@ public class UserService implements UserDetailsService {
 
     private UserDAO dao;
 
+    private SearchDAO searchDAO;
+
     private JwtUtility jwtUtility;
 
     private OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver;
 
     private SesAdapter sesAdapter;
 
-    private static final Set<String> allowedEmailDomains = ImmutableSet.of("brown.edu");
+    private static final Set<String> allowedEmailDomains =
+            ImmutableSet.of("brown.edu");
 
     @Autowired
     public UserService(UserDAO dao,
-                       JwtUtility jwtUtility,
-                       OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver,
-                       SesAdapter sesAdapter) {
+            SearchDAO searchDAO,
+            JwtUtility jwtUtility,
+            OAuth2AuthorizationRequestResolver oAuth2AuthorizationRequestResolver,
+            SesAdapter sesAdapter) {
         this.dao = dao;
+        this.searchDAO = searchDAO;
         this.jwtUtility = jwtUtility;
-        this.oAuth2AuthorizationRequestResolver = oAuth2AuthorizationRequestResolver;
+        this.oAuth2AuthorizationRequestResolver =
+                oAuth2AuthorizationRequestResolver;
         this.sesAdapter = sesAdapter;
     }
 
@@ -60,7 +74,8 @@ public class UserService implements UserDetailsService {
         try {
             return dao.getUserByUsername(username);
         } catch (UserNotFoundException e) {
-            throw new UsernameNotFoundException(String.format("%s is not a valid username", username));
+            throw new UsernameNotFoundException(
+                    String.format("%s is not a valid username", username));
         }
     }
 
@@ -82,24 +97,56 @@ public class UserService implements UserDetailsService {
         } catch (UserNotFoundException e) {
             dao.saveUser(user);
 
+            populateTablesForNewUser(user);
+
             // successfully created a new user
             return 0;
         } catch (Exception e) {
-            log.error("Unexpected exception while creating new user " + user.getUsername() + ": {}", e);
+            log.error("Unexpected exception while creating new user "
+                    + user.getUsername() + ": {}", e);
             return -2;
         }
     }
 
-    public synchronized void updateUser(User newRecord) throws UserNotFoundException {
+    // exceptions declared to suppress compiler warnings. should never occur.
+    private synchronized void populateTablesForNewUser(User user) {
+        try {
+            // Populate course tables
+            Set<Course> courses = user.getCourses();
+            for (Course c : courses) {
+                CourseRoster courseRoster = CourseRoster.builder().name(c.getName())
+                        .students(new HashSet<>()).build();
+                searchDAO.createCourseRosterIfNotExists(courseRoster);
+                searchDAO.addUserToCourseRoster(user.getUsername(), c.getName());
+            }
+
+            // Populate concentration tables
+            List<String> concentrations = user.getMajors();
+            for (String c : concentrations) {
+                Concentration concentration = Concentration.builder().name(c)
+                        .students(new HashSet<>()).build();
+                searchDAO.createConcentrationIfNotExists(concentration);
+                searchDAO.addUserToConcentration(user.getUsername(), c);
+            }
+        } catch (CourseNotFoundException|ConcentrationNotFoundException e) {
+            // to suppress compiler warnings. should never get here.
+            return;
+        }
+    }
+
+    public synchronized void updateUser(User newRecord)
+            throws UserNotFoundException {
         // bubble up exception if user not found
         User oldRecord = dao.getUserByUsername(newRecord.getUsername());
 
-        // these fields cannot be modified by users, setting to null retains the old value
+        // these fields cannot be modified by users, setting to null retains the
+        // old value
         newRecord.setId(oldRecord.getId());
         newRecord.setAuthorities(null);
         newRecord.setVerified(oldRecord.isVerified());
         newRecord.setCreationType(null);
-        newRecord.setProfileCompleted(checkProfileComplete(newRecord) || oldRecord.isProfileCompleted());
+        newRecord.setProfileCompleted(checkProfileComplete(newRecord)
+                || oldRecord.isProfileCompleted());
         newRecord.setCreatedAt(null);
         if (UserCreationType.O_AUTH.equals(oldRecord.getCreationType())) {
             newRecord.setPassword(null);
@@ -113,10 +160,10 @@ public class UserService implements UserDetailsService {
      * <p>
      * Returns one of the following exit codes:
      * <ul>
-     * <li> 0 indicates successful deletion </li>
-     * <li> -1 indicates username does not exist </li>
-     * <li> -2 indicates failure to delete </li>
-     * <li> -3 indicates unexpected exception occurred </li>
+     * <li>0 indicates successful deletion</li>
+     * <li>-1 indicates username does not exist</li>
+     * <li>-2 indicates failure to delete</li>
+     * <li>-3 indicates unexpected exception occurred</li>
      * </ul>
      *
      * @param username The username of the user to delete
@@ -126,7 +173,8 @@ public class UserService implements UserDetailsService {
         try {
             return dao.deleteUser(username);
         } catch (Exception e) {
-            log.error("Unexpected exception while deleting user " + username + ": {}", e);
+            log.error("Unexpected exception while deleting user " + username
+                    + ": {}", e);
             return -3;
         }
     }
@@ -143,7 +191,8 @@ public class UserService implements UserDetailsService {
         final User user = loadUserByUsername(username);
 
         if (!UserCreationType.TRADITIONAL.equals(user.getCreationType())) {
-            throw new UnmatchedUserCreationTypeException(UserCreationType.TRADITIONAL);
+            throw new UnmatchedUserCreationTypeException(
+                    UserCreationType.TRADITIONAL);
         }
 
         if (!user.isVerified()) {
@@ -171,32 +220,39 @@ public class UserService implements UserDetailsService {
         }
 
         if (!UserCreationType.O_AUTH.equals(user.getCreationType())) {
-            throw new UnmatchedUserCreationTypeException(UserCreationType.O_AUTH);
+            throw new UnmatchedUserCreationTypeException(
+                    UserCreationType.O_AUTH);
         }
 
         return jwtUtility.generateToken(user);
     }
 
-    public OAuth2LoginAuthenticationToken getOAuth2LoginAuthenticationToken(HttpServletRequest request, String authCode,
-                                                                            String registrationId, ClientRegistration registration) {
+    public OAuth2LoginAuthenticationToken getOAuth2LoginAuthenticationToken(
+            HttpServletRequest request, String authCode,
+            String registrationId, ClientRegistration registration) {
         if (registration == null) {
             throw new UnknownOAuthRegistrationException();
         }
 
-        OAuth2AuthorizationRequest authorizationRequest = oAuth2AuthorizationRequestResolver.resolve(request, registrationId);
-        OAuth2AuthorizationResponse authorizationResponse = OAuth2AuthorizationResponse
-                .success(authCode)
-                .redirectUri("/")
-                .state(authorizationRequest.getState())
-                .build();
+        OAuth2AuthorizationRequest authorizationRequest =
+                oAuth2AuthorizationRequestResolver.resolve(request,
+                        registrationId);
+        OAuth2AuthorizationResponse authorizationResponse =
+                OAuth2AuthorizationResponse
+                        .success(authCode)
+                        .redirectUri("/")
+                        .state(authorizationRequest.getState())
+                        .build();
 
         return new OAuth2LoginAuthenticationToken(registration,
-                new OAuth2AuthorizationExchange(authorizationRequest, authorizationResponse));
+                new OAuth2AuthorizationExchange(authorizationRequest,
+                        authorizationResponse));
     }
 
     public void authorizeEmailDomain(String emailAddress) {
         if (StringUtils.isEmpty(emailAddress)) {
-            throw new DisallowedEmailDomainException("Empty email address", emailAddress);
+            throw new DisallowedEmailDomainException("Empty email address",
+                    emailAddress);
         }
 
         String[] splits = emailAddress.split("@");
@@ -204,7 +260,8 @@ public class UserService implements UserDetailsService {
             return;
         }
 
-        throw new DisallowedEmailDomainException("Disallowed email domain", emailAddress);
+        throw new DisallowedEmailDomainException("Disallowed email domain",
+                emailAddress);
     }
 
     public String startEmailVerification(String emailAddress) {
@@ -220,24 +277,31 @@ public class UserService implements UserDetailsService {
         return verificationCode;
     }
 
-    public boolean validateEmailVerificationCode(String emailAddress, String inputCode) {
+    public boolean validateEmailVerificationCode(String emailAddress,
+            String inputCode) {
         String expectedCode = dao.getEmailVerificationCode(emailAddress);
 
         if (StringUtils.isEmpty(inputCode) || !inputCode.equals(expectedCode)) {
-            log.info("Email Verification: Code {} did not match with the expected code {} for user {}", inputCode,
+            log.info(
+                    "Email Verification: Code {} did not match with the expected code {} for user {}",
+                    inputCode,
                     expectedCode, emailAddress);
             return false;
         }
 
-        log.info("Email Verification: Code {} was validated for user {}", inputCode, emailAddress);
+        log.info("Email Verification: Code {} was validated for user {}",
+                inputCode, emailAddress);
         return true;
     }
 
     public void verifyUser(String username) throws UserNotFoundException {
         User user = dao.getUserByUsername(username);
         if (user.isVerified()) {
-            log.info("User {} successfully verified their email more than once, something might be wrong. " +
-                    "Check UserController/Service/DAO", username);
+            log.info(
+                    "User {} successfully verified their email more than once, something might be wrong. "
+                            +
+                            "Check UserController/Service/DAO",
+                    username);
         }
 
         // verify and delete entry from db
@@ -248,11 +312,16 @@ public class UserService implements UserDetailsService {
 
     public boolean checkProfileComplete(User newRecord) {
         return StringUtils.isNotBlank(newRecord.getUsername())
-                && StringUtils.isNotBlank(newRecord.getFirstName()) && StringUtils.isNotBlank(newRecord.getLastName())
+                && StringUtils.isNotBlank(newRecord.getFirstName())
+                && StringUtils.isNotBlank(newRecord.getLastName())
                 && StringUtils.isNotBlank(newRecord.getClassYear())
-                && !CollectionUtils.isEmpty(newRecord.getMajors()) && StringUtils.isNotBlank(newRecord.getMajors().get(0))
-                && newRecord.getInterests1() != null && newRecord.getInterests1().size() == 3
-                && newRecord.getInterests2() != null && newRecord.getInterests2().size() == 3
-                && newRecord.getInterests3() != null && newRecord.getInterests3().size() == 3;
+                && !CollectionUtils.isEmpty(newRecord.getMajors())
+                && StringUtils.isNotBlank(newRecord.getMajors().get(0))
+                && newRecord.getInterests1() != null
+                && newRecord.getInterests1().size() == 3
+                && newRecord.getInterests2() != null
+                && newRecord.getInterests2().size() == 3
+                && newRecord.getInterests3() != null
+                && newRecord.getInterests3().size() == 3;
     }
 }

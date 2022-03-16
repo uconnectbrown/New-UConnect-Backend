@@ -75,6 +75,18 @@ public class SearchDAO {
         ddbAdapter.save(concentrationTableName, concentration);
     }
 
+    public void removeUserFromCourseRoster(String username, String courseRosterName) throws CourseNotFoundException {
+        CourseRoster courseRoster = findCourseRosterByName(courseRosterName);
+        courseRoster.getStudents().remove(username);
+        ddbAdapter.save(courseTableName, courseRoster);
+    }
+
+    public void removeUserFromConcentration(String username, String concentrationName) throws ConcentrationNotFoundException {
+        Concentration concentration = findConcentrationByName(concentrationName);
+        concentration.getStudents().remove(username);
+        ddbAdapter.save(concentrationTableName, concentration);
+    }
+
     private CourseRoster findCourseRosterByName(String name)
             throws CourseNotFoundException {
         CourseRoster desiredCourse = new CourseRoster();

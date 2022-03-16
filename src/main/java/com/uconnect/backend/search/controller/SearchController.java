@@ -82,7 +82,7 @@ public class SearchController {
         }
     }
 
-    @GetMapping("/v1/search/getStudentsByName/{name}")
+    @GetMapping("/v1/search/name/{name}")
     public ResponseEntity<?> getStudentsByName(@PathVariable("name") String name) {
         try {
             Set<User> students = searchService.getStudentsByName(name);

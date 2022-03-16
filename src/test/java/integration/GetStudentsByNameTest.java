@@ -79,7 +79,7 @@ public class GetStudentsByNameTest extends BaseIntTest {
         return mockMvc
                 .perform(MockMvcRequestBuilders
                         .get(String.format(
-                                "/v1/search/getStudentsByName/%s",
+                                "/v1/search/name/%s",
                                 name))
                         .header("Authorization",
                                 String.format("Bearer %s", token))

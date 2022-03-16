@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -95,8 +96,6 @@ public class UserService implements UserDetailsService {
             // user exists
             return -1;
         } catch (UserNotFoundException e) {
-            dao.saveUser(user);
-
             populateTablesForNewUser(user);
 
             // successfully created a new user
@@ -108,10 +107,12 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    // exceptions declared to suppress compiler warnings. should never occur.
     private synchronized void populateTablesForNewUser(User user) {
         try {
-            // Populate course tables
+            // Populate user table
+            dao.saveUser(user);
+
+            // Populate course table
             Set<Course> courses = user.getCourses();
             for (Course c : courses) {
                 CourseRoster courseRoster = CourseRoster.builder().name(c.getName())
@@ -120,7 +121,7 @@ public class UserService implements UserDetailsService {
                 searchDAO.addUserToCourseRoster(user.getUsername(), c.getName());
             }
 
-            // Populate concentration tables
+            // Populate concentration table
             List<String> concentrations = user.getMajors();
             for (String c : concentrations) {
                 Concentration concentration = Concentration.builder().name(c)
@@ -152,7 +153,68 @@ public class UserService implements UserDetailsService {
             newRecord.setPassword(null);
         }
 
-        dao.saveUser(newRecord);
+        updateTablesForExistingUser(oldRecord, newRecord);
+    }
+
+    private synchronized void updateTablesForExistingUser(User oldRecord, User newRecord) {
+        try {
+            dao.saveUser(newRecord);
+            updateCourseTable(oldRecord, newRecord);
+            updateConcentrationTable(oldRecord, newRecord);
+        } catch (CourseNotFoundException|ConcentrationNotFoundException e) {
+            // to suppress compiler warnings. should never get here.
+            return;
+        }
+    }
+
+    private synchronized void updateCourseTable(User oldRecord, User newRecord) throws CourseNotFoundException {
+        Set<Course> coursesToRemove = difference(oldRecord.getCourses(), newRecord.getCourses());
+        for (Course c : coursesToRemove) {
+            CourseRoster courseRoster = CourseRoster.builder().name(c.getName())
+                    .students(new HashSet<>()).build();
+            searchDAO.createCourseRosterIfNotExists(courseRoster);
+            searchDAO.removeUserFromCourseRoster(newRecord.getUsername(), c.getName());
+        }
+        Set<Course> coursesToAdd = difference(newRecord.getCourses(), oldRecord.getCourses());
+        for (Course c : coursesToAdd) {
+            CourseRoster courseRoster = CourseRoster.builder().name(c.getName())
+                    .students(new HashSet<>()).build();
+            searchDAO.createCourseRosterIfNotExists(courseRoster);
+            searchDAO.addUserToCourseRoster(newRecord.getUsername(), c.getName());
+        }
+    }
+
+    private synchronized void updateConcentrationTable(User oldRecord, User newRecord) throws ConcentrationNotFoundException {
+        List<String> concentrationsToRemove = difference(oldRecord.getMajors(), newRecord.getMajors());
+        for (String c : concentrationsToRemove) {
+            Concentration concentration = Concentration.builder().name(c)
+                    .students(new HashSet<>()).build();
+            searchDAO.createConcentrationIfNotExists(concentration);
+            searchDAO.removeUserFromConcentration(newRecord.getUsername(), c);
+        }
+        List<String> concentrationsToAdd = difference(newRecord.getMajors(), oldRecord.getMajors());
+        for (String c : concentrationsToAdd) {
+            Concentration concentration = Concentration.builder().name(c)
+                    .students(new HashSet<>()).build();
+            searchDAO.createConcentrationIfNotExists(concentration);
+            searchDAO.addUserToConcentration(newRecord.getUsername(), c);
+        }
+    }
+
+    // Returns difference of sets (a/b) as a new set.
+    private synchronized <T> Set<T> difference(Set<T> a, Set<T> b) {
+        Set<T> aCopy = new HashSet<>(a);
+        Set<T> bCopy = new HashSet<>(b);
+        aCopy.removeAll(bCopy);
+        return aCopy;
+    }
+
+    // Above function overloaded for lists.
+    private synchronized <T> List<T> difference(List<T> a, List<T> b) {
+        List<T> aCopy = new ArrayList<>(a);
+        List<T> bCopy = new ArrayList<>(b);
+        aCopy.removeAll(bCopy);
+        return aCopy;
     }
 
     /**

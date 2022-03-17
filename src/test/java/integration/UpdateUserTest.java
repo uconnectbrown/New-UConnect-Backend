@@ -52,8 +52,8 @@ public class UpdateUserTest extends BaseIntTest {
                     .username("coon@brown.edu")
                     .password("coon_and_friends")
                     .creationType(UserCreationType.TRADITIONAL)
-                    .isVerified(true)
-                    .isProfileCompleted(false)
+                    .verified(true)
+                    .profileCompleted(false)
                     .createdAt(new Date())
                     .build();
             simulatedOAuthUserToken = UserTestUtil.getTokenForTraditionalUser(mockMvc, simulatedOAuthUser, true, ddbAdapter, userTableName);
@@ -64,7 +64,7 @@ public class UpdateUserTest extends BaseIntTest {
         }
         oldUser = MockData.generateValidUser();
         oldUser.setCreationType(UserCreationType.TRADITIONAL);
-        oldUser.setIsVerified(true);
+        oldUser.setVerified(true);
     }
 
     @AfterEach
@@ -374,9 +374,9 @@ public class UpdateUserTest extends BaseIntTest {
         User newRecord = User.builder()
                 .username(username)
                 .authorities(ImmutableList.of(new UserAuthority("ADMIN")))
-                .isVerified(!oldUser.getIsVerified())
+                .verified(!oldUser.getVerified())
                 .creationType(UserCreationType.O_AUTH)
-                .isProfileCompleted(!oldUser.getIsProfileCompleted())
+                .profileCompleted(!oldUser.getProfileCompleted())
                 .createdAt(new Date())
                 .build();
 
@@ -411,7 +411,7 @@ public class UpdateUserTest extends BaseIntTest {
     @SneakyThrows
     public void testSuccessCompleteProfile() {
         Assertions.assertFalse(UserTestUtil.getUserModel(mockMvc, simulatedOAuthUser.getUsername(), simulatedOAuthUser.getUsername(),
-                simulatedOAuthUserToken).getIsProfileCompleted());
+                simulatedOAuthUserToken).getProfileCompleted());
 
         List<InterestItem> fakeInterests = ImmutableList.of(new InterestItem(), new InterestItem(), new InterestItem());
         User completedUser = User.builder()
@@ -425,7 +425,7 @@ public class UpdateUserTest extends BaseIntTest {
                 .interests3(fakeInterests)
                 .build();
 
-        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).getIsProfileCompleted());
+        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).getProfileCompleted());
     }
 
     @Test
@@ -438,14 +438,14 @@ public class UpdateUserTest extends BaseIntTest {
                 .majors(ImmutableList.of("Gender Studies"))
                 .build();
 
-        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).getIsProfileCompleted());
+        Assertions.assertTrue(getUpdatedUser(completedUser, simulatedOAuthUserToken).getProfileCompleted());
     }
 
     @Test
     @SneakyThrows
     public void testFailureCompleteProfileNoMajor() {
         Assertions.assertFalse(UserTestUtil.getUserModel(mockMvc, simulatedOAuthUser.getUsername(), simulatedOAuthUser.getUsername(),
-                simulatedOAuthUserToken).getIsProfileCompleted());
+                simulatedOAuthUserToken).getProfileCompleted());
 
         List<InterestItem> fakeInterests = ImmutableList.of(new InterestItem(), new InterestItem(), new InterestItem());
         User completedUser = User.builder()
@@ -459,7 +459,7 @@ public class UpdateUserTest extends BaseIntTest {
                 .interests3(fakeInterests)
                 .build();
 
-        Assertions.assertFalse(getUpdatedUser(completedUser, simulatedOAuthUserToken).getIsProfileCompleted());
+        Assertions.assertFalse(getUpdatedUser(completedUser, simulatedOAuthUserToken).getProfileCompleted());
     }
 
     // -----------
@@ -486,9 +486,9 @@ public class UpdateUserTest extends BaseIntTest {
     private void verifyUnchangedProperties(User expected, User actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getAuthorities(), actual.getAuthorities());
-        assertEquals(expected.getIsVerified(), actual.getIsVerified());
+        assertEquals(expected.getVerified(), actual.getVerified());
         assertEquals(expected.getCreationType(), actual.getCreationType());
-        assertEquals(expected.getIsProfileCompleted(), actual.getIsProfileCompleted());
+        assertEquals(expected.getProfileCompleted(), actual.getProfileCompleted());
         assertEquals(expected.getCreatedAt(), actual.getCreatedAt());
     }
 }

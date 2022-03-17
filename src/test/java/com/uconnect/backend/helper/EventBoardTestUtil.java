@@ -145,14 +145,14 @@ public class EventBoardTestUtil {
         // ignore last five digits due to time precision
         assertTrue(e1.getTimestamp().getTime() <= e2.getTimestamp().getTime() + 100 ||
                 e1.getTimestamp().getTime() >= e2.getTimestamp().getTime() - 100);
-        assertEquals(e1.getIsAnonymous(), e2.getIsAnonymous());
+        assertEquals(e1.getAnonymous(), e2.getAnonymous());
         haveSameComments(e1.getComments(), e2.getComments());
     }
 
     public static void verifySameCommentsSkipReactions(Comment c1, Comment c2) {
         assertEquals(c1.getAuthor(), c2.getAuthor());
         assertEquals(c1.getContent(), c2.getContent());
-        assertEquals(c1.getIsAnonymous(), c2.getIsAnonymous());
+        assertEquals(c1.getAnonymous(), c2.getAnonymous());
         assertTrue(c1.getTimestamp().getTime() <= c2.getTimestamp().getTime() + 100 ||
                 c1.getTimestamp().getTime() >= c2.getTimestamp().getTime() - 100);
         haveSameAuthorInfo(c1.getAuthorInfo(), c2.getAuthorInfo());

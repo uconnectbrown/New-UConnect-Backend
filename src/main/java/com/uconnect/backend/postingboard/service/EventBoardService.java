@@ -66,7 +66,7 @@ public class EventBoardService {
     // -----------
     public Event newAnonymousEvent(Event event) {
         event.setTimestamp(new Date());
-        event.setIsAnonymous(true);
+        event.setAnonymous(true);
         event.setAuthor(ANONYMOUS_AUTHOR);
         event.setHost(ANONYMOUS_HOST);
         event.setIndex((long) -1);
@@ -77,7 +77,7 @@ public class EventBoardService {
 
     public Event newVerifiedEvent(Event event) {
         event.setTimestamp(new Date());
-        event.setIsAnonymous(false);
+        event.setAnonymous(false);
         long index = counterDAO.incrementEventBoardIndex() - 1;
         event.setIndex(index);
         event.setReactions(EMPTY_REACTION_COLLECTION);
@@ -125,9 +125,9 @@ public class EventBoardService {
         verifyEntityExists(parentId);
 
         comment.setTimestamp(new Date());
-        comment.setIsAnonymous(true);
-        if (comment.getIsCommentPresent() == null) {
-            comment.setIsCommentPresent(false);
+        comment.setAnonymous(true);
+        if (comment.getCommentPresent() == null) {
+            comment.setCommentPresent(false);
         }
         comment.setAuthor(ANONYMOUS_AUTHOR);
         comment.setReactions(EMPTY_REACTION_COLLECTION);
@@ -140,9 +140,9 @@ public class EventBoardService {
         verifyEntityExists(parentId);
 
         comment.setTimestamp(new Date());
-        comment.setIsAnonymous(false);
-        if (comment.getIsCommentPresent() == null) {
-            comment.setIsCommentPresent(false);
+        comment.setAnonymous(false);
+        if (comment.getCommentPresent() == null) {
+            comment.setCommentPresent(false);
         }
         comment.setReactions(EMPTY_REACTION_COLLECTION);
         return eventBoardDAO.savePublishedComment(comment);
@@ -248,7 +248,7 @@ public class EventBoardService {
                 comment.setAuthorInfo(getAuthorInfo(comment.getAuthor()));
                 eraseReactorUsernames(comment.getReactions(), viewerUsername);
 
-                if (comment.getIsCommentPresent()) {
+                if (comment.getCommentPresent()) {
                     List<Comment> children = eventBoardDAO.getPublishedCommentsByParentId(comment.getId());
                     comment.setComments(children);
 

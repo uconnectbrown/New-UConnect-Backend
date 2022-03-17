@@ -90,7 +90,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     public void testSuccessSubmitAnon() {
         Comment comment = MockData.generateValidEventBoardComment(parentEventId);
         comment.setAuthor("");
-        comment.setIsAnonymous(true);
+        comment.setAnonymous(true);
 
         testSuccessSubmitAnon(comment);
     }
@@ -106,7 +106,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitAnonFalseIsAnonymous() {
         Comment comment = MockData.generateValidEventBoardComment(parentEventId);
-        comment.setIsAnonymous(false);
+        comment.setAnonymous(false);
 
         testSuccessSubmitAnon(comment);
     }
@@ -131,7 +131,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitVerified() {
         Comment comment = MockData.generateValidEventBoardComment(parentEventId);
-        comment.setIsAnonymous(false);
+        comment.setAnonymous(false);
         comment.setAuthor(verifiedUser.getUsername());
 
         testSuccessSubmitVerified(comment);
@@ -141,7 +141,7 @@ public class EventBoardCommentTest extends BaseIntTest {
     public void testSuccessTrueIsAnonymous() {
         Comment comment = MockData.generateValidEventBoardComment(parentEventId);
         comment.setAuthor(verifiedUser.getUsername());
-        comment.setIsAnonymous(true);
+        comment.setAnonymous(true);
 
         testSuccessSubmitVerified(comment);
     }
@@ -174,7 +174,7 @@ public class EventBoardCommentTest extends BaseIntTest {
             Comment comment = MockData.generateValidEventBoardComment(parentEventId);
             comment.setAuthor(verifiedUser.getUsername());
             comment.setAuthorInfo(verifiedUserNoPassword);
-            comment.setIsAnonymous(false);
+            comment.setAnonymous(false);
             expectedComments.add(comment);
 
             EventBoardTestUtil.submitCommentVerified(mockMvc, comment, verifiedUser.getUsername(), token)
@@ -238,7 +238,7 @@ public class EventBoardCommentTest extends BaseIntTest {
         Comment actualComment = comments.get(0);
 
         comment.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
-        comment.setIsAnonymous(true);
+        comment.setAnonymous(true);
         EventBoardTestUtil.verifySameCommentsSkipReactions(comment, actualComment);
 
         return actualComment;
@@ -249,8 +249,8 @@ public class EventBoardCommentTest extends BaseIntTest {
         assertFalse(comments.isEmpty());
         Comment actualComment = comments.get(0);
 
-        assertFalse(actualComment.getIsAnonymous());
-        comment.setIsAnonymous(false);
+        assertFalse(actualComment.getAnonymous());
+        comment.setAnonymous(false);
         EventBoardTestUtil.verifySameCommentsSkipReactions(comment, actualComment);
 
         return actualComment;
@@ -276,8 +276,8 @@ public class EventBoardCommentTest extends BaseIntTest {
             Comment comment = MockData.generateValidEventBoardComment();
             comment.setAuthor(verifiedUser.getUsername());
             comment.setAuthorInfo(verifiedUserNoPassword);
-            comment.setIsAnonymous(false);
-            comment.setIsCommentPresent(true);
+            comment.setAnonymous(false);
+            comment.setCommentPresent(true);
             comment.setReactions(EMPTY_REACTION_COLLECTION);
             comments.add(comment);
             comment.setComments(buildRandomCommentTree(minDepth, maxDepth, maxNumChildren, newLevelPercentage, currDepth + 1));

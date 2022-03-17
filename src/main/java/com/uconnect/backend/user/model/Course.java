@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 public class Course {
     @EqualsAndHashCode.Include
     private String code;
+
     private String color;
+
+    @EqualsAndHashCode.Include
     private String name;
 }

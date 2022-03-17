@@ -65,25 +65,43 @@ public class SearchDAO {
 
     public void addUserToCourseRoster(String username, String courseRosterName) throws CourseNotFoundException {
         CourseRoster courseRoster = findCourseRosterByName(courseRosterName);
+        if (courseRoster.getStudents() == null) {
+            courseRoster.setStudents(new HashSet<>());
+        }
         courseRoster.getStudents().add(username);
         ddbAdapter.save(courseTableName, courseRoster);
     }
 
     public void addUserToConcentration(String username, String concentrationName) throws ConcentrationNotFoundException {
         Concentration concentration = findConcentrationByName(concentrationName);
+        if (concentration.getStudents() == null) {
+            concentration.setStudents(new HashSet<>());
+        }
         concentration.getStudents().add(username);
         ddbAdapter.save(concentrationTableName, concentration);
     }
 
     public void removeUserFromCourseRoster(String username, String courseRosterName) throws CourseNotFoundException {
         CourseRoster courseRoster = findCourseRosterByName(courseRosterName);
+        if (courseRoster.getStudents() == null) {
+            return;
+        }
         courseRoster.getStudents().remove(username);
+        if (courseRoster.getStudents().isEmpty()) {
+            return;
+        }
         ddbAdapter.save(courseTableName, courseRoster);
     }
 
     public void removeUserFromConcentration(String username, String concentrationName) throws ConcentrationNotFoundException {
         Concentration concentration = findConcentrationByName(concentrationName);
+        if (concentration.getStudents() == null) {
+            return;
+        }
         concentration.getStudents().remove(username);
+        if (concentration.getStudents().isEmpty()) {
+            return;
+        }
         ddbAdapter.save(concentrationTableName, concentration);
     }
 

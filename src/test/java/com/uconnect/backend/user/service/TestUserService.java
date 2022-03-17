@@ -10,6 +10,7 @@ import java.util.Set;
 import com.uconnect.backend.exception.UserNotFoundException;
 import com.uconnect.backend.helper.BaseUnitTest;
 import com.uconnect.backend.helper.MockData;
+import com.uconnect.backend.search.dao.SearchDAO;
 import com.uconnect.backend.user.dao.UserDAO;
 import com.uconnect.backend.user.model.User;
 
@@ -26,6 +27,9 @@ public class TestUserService extends BaseUnitTest {
     @Mock
     private UserDAO dao;
 
+    @Mock
+    private SearchDAO searchDAO;
+
     private UserService userService;
 
     private User user;
@@ -40,7 +44,7 @@ public class TestUserService extends BaseUnitTest {
     public void setup() {
         if (!init) {
             user = MockData.generateValidUser();
-            userService = new UserService(dao, jwtUtility, null, null);
+            userService = new UserService(dao, searchDAO, jwtUtility, null, null);
             pending = Collections.singleton(MockData.generateValidUser().getUsername());
             connections = Collections.singleton(MockData.generateValidUser().getUsername());
             user.setPending(pending);

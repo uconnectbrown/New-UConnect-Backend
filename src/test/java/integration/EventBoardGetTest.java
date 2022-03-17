@@ -60,7 +60,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAuthor(verifiedUser.getUsername());
                 e.setAuthorInfo(verifiedUserNoPassword);
                 e.setHost(verifiedHost);
-                e.setAnonymous(false);
+                e.setIsAnonymous(false);
                 e.setTitle(String.valueOf(i));
                 e.setComments(new ArrayList<>(0));
 
@@ -79,7 +79,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
                 e.setAuthorInfo(anonUser);
                 e.setHost(EventBoardService.ANONYMOUS_HOST);
-                e.setAnonymous(true);
+                e.setIsAnonymous(true);
                 e.setTitle(String.valueOf(i));
                 e.setComments(new ArrayList<>(0));
 
@@ -212,7 +212,7 @@ public class EventBoardGetTest extends BaseIntTest {
         // add them back to the db
         for (int i = realCount; i < startIndex + 1; i++) {
             Event removed = expectedEventsPublished.get(i);
-            removed.setIndex(i);
+            removed.setIndex((long) i);
             ddbAdapter.save(eventBoardEventPublishedTableName, removed);
         }
     }

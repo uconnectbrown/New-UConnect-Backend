@@ -50,8 +50,8 @@ public class FirebaseMigration {
 
             User user = mapper.treeToValue(node, User.class);
             user.setCreationType(UserCreationType.O_AUTH);
-            user.setVerified(true);
-            user.setProfileCompleted(!isComplete);
+            user.setIsVerified(true);
+            user.setIsProfileCompleted(!isComplete);
             user.setUsername(username);
 
             List<String> majors = user.getMajors();

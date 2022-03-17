@@ -69,7 +69,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor("");
         event.setHost("");
-        event.setAnonymous(true);
+        event.setIsAnonymous(true);
 
         testSuccessSubmitAnon(event);
     }
@@ -77,7 +77,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitAnonWithIndex() {
         Event event = MockData.generateValidEventBoardEvent();
-        event.setIndex(5);
+        event.setIndex(5L);
 
         testSuccessSubmitAnon(event);
     }
@@ -94,7 +94,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitAnonFalseIsAnonymous() {
         Event event = MockData.generateValidEventBoardEvent();
-        event.setAnonymous(false);
+        event.setIsAnonymous(false);
 
         testSuccessSubmitAnon(event);
     }
@@ -130,7 +130,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor(verifiedUser.getUsername());
         event.setHost(verifiedHost);
-        event.setAnonymous(true);
+        event.setIsAnonymous(true);
 
         testSuccessSubmitVerified(event);
     }
@@ -141,7 +141,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor(verifiedUser.getUsername());
         event.setHost(verifiedHost);
-        event.setAnonymous(false);
+        event.setIsAnonymous(false);
 
         int numDupEvents = 5;
         for (int i = 0; i < numDupEvents; i++) {
@@ -213,8 +213,8 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
 
         event.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
         event.setHost(EventBoardService.ANONYMOUS_HOST);
-        event.setIndex(-1);
-        event.setAnonymous(true);
+        event.setIndex((long) -1);
+        event.setIsAnonymous(true);
         EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;
@@ -225,9 +225,9 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         assertFalse(events.isEmpty());
         Event actualEvent = events.get(0);
 
-        assertFalse(actualEvent.isAnonymous());
+        assertFalse(actualEvent.getIsAnonymous());
         event.setIndex(getNextEventIndex() - 1);
-        event.setAnonymous(false);
+        event.setIsAnonymous(false);
         EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;

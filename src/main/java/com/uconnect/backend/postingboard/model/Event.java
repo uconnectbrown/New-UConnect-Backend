@@ -60,13 +60,13 @@ public class Event {
     private String description;
 
     @DynamoDBAttribute
-    private boolean isAnonymous;
+    private Boolean isAnonymous;
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "indexIndex")
     @EqualsAndHashCode.Include
     // skip validation, set this to the correct value in controller/service
-    private long index;
+    private Long index;
 
     @DynamoDBAttribute
     private ReactionCollection reactions;

@@ -23,6 +23,8 @@ public class MockData {
                 .password(RandomStringUtils.randomAlphanumeric(15))
                 .firstName(RandomStringUtils.randomAlphanumeric(7))
                 .lastName(RandomStringUtils.randomAlphanumeric(7))
+                .isVerified(false)
+                .isProfileCompleted(false)
                 .build();
     }
 

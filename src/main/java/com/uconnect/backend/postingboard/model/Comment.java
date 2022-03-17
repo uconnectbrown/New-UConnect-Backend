@@ -52,13 +52,13 @@ public class Comment {
     private String content;
 
     @DynamoDBAttribute
-    private boolean anonymous;
+    private Boolean isAnonymous;
 
     @DynamoDBAttribute
     private ReactionCollection reactions;
 
     @DynamoDBAttribute
-    private boolean commentPresent;
+    private Boolean isCommentPresent;
 
     @DynamoDBIgnore
     private User authorInfo;

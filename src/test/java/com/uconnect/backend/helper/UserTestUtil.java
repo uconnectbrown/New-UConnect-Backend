@@ -73,7 +73,7 @@ public class UserTestUtil {
      */
     public static void verifyUserHack(DdbAdapter ddbAdapter, String username, String userTableName) throws UserNotFoundException {
         User user = ddbAdapter.findByUsername(username);
-        user.setVerified(true);
+        user.setIsVerified(true);
         ddbAdapter.save(userTableName, user);
     }
 

@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -142,18 +143,18 @@ public class EventBoardTestUtil {
         assertEquals(e1.getHost(), e2.getHost());
         assertEquals(e1.getDescription(), e2.getDescription());
         // ignore last five digits due to time precision
-        assertEquals(e1.getTimestamp().getTime() / 10_000, e2.getTimestamp().getTime() / 10_000);
-        assertEquals(e1.getStartTime(), e2.getStartTime());
-        assertEquals(e1.isAnonymous(), e2.isAnonymous());
+        assertTrue(e1.getTimestamp().getTime() <= e2.getTimestamp().getTime() + 100 ||
+                e1.getTimestamp().getTime() >= e2.getTimestamp().getTime() - 100);
+        assertEquals(e1.getIsAnonymous(), e2.getIsAnonymous());
         haveSameComments(e1.getComments(), e2.getComments());
     }
 
     public static void verifySameCommentsSkipReactions(Comment c1, Comment c2) {
         assertEquals(c1.getAuthor(), c2.getAuthor());
         assertEquals(c1.getContent(), c2.getContent());
-        assertEquals(c1.isAnonymous(), c2.isAnonymous());
-        // ignore last 6 digits due to time precision
-        assertEquals(c1.getTimestamp().getTime() / 100_000, c2.getTimestamp().getTime() / 100_000);
+        assertEquals(c1.getIsAnonymous(), c2.getIsAnonymous());
+        assertTrue(c1.getTimestamp().getTime() <= c2.getTimestamp().getTime() + 100 ||
+                c1.getTimestamp().getTime() >= c2.getTimestamp().getTime() - 100);
         haveSameAuthorInfo(c1.getAuthorInfo(), c2.getAuthorInfo());
         haveSameComments(c1.getComments(), c2.getComments());
     }

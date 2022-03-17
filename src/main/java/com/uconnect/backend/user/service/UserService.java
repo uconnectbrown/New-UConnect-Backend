@@ -97,9 +97,9 @@ public class UserService implements UserDetailsService {
         // these fields cannot be modified by users, setting to null retains the old value
         newRecord.setId(oldRecord.getId());
         newRecord.setAuthorities(null);
-        newRecord.setVerified(oldRecord.isVerified());
+        newRecord.setIsVerified(oldRecord.getIsVerified());
         newRecord.setCreationType(null);
-        newRecord.setProfileCompleted(checkProfileComplete(newRecord) || oldRecord.isProfileCompleted());
+        newRecord.setIsProfileCompleted(checkProfileComplete(newRecord) || oldRecord.getIsProfileCompleted());
         newRecord.setCreatedAt(null);
         if (UserCreationType.O_AUTH.equals(oldRecord.getCreationType())) {
             newRecord.setPassword(null);
@@ -146,7 +146,7 @@ public class UserService implements UserDetailsService {
             throw new UnmatchedUserCreationTypeException(UserCreationType.TRADITIONAL);
         }
 
-        if (!user.isVerified()) {
+        if (!user.getIsVerified()) {
             return "notVerified";
         }
 
@@ -163,7 +163,8 @@ public class UserService implements UserDetailsService {
             user = User.builder()
                     .username(username)
                     .creationType(UserCreationType.O_AUTH)
-                    .verified(true)
+                    .isVerified(true)
+                    .isProfileCompleted(false)
                     .createdAt(new Date())
                     .build();
 
@@ -235,13 +236,13 @@ public class UserService implements UserDetailsService {
 
     public void verifyUser(String username) throws UserNotFoundException {
         User user = dao.getUserByUsername(username);
-        if (user.isVerified()) {
+        if (user.getIsVerified()) {
             log.info("User {} successfully verified their email more than once, something might be wrong. " +
                     "Check UserController/Service/DAO", username);
         }
 
         // verify and delete entry from db
-        user.setVerified(true);
+        user.setIsVerified(true);
         dao.saveUser(user);
         dao.setEmailVerificationCode(username, null);
     }

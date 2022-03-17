@@ -69,7 +69,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor("");
         event.setHost("");
-        event.setIsAnonymous(true);
+        event.setAnonymous(true);
 
         testSuccessSubmitAnon(event);
     }
@@ -94,7 +94,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
     @Test
     public void testSuccessSubmitAnonFalseIsAnonymous() {
         Event event = MockData.generateValidEventBoardEvent();
-        event.setIsAnonymous(false);
+        event.setAnonymous(false);
 
         testSuccessSubmitAnon(event);
     }
@@ -130,7 +130,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor(verifiedUser.getUsername());
         event.setHost(verifiedHost);
-        event.setIsAnonymous(true);
+        event.setAnonymous(true);
 
         testSuccessSubmitVerified(event);
     }
@@ -141,7 +141,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         Event event = MockData.generateValidEventBoardEvent();
         event.setAuthor(verifiedUser.getUsername());
         event.setHost(verifiedHost);
-        event.setIsAnonymous(false);
+        event.setAnonymous(false);
 
         int numDupEvents = 5;
         for (int i = 0; i < numDupEvents; i++) {
@@ -214,7 +214,7 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         event.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
         event.setHost(EventBoardService.ANONYMOUS_HOST);
         event.setIndex((long) -1);
-        event.setIsAnonymous(true);
+        event.setAnonymous(true);
         EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;
@@ -225,9 +225,9 @@ public class EventBoardSubmitEventTest extends BaseIntTest {
         assertFalse(events.isEmpty());
         Event actualEvent = events.get(0);
 
-        assertFalse(actualEvent.getIsAnonymous());
+        assertFalse(actualEvent.getAnonymous());
         event.setIndex(getNextEventIndex() - 1);
-        event.setIsAnonymous(false);
+        event.setAnonymous(false);
         EventBoardTestUtil.verifySameEventsSkipReactions(event, actualEvent);
 
         return actualEvent;

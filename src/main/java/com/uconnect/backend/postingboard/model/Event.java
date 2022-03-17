@@ -60,7 +60,7 @@ public class Event {
     private String description;
 
     @DynamoDBAttribute
-    private Boolean isAnonymous;
+    private Boolean anonymous;
 
     @DynamoDBAttribute
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "indexIndex")

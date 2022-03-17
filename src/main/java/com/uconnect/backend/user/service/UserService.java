@@ -97,9 +97,9 @@ public class UserService implements UserDetailsService {
         // these fields cannot be modified by users, setting to null retains the old value
         newRecord.setId(oldRecord.getId());
         newRecord.setAuthorities(null);
-        newRecord.setIsVerified(oldRecord.getIsVerified());
+        newRecord.setVerified(oldRecord.getVerified());
         newRecord.setCreationType(null);
-        newRecord.setIsProfileCompleted(checkProfileComplete(newRecord) || oldRecord.getIsProfileCompleted());
+        newRecord.setProfileCompleted(checkProfileComplete(newRecord) || oldRecord.getProfileCompleted());
         newRecord.setCreatedAt(null);
         if (UserCreationType.O_AUTH.equals(oldRecord.getCreationType())) {
             newRecord.setPassword(null);
@@ -146,7 +146,7 @@ public class UserService implements UserDetailsService {
             throw new UnmatchedUserCreationTypeException(UserCreationType.TRADITIONAL);
         }
 
-        if (!user.getIsVerified()) {
+        if (!user.getVerified()) {
             return "notVerified";
         }
 
@@ -163,8 +163,8 @@ public class UserService implements UserDetailsService {
             user = User.builder()
                     .username(username)
                     .creationType(UserCreationType.O_AUTH)
-                    .isVerified(true)
-                    .isProfileCompleted(false)
+                    .verified(true)
+                    .profileCompleted(false)
                     .createdAt(new Date())
                     .build();
 
@@ -236,13 +236,13 @@ public class UserService implements UserDetailsService {
 
     public void verifyUser(String username) throws UserNotFoundException {
         User user = dao.getUserByUsername(username);
-        if (user.getIsVerified()) {
+        if (user.getVerified()) {
             log.info("User {} successfully verified their email more than once, something might be wrong. " +
                     "Check UserController/Service/DAO", username);
         }
 
         // verify and delete entry from db
-        user.setIsVerified(true);
+        user.setVerified(true);
         dao.saveUser(user);
         dao.setEmailVerificationCode(username, null);
     }

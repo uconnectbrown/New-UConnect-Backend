@@ -114,7 +114,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
-        assertTrue(user.getIsVerified());
+        assertTrue(user.getVerified());
     }
 
     @Test
@@ -151,7 +151,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
-        assertTrue(user.getIsVerified());
+        assertTrue(user.getVerified());
     }
 
     @Test
@@ -175,7 +175,7 @@ public class GoogleOAuthTest extends BaseIntTest {
         assertEquals(UserCreationType.O_AUTH, user.getCreationType());
         assertEquals(validOAuthUsername, user.getUsername());
         assertNull(user.getPassword());
-        assertTrue(user.getIsVerified());
+        assertTrue(user.getVerified());
 
         JwtRequest request = new JwtRequest(validOAuthUsername, "");
 

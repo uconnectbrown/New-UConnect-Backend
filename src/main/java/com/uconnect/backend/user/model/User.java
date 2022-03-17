@@ -137,10 +137,10 @@ public class User implements UserDetails {
 
     // no validation needed, always manually set to false for new users
     @DynamoDBAttribute
-    private Boolean isVerified;
+    private Boolean verified;
 
     @DynamoDBAttribute
-    private Boolean isProfileCompleted;
+    private Boolean profileCompleted;
 
     @DynamoDBAttribute
     private List<UserAuthority> authorities;

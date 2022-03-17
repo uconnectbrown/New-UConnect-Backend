@@ -60,7 +60,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAuthor(verifiedUser.getUsername());
                 e.setAuthorInfo(verifiedUserNoPassword);
                 e.setHost(verifiedHost);
-                e.setIsAnonymous(false);
+                e.setAnonymous(false);
                 e.setTitle(String.valueOf(i));
                 e.setComments(new ArrayList<>(0));
 
@@ -79,7 +79,7 @@ public class EventBoardGetTest extends BaseIntTest {
                 e.setAuthor(EventBoardService.ANONYMOUS_AUTHOR);
                 e.setAuthorInfo(anonUser);
                 e.setHost(EventBoardService.ANONYMOUS_HOST);
-                e.setIsAnonymous(true);
+                e.setAnonymous(true);
                 e.setTitle(String.valueOf(i));
                 e.setComments(new ArrayList<>(0));
 

@@ -96,8 +96,8 @@ public class UserController {
         }
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setCreationType(UserCreationType.TRADITIONAL);
-        user.setIsVerified(false);
-        user.setIsProfileCompleted(userService.checkProfileComplete(user));
+        user.setVerified(false);
+        user.setProfileCompleted(userService.checkProfileComplete(user));
         user.setCreatedAt(new Date());
 
         int result = userService.createNewUser(user);
